@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Solana keypairs and wallets (never commit)
+keys/
+wallets/
+*.keypair.json
+id.json
+
+# Local databases
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+data/
+
+# Logs and test output
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+coverage/
+playwright-report/
+test-results/
+
+# Deploy and tooling
+.vercel/
+.fly/
+.turbo/
+.cache/
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
