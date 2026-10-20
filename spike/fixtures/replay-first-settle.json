@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-20T13:42:59.908Z",
+  "timing": {
+    "verifyToSettleStartMs": 270,
+    "settleMs": 1329,
+    "settleEndEpochMs": 1792503779908
+  },
+  "result": {
+    "success": true,
+    "payer": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+    "transaction": "3QqVHyhmeWxYmbNp4Uurm9MKChet1n4idDZKSFKvnUgzPvhMMqSVRCiEuWDCZyzEVoXdHo1S7k8d3KcQc7BvhFFK",
+    "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+  }
+}

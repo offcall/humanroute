@@ -1,0 +1,49 @@
+{
+  "capturedAt": "2026-10-20T13:38:49.444Z",
+  "request": {
+    "method": "POST",
+    "url": "http://localhost:4402/x/translate",
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "text": "Hello world",
+      "sourceLang": "en",
+      "targetLang": "de"
+    }
+  },
+  "status": 402,
+  "statusLine": "HTTP/1.1 402 Payment Required",
+  "headers": {
+    "cache-control": "no-store",
+    "content-type": "application/json",
+    "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cDovL2xvY2FsaG9zdDo0NDAyL3gvdHJhbnNsYXRlIiwiZGVzY3JpcHRpb24iOiJIdW1hbiB0cmFuc2xhdGlvbiBqb2IgKHNwaWtlKSIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiJ9LCJhY2NlcHRzIjpbeyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJzb2xhbmE6RXRXVFJBQlphWXE2aU1mZVlLb3VSdTE2NlZVMnhxYTEiLCJhbW91bnQiOiI1MDAwMDAiLCJhc3NldCI6IkZleWpVRkpDc3JkbVJCN3ZKUXFDdENYVHhnS0QxMURmWXFhY1ZEREdSdzJjIiwicGF5VG8iOiJHQTJ6VExnbnphYzh6ZHIyVlpCTEM3RmNoYUxKYnozTUFSbnpCUmtkVUZtciIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7ImZlZVBheWVyIjoiQ0tQS0pXTmRKRXFhODF4N0NrWjE0QlZQaVk2eTE2U3hzN293em5xdFdZcDUifX1dfQ==",
+    "content-length": "2",
+    "date": "Tue, 20 Oct 2026 13:38:37 GMT",
+    "connection": "keep-alive",
+    "keep-alive": "timeout=5"
+  },
+  "body": "{}",
+  "paymentRequiredDecoded": {
+    "x402Version": 2,
+    "error": "Payment required",
+    "resource": {
+      "url": "http://localhost:4402/x/translate",
+      "description": "Human translation job (spike)",
+      "mimeType": "application/json"
+    },
+    "accepts": [
+      {
+        "scheme": "exact",
+        "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+        "amount": "500000",
+        "asset": "FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c",
+        "payTo": "GA2zTLgnzac8zdr2VZBLC7FchaLJbz3MARnzBRkdUFmr",
+        "maxTimeoutSeconds": 300,
+        "extra": {
+          "feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"
+        }
+      }
+    ]
+  }
+}

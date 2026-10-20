@@ -1,0 +1,105 @@
+{
+  "signature": "31R1kGMqhUczbBHhgHCKBGCcPEgWprvSyXZYCeVpeHNf5nrnniHqjD8zeSn729KFzEsyp6BieXmBQGXKSJ6SjbKe",
+  "payer": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+  "slot": 513178507,
+  "blockTime": 1792503636,
+  "err": null,
+  "feeLamports": 10001,
+  "feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5",
+  "signers": [
+    "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5",
+    "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt"
+  ],
+  "agentInTx": true,
+  "agentLamportsPre": 500000000,
+  "agentLamportsPost": 500000000,
+  "agentCurrentLamports": 500000000,
+  "tokenPre": [
+    {
+      "accountIndex": 2,
+      "mint": "FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c",
+      "owner": "GA2zTLgnzac8zdr2VZBLC7FchaLJbz3MARnzBRkdUFmr",
+      "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "uiTokenAmount": {
+        "amount": "0",
+        "decimals": 6,
+        "uiAmount": null,
+        "uiAmountString": "0"
+      }
+    },
+    {
+      "accountIndex": 3,
+      "mint": "FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c",
+      "owner": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+      "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "uiTokenAmount": {
+        "amount": "100000000",
+        "decimals": 6,
+        "uiAmount": 100,
+        "uiAmountString": "100"
+      }
+    }
+  ],
+  "tokenPost": [
+    {
+      "accountIndex": 2,
+      "mint": "FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c",
+      "owner": "GA2zTLgnzac8zdr2VZBLC7FchaLJbz3MARnzBRkdUFmr",
+      "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "uiTokenAmount": {
+        "amount": "500000",
+        "decimals": 6,
+        "uiAmount": 0.5,
+        "uiAmountString": "0.5"
+      }
+    },
+    {
+      "accountIndex": 3,
+      "mint": "FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c",
+      "owner": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+      "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "uiTokenAmount": {
+        "amount": "99500000",
+        "decimals": 6,
+        "uiAmount": 99.5,
+        "uiAmountString": "99.5"
+      }
+    }
+  ],
+  "instructions": [
+    {
+      "program": "ComputeBudget111111111111111111111111111111"
+    },
+    {
+      "program": "ComputeBudget111111111111111111111111111111"
+    },
+    {
+      "program": "spl-token",
+      "type": "transferChecked",
+      "info": {
+        "authority": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+        "destination": "EyqH64PJpw63KdN1j6RJ5haRoXU4rkqKaGNwqc6iyuMW",
+        "mint": "FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c",
+        "source": "HXay7Sj7t1R1wWLvNmzDa3nDSPBhxH7GG3aEpwFiKB6U",
+        "tokenAmount": {
+          "amount": "500000",
+          "decimals": 6,
+          "uiAmount": 0.5,
+          "uiAmountString": "0.5"
+        }
+      }
+    },
+    {
+      "program": "spl-memo"
+    }
+  ],
+  "timing": {
+    "settleMs": 1048,
+    "verifyToSettleStartMs": 253,
+    "settleEndToConfirmedFoundMs": 11999,
+    "confirmPollMs": 225,
+    "polls": 1,
+    "note": "settleEndToConfirmedFoundMs includes delay before this script started"
+  },
+  "explorer": "https://explorer.solana.com/tx/31R1kGMqhUczbBHhgHCKBGCcPEgWprvSyXZYCeVpeHNf5nrnniHqjD8zeSn729KFzEsyp6BieXmBQGXKSJ6SjbKe?cluster=devnet"
+}

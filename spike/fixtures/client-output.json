@@ -1,0 +1,13 @@
+{
+  "agent": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+  "status": 200,
+  "body": "{\"ok\":true,\"accepted\":{\"text\":\"Hello world\",\"sourceLang\":\"en\",\"targetLang\":\"de\"}}",
+  "paymentResponse": {
+    "success": true,
+    "payer": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+    "transaction": "31R1kGMqhUczbBHhgHCKBGCcPEgWprvSyXZYCeVpeHNf5nrnniHqjD8zeSn729KFzEsyp6BieXmBQGXKSJ6SjbKe",
+    "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+  },
+  "roundTripMs": 1508,
+  "doneEpochMs": 1792503637567
+}

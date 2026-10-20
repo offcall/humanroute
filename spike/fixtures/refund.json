@@ -1,0 +1,33 @@
+{
+  "at": "2026-10-20T13:41:50.095Z",
+  "signature": "2nYLzgNMKD68meFmJiQUFb8RaEQfMbMaNdCU5DuSemGPRnqXaEi2hCQXxE8NUnkFeBrmDqeQsdikvMvPWbEL9HQ4",
+  "explorer": "https://explorer.solana.com/tx/2nYLzgNMKD68meFmJiQUFb8RaEQfMbMaNdCU5DuSemGPRnqXaEi2hCQXxE8NUnkFeBrmDqeQsdikvMvPWbEL9HQ4?cluster=devnet",
+  "paymentSignature": "31R1kGMqhUczbBHhgHCKBGCcPEgWprvSyXZYCeVpeHNf5nrnniHqjD8zeSn729KFzEsyp6BieXmBQGXKSJ6SjbKe",
+  "memo": "hr:spike:31R1kGMqhUczbBHhgHCKBGCcPEgWprvSyXZYCeVpeHNf5nrnniHqjD8zeSn729KFzEsyp6BieXmBQGXKSJ6SjbKe",
+  "mint": "FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c",
+  "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  "amount": "500000",
+  "decimals": 6,
+  "from": {
+    "owner": "GA2zTLgnzac8zdr2VZBLC7FchaLJbz3MARnzBRkdUFmr",
+    "ata": "EyqH64PJpw63KdN1j6RJ5haRoXU4rkqKaGNwqc6iyuMW"
+  },
+  "to": {
+    "owner": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+    "ata": "HXay7Sj7t1R1wWLvNmzDa3nDSPBhxH7GG3aEpwFiKB6U"
+  },
+  "confirmMs": 810,
+  "slot": 513178813,
+  "err": null,
+  "feeLamports": 5000,
+  "feePayer": "GA2zTLgnzac8zdr2VZBLC7FchaLJbz3MARnzBRkdUFmr",
+  "logMemo": "Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]",
+  "balancesBefore": {
+    "hold": "500000",
+    "payer": "99500000"
+  },
+  "balancesAfter": {
+    "hold": "0",
+    "payer": "100000000"
+  }
+}

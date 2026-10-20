@@ -1,0 +1,109 @@
+{
+  "note": "Step-3 PAYMENT-SIGNATURE was not captured; a fresh header was created, sent once, then resent identically.",
+  "paymentSignatureHeader": {
+    "PAYMENT-SIGNATURE": "eyJ4NDAyVmVyc2lvbiI6MiwicGF5bG9hZCI6eyJ0cmFuc2FjdGlvbiI6IkFnQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBREhxWjJMR1NVREs3SDFSV0tKZEs5ZTlTNW9KeHVvMnNmRDE3MGhvME53WUFBYlc1NFc1QXpnTDdGeWtQZkIvM3R1a1VuV0VyQWRnbWIzZFpneTRTSUdnQUlCQkFpb0pqNDIzMVFsVWRLMmIwZkozVlV4aW9nUlhkME5RaEJ2Sk82MjJaVUtmclVadzF1aHh1RHIwMGhlNWxmaGVDaDNXTkhtalljQzN5WGNXRm9kNy8wRno3Y0s4U2dLeUFPS01RdGh4WXJTcE1TWWx3SkhyZy9Xc3FtMDFzSE1leVgxa05KN05LMWRSNzZ0N0JPTlNGa3ZlTXMwbHpOVGpMZnBPQ2tsMFZQWHhRTUdSbS9sSVJjeS8reXR1bkxEbStlOGpPVzd4ZmNTYXl4RG16cEFBQUFBMmI1QkZvYzJ4UlQxblRJTzc2Q2kyaXVnbGJoWmVXL0J2dGdBdERzdmh5VUZTbE5hbVNraEJrMGs2SEZnMmpoOGZEVzEzYnlTdTRIa0g2aEFRUVZFalFiZDl1SFhaYUdUMmN2aFJzN3JlYXdjdElYdFgxczNrVHFNOVlWKy93Q3BPdExoL2QvQWg5eUFPeWFwT0NMdVhRQWNUUngrNTdlakpXTUNwejBYbmxvRUJBQUZBaUJPQUFBRUFBa0RBUUFBQUFBQUFBQUhCQU1GQWdFS0RDQ2hCd0FBQUFBQUJnWUFJREU0TUdJNE5ESTRNekkzWVdGaFpqTmlaVE0zWkRCbVpEVXpORFppWVRWbEFBPT0ifSwicmVzb3VyY2UiOnsidXJsIjoiaHR0cDovL2xvY2FsaG9zdDo0NDAyL3gvdHJhbnNsYXRlIiwiZGVzY3JpcHRpb24iOiJIdW1hbiB0cmFuc2xhdGlvbiBqb2IgKHNwaWtlKSIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiJ9LCJhY2NlcHRlZCI6eyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJzb2xhbmE6RXRXVFJBQlphWXE2aU1mZVlLb3VSdTE2NlZVMnhxYTEiLCJhbW91bnQiOiI1MDAwMDAiLCJhc3NldCI6IkZleWpVRkpDc3JkbVJCN3ZKUXFDdENYVHhnS0QxMURmWXFhY1ZEREdSdzJjIiwicGF5VG8iOiJHQTJ6VExnbnphYzh6ZHIyVlpCTEM3RmNoYUxKYnozTUFSbnpCUmtkVUZtciIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7ImZlZVBheWVyIjoiQ0tQS0pXTmRKRXFhODF4N0NrWjE0QlZQaVk2eTE2U3hzN293em5xdFdZcDUifX19"
+  },
+  "paymentPayload": {
+    "x402Version": 2,
+    "payload": {
+      "transaction": "AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADHqZ2LGSUDK7H1RWKJdK9e9S5oJxuo2sfD170ho0NwYAAbW54W5AzgL7FykPfB/3tukUnWErAdgmb3dZgy4SIGgAIBBAioJj4231QlUdK2b0fJ3VUxiogRXd0NQhBvJO622ZUKfrUZw1uhxuDr00he5lfheCh3WNHmjYcC3yXcWFod7/0Fz7cK8SgKyAOKMQthxYrSpMSYlwJHrg/Wsqm01sHMeyX1kNJ7NK1dR76t7BONSFkveMs0lzNTjLfpOCkl0VPXxQMGRm/lIRcy/+ytunLDm+e8jOW7xfcSayxDmzpAAAAA2b5BFoc2xRT1nTIO76Ci2iuglbhZeW/BvtgAtDsvhyUFSlNamSkhBk0k6HFg2jh8fDW13bySu4HkH6hAQQVEjQbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpOtLh/d/Ah9yAOyapOCLuXQAcTRx+57ejJWMCpz0XnloEBAAFAiBOAAAEAAkDAQAAAAAAAAAHBAMFAgEKDCChBwAAAAAABgYAIDE4MGI4NDI4MzI3YWFhZjNiZTM3ZDBmZDUzNDZiYTVlAA=="
+    },
+    "resource": {
+      "url": "http://localhost:4402/x/translate",
+      "description": "Human translation job (spike)",
+      "mimeType": "application/json"
+    },
+    "accepted": {
+      "scheme": "exact",
+      "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+      "amount": "500000",
+      "asset": "FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c",
+      "payTo": "GA2zTLgnzac8zdr2VZBLC7FchaLJbz3MARnzBRkdUFmr",
+      "maxTimeoutSeconds": 300,
+      "extra": {
+        "feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"
+      }
+    }
+  },
+  "balances": {
+    "before": {
+      "agent": "100000000",
+      "hold": "0"
+    },
+    "afterFirst": {
+      "agent": "99500000",
+      "hold": "500000"
+    },
+    "afterSecond": {
+      "agent": "99500000",
+      "hold": "500000"
+    }
+  },
+  "first": {
+    "at": "2026-10-20T13:42:59.911Z",
+    "ms": 1603,
+    "status": 200,
+    "headers": {
+      "cache-control": "private",
+      "connection": "keep-alive",
+      "content-length": "81",
+      "content-type": "application/json",
+      "date": "Tue, 20 Oct 2026 13:42:59 GMT",
+      "keep-alive": "timeout=5",
+      "payment-response": "eyJzdWNjZXNzIjp0cnVlLCJwYXllciI6IkRCd2FZVk0xZjFFVEFDTUJGZ1QzVW9RSmdWNUNNQ05oUG1WTEQ5bXlNSkx0IiwidHJhbnNhY3Rpb24iOiIzUXFWSHlobWVXeFltYk5wNFV1cm05TUtDaGV0MW40aWREWktTRkt2blVnelB2aE1NcVNWUkNpRXVXRENaeXpFVm9YZEhvMVM3azhkM0tjUWM3QnZoRkZLIiwibmV0d29yayI6InNvbGFuYTpFdFdUUkFCWmFZcTZpTWZlWUtvdVJ1MTY2VlUyeHFhMSJ9"
+    },
+    "body": {
+      "ok": true,
+      "accepted": {
+        "text": "Hello world",
+        "sourceLang": "en",
+        "targetLang": "de"
+      }
+    },
+    "paymentResponseDecoded": {
+      "success": true,
+      "payer": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+      "transaction": "3QqVHyhmeWxYmbNp4Uurm9MKChet1n4idDZKSFKvnUgzPvhMMqSVRCiEuWDCZyzEVoXdHo1S7k8d3KcQc7BvhFFK",
+      "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+    },
+    "paymentRequiredDecoded": null
+  },
+  "second": {
+    "at": "2026-10-20T13:43:00.212Z",
+    "ms": 234,
+    "status": 402,
+    "headers": {
+      "cache-control": "no-store",
+      "connection": "keep-alive",
+      "content-length": "2",
+      "content-type": "application/json",
+      "date": "Tue, 20 Oct 2026 13:43:00 GMT",
+      "keep-alive": "timeout=5",
+      "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJpbnZhbGlkX2V4YWN0X3N2bV90cmFuc2FjdGlvbl9zaW11bGF0aW9uX2ZhaWxlZCIsInJlc291cmNlIjp7InVybCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDQwMi94L3RyYW5zbGF0ZSIsImRlc2NyaXB0aW9uIjoiSHVtYW4gdHJhbnNsYXRpb24gam9iIChzcGlrZSkiLCJtaW1lVHlwZSI6ImFwcGxpY2F0aW9uL2pzb24ifSwiYWNjZXB0cyI6W3sic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoic29sYW5hOkV0V1RSQUJaYVlxNmlNZmVZS291UnUxNjZWVTJ4cWExIiwiYW1vdW50IjoiNTAwMDAwIiwiYXNzZXQiOiJGZXlqVUZKQ3NyZG1SQjd2SlFxQ3RDWFR4Z0tEMTFEZllxYWNWRERHUncyYyIsInBheVRvIjoiR0EyelRMZ256YWM4emRyMlZaQkxDN0ZjaGFMSmJ6M01BUm56QlJrZFVGbXIiLCJtYXhUaW1lb3V0U2Vjb25kcyI6MzAwLCJleHRyYSI6eyJmZWVQYXllciI6IkNLUEtKV05kSkVxYTgxeDdDa1oxNEJWUGlZNnkxNlN4czdvd3pucXRXWXA1In19XX0="
+    },
+    "body": {},
+    "paymentResponseDecoded": null,
+    "paymentRequiredDecoded": {
+      "x402Version": 2,
+      "error": "invalid_exact_svm_transaction_simulation_failed",
+      "resource": {
+        "url": "http://localhost:4402/x/translate",
+        "description": "Human translation job (spike)",
+        "mimeType": "application/json"
+      },
+      "accepts": [
+        {
+          "scheme": "exact",
+          "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+          "amount": "500000",
+          "asset": "FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c",
+          "payTo": "GA2zTLgnzac8zdr2VZBLC7FchaLJbz3MARnzBRkdUFmr",
+          "maxTimeoutSeconds": 300,
+          "extra": {
+            "feePayer": "CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"
+          }
+        }
+      ]
+    }
+  }
+}

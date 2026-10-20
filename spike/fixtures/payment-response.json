@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-20T13:40:37.565Z",
+  "status": 200,
+  "header": "eyJzdWNjZXNzIjp0cnVlLCJwYXllciI6IkRCd2FZVk0xZjFFVEFDTUJGZ1QzVW9RSmdWNUNNQ05oUG1WTEQ5bXlNSkx0IiwidHJhbnNhY3Rpb24iOiIzMVIxa0dNcWhVY3piQkhoZ0hDS0JHQ2NQRWdXcHJ2U3lYWllDZVZwZUhOZjVucm5uaUhxakQ4emVTbjcyOUtGekVzeXA2QmllWG1CUUdYS1NKNlNqYktlIiwibmV0d29yayI6InNvbGFuYTpFdFdUUkFCWmFZcTZpTWZlWUtvdVJ1MTY2VlUyeHFhMSJ9",
+  "decoded": {
+    "success": true,
+    "payer": "DBwaYVM1f1ETACMBFgT3UoQJgV5CMCNhPmVLD9myMJLt",
+    "transaction": "31R1kGMqhUczbBHhgHCKBGCcPEgWprvSyXZYCeVpeHNf5nrnniHqjD8zeSn729KFzEsyp6BieXmBQGXKSJ6SjbKe",
+    "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
+  }
+}
