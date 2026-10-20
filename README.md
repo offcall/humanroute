@@ -28,11 +28,16 @@ Measured on 2026-10-20 against this repo's gateway (`npm start`, SLA 60 s, price
 | Expert opens the inbox and answers, release 0.45 to expert | ok, `released`, expert balance 0 → 0.45, hold keeps 0.05 | [2DMpUuXw…](https://explorer.solana.com/tx/2DMpUuXwbxPpZMoH5n2sbjjkMRqyPDJq3zvsy8iqMMHJ1WUQXZdrLG5u67zmSZ97NjAA7FDFLt9UzqfHiVW9F2t9?cluster=devnet) | answer at +10 s, `releasing` at +12 s, `released` (confirmed) at +14 s |
 | Second answer to the same job | `409`, job unchanged | — | — |
 | Expert silent (`npm run demo:silent`), refund 0.50 to payer | ok, `refunded`, `refund_reason: sla_expired`, exit 0 | payment [4HhogNBf…](https://explorer.solana.com/tx/4HhogNBfEDYtdeVyYD5VFbAq16Xy8znRu1DjcUsEsVuFUkpsahPBzqPciA4dRUBE2gxFmvs2Jmqi3ZDu5KYqzioJ?cluster=devnet), refund [35TMEDYo…](https://explorer.solana.com/tx/35TMEDYoK97KJS6TZFx7PxidjnLi9LrdurWgUwC9TiyDWYRskqk4CGeSA7hsqdnekVvS3TYCroF2eP9EjfdcUsW8?cluster=devnet) | `refunding` at +62 s, `refunded` (confirmed) at +64 s, 66 s end to end |
-| Replay, same body → same `202` | not run against the gateway yet; the spike showed the facilitator rejects an already-landed transaction with `402` (see Status) | — | — |
-| Replay, other body → `409` | not run against the gateway yet | — | — |
+| Replay, same `PAYMENT-SIGNATURE` + same body (twice) | `202` with the same `jobId`, no second settle, no second charge | — | immediate, before the facilitator is called |
+| Replay, same `PAYMENT-SIGNATURE` + other body | `409 payment already used for a different request` | — | immediate |
 | `npm run e2e:devnet` (own server on a free port, silent agent) | `PASS: refund confirmed within SLA+90s`, exit 0 | payment [2sr36nHP…](https://explorer.solana.com/tx/2sr36nHPwc757R7SBzbWFCD88pt9VEM7Ctg5uwKF1QpSHoCC8EJMbUCdcEKaCJG7koszFEtYuUVFrjReV9Abo9m3?cluster=devnet), refund [3SpBneB7…](https://explorer.solana.com/tx/3SpBneB7Fx2oDWM3hjmw6tEcRCsT8cd82a1forZ3HKqwsquXoF2m53oNmjCN6aDuaMcgw1sGjWGWFnWo3vHuznKw?cluster=devnet) | 68 s including server start |
 
-Not covered by this run: orphan payments, `failed` transfers and `npm run requeue`, preflight `503` on devnet (only smoke-tested with an unreachable RPC), real devnet USDC.
+| Gateway killed 2 s after the refund was broadcast, then restarted | the `sent` row was recovered by signature status: same signature confirmed, no second send | refund [2s9f27T8…](https://explorer.solana.com/tx/2s9f27T8n2PJf7VzxaEsZoCA7Kt2ASshjHm2JUgyCaoYhHCWuoe3Q1vFo3WiSJDUthhDxz3d5dSSUgzL?cluster=devnet) | confirmed ~8 s after restart |
+| Expert wallet without a token account | release → `failed`, `OPERATOR ACTION REQUIRED` in the log, status `releasing` with `last_error`; after creating the ATA `npm run requeue -- <id>` → `pending` → sent → `confirmed`; a second requeue is refused (exit 2) | release [3wfM3uFo…](https://explorer.solana.com/tx/3wfM3uFoZypN1sXupYHzeeoCvvV2NdjiYUZyY8ZmLXuJw4juP7v6pd4CiESuFw23NnCEkKxTVBdiurt?cluster=devnet) | confirmed ~10 s after requeue |
+| Preflight failing on devnet (wrong mint) | server stays up, `/health` `ready:false`, `POST /x/translate` → `503 not_ready` with reasons (no URLs), log `payouts paused` | — | — |
+| Database from an older schema | startup refused: `legacy database at <path>: delete it or set DB_PATH`, exit 1 | — | — |
+
+Not covered by this run: orphan payments on devnet (only smoke-tested with a forged settle header), RPC outage during a payout, real devnet USDC.
 
 ## Architecture
 
