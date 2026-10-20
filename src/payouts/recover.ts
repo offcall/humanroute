@@ -1,0 +1,97 @@
+// Resolves sent transfers (ADR 0006). A signature is given up only when the chain does not know it,
+// the block height is past its last_valid_block_height, and no hold transaction carries the memo.
+import type { SolanaClient } from "../chain/index.js";
+import { type Transfer, TransferStatus } from "../store/index.js";
+import { fail, retry } from "./send.js";
+import type { Expiry, PayoutDeps } from "./types.js";
+
+// Call only after the chain reported the signature unknown.
+export const checkExpiry = async (
+	chain: SolanaClient,
+	memo: string,
+	lastValidBlockHeight: number,
+): Promise<Expiry> => {
+	const height = await chain.blockHeight();
+	if (!height.ok) {
+		return { state: "unavailable", error: height.error.message };
+	}
+	if (height.value <= lastValidBlockHeight) {
+		return { state: "live" };
+	}
+
+	const found = await chain.findMemo(memo);
+	if (!found.ok) {
+		return { state: "unavailable", error: found.error.message };
+	}
+	if (found.value === null) {
+		return { state: "expired" };
+	}
+	return { state: "landed", signature: found.value };
+};
+
+const confirmFromMemo = async (
+	deps: PayoutDeps,
+	transfer: Transfer,
+	signature: string,
+): Promise<void> => {
+	const status = await deps.chain.signatureStatus(signature);
+	if (!status.ok || status.value.state !== "confirmed") {
+		return;
+	}
+	deps.store.transfers.markConfirmed(transfer.id, signature, deps.now());
+	deps.log(
+		`transfer ${transfer.id} confirmed via memo ${transfer.memo} sig ${signature}`,
+	);
+};
+
+export const checkSent = async (
+	deps: PayoutDeps,
+	transfer: Transfer,
+): Promise<void> => {
+	const { txSig, lastValidBlockHeight } = transfer;
+	if (txSig === null || lastValidBlockHeight === null) {
+		retry(deps, transfer, "sent row without signature or blockhash");
+		return;
+	}
+	const status = await deps.chain.signatureStatus(txSig);
+	if (!status.ok) {
+		return deps.log(`status of ${txSig} unavailable: ${status.error.message}`);
+	}
+	const current = status.value;
+	if (current.state === "confirmed") {
+		deps.store.transfers.markConfirmed(transfer.id, txSig, deps.now());
+		return deps.log(
+			`transfer ${transfer.id} (${transfer.kind} job ${transfer.jobId}) confirmed sig ${txSig}`,
+		);
+	}
+	if (current.state === "failed") {
+		return fail(
+			deps,
+			transfer,
+			`on-chain error: ${current.error} sig ${txSig}`,
+		);
+	}
+	if (current.state === "pending") {
+		return;
+	}
+
+	const expiry = await checkExpiry(
+		deps.chain,
+		transfer.memo,
+		lastValidBlockHeight,
+	);
+	if (expiry.state === "landed") {
+		await confirmFromMemo(deps, transfer, expiry.signature);
+	} else if (expiry.state === "expired") {
+		const error = `signature ${txSig} unseen after block height ${lastValidBlockHeight}`;
+		retry(deps, transfer, error);
+	}
+};
+
+export const recoverSent = async (deps: PayoutDeps): Promise<void> => {
+	for (const transfer of deps.store.transfers.listByStatus(
+		TransferStatus.Sent,
+	)) {
+		await checkSent(deps, transfer);
+	}
+};
