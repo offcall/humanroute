@@ -4,6 +4,9 @@
 
 Accepted. Supersedes the "one mint: devnet USDC" sentence of ADR 0008.
 
+
+Note (2026-10-20, later the same day): the Circle faucet delivered 20 devnet USDC to the agent wallet and both demo scenarios were repeated on devnet USDC (`README.md`, Devnet run). The decision stands: any 6-decimal mint is accepted and the test mint remains the fallback when no USDC faucet is reachable.
+
 ## Context
 
 ADR 0008 fixed one mint: devnet USDC `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`. During the spike (`spike/REPORT.md`) the Circle devnet USDC faucet never delivered tokens to the agent wallet, so no payment in devnet USDC was possible. The code already takes the mint from `USDC_MINT` and checks only that it has 6 decimals.
