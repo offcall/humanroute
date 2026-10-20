@@ -14,16 +14,18 @@ An AI agent that is unsure about a translation pays a human expert $0.50 per que
 > | Replay of a byte-identical `PAYMENT-SIGNATURE` | Rejected by the facilitator (402), no second debit | first send [3QqVHyhm…](https://explorer.solana.com/tx/3QqVHyhmeWxYmbNp4Uurm9MKChet1n4idDZKSFKvnUgzPvhMMqSVRCiEuWDCZyzEVoXdHo1S7k8d3KcQc7BvhFFK?cluster=devnet), replay → 402 in 234 ms |
 > | Underpayment (0.10 instead of 0.50) | Rejected locally (402) before any facilitator call | 2 ms, no debit |
 >
-> All spike payments used the SPL **test mint** `FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c` (6 decimals), not devnet USDC: the Circle faucet never delivered. Payment and refund in real devnet USDC are **not verified** ([ADR 0015](docs/adr/0015-devnet-test-mint-for-the-demo.md)).
+> The spike paid with the SPL **test mint** `FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c` because the Circle faucet had not delivered yet. Later the same day the faucet delivered 20 devnet USDC and both demo scenarios were repeated on **real devnet USDC** `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`: see the first two rows of [Devnet run](#devnet-run).
 >
 > **The gateway itself** (this repo's `src/`) against devnet: see [Devnet run](#devnet-run).
 
 ## Devnet run
 
-Measured on 2026-10-20 against this repo's gateway (`npm start`, SLA 60 s, price 0.50 of the test mint `FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c`, facilitator `https://x402.org/facilitator`). Timings are wall-clock from the agent's point of view, taken from the demo output and the server log.
+Measured on 2026-10-20 against this repo's gateway (`npm start`, SLA 60 s, price 0.50, facilitator `https://x402.org/facilitator`). The first two rows use real devnet USDC `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`; the rest were run earlier with the test mint `FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c`, which stays the fallback when no USDC faucet is reachable. Timings are wall-clock from the agent's point of view, taken from the demo output and the server log.
 
 | Scenario | Result | Signature | Timing |
 | --- | --- | --- | --- |
+| **devnet USDC**: `npm run demo`, expert answers, release 0.45 USDC | `released`; agent 20 → 19.5, expert 0 → 0.45, hold 0 → 0.05 USDC | payment [67p8AF27…](https://explorer.solana.com/tx/67p8AF27hcJHrsQKgW3WbbRwMips91dCMqyJ6wBm92HSKwhwh1YNksE1uf6keinkgrusDcLjfM1DyYzvkyWzs9ys?cluster=devnet), release [5VYEYFWq…](https://explorer.solana.com/tx/5VYEYFWqrXBMbY45tcg8TeL1WiTffrxqH6KA89YZwRjJPUuvEG6qhKcHP45enaLam6FwoTEguqDYBAM7b3AXjVsq?cluster=devnet) | `releasing` at +4 s, `released` (confirmed) at +8 s |
+| **devnet USDC**: `npm run demo:silent`, refund 0.50 USDC | `refunded`, `sla_expired`, exit 0 | payment [56E9PXQV…](https://explorer.solana.com/tx/56E9PXQVhRDyEk2wqX5bsfUuoE7PcMikBDotrfL572hMK8VhDZm9RAUgzXfmaszmfmNBFjTehvCbbAtAVwRvvMmk?cluster=devnet), refund [23m5LZf3…](https://explorer.solana.com/tx/23m5LZf39oXXxoZ5iRdn3X4EbYSFbkfWKUJhwxXxSm1BWhRdFFrTnKDYEbp6c7DevkZb9xrDX3j7SoAtiD8r6HTg?cluster=devnet) | `refunding` at +62 s, `refunded` (confirmed) at +64 s, 69 s end to end |
 | Paid escalation (`npm run demo`), x402 settle → `202` | ok, job `paid`, payer = agent wallet | [2fqFPQbY…](https://explorer.solana.com/tx/2fqFPQbYNP7y55awMAJRKVhQVmb17QtJmNA8fWxprYZSTAhuCfYDUCvQ4U9iM3ycuaDh4P8hDTHE3w9ReQPam8cf?cluster=devnet) | ~2 s from first request to `202` |
 | Expert opens the inbox and answers, release 0.45 to expert | ok, `released`, expert balance 0 → 0.45, hold keeps 0.05 | [2DMpUuXw…](https://explorer.solana.com/tx/2DMpUuXwbxPpZMoH5n2sbjjkMRqyPDJq3zvsy8iqMMHJ1WUQXZdrLG5u67zmSZ97NjAA7FDFLt9UzqfHiVW9F2t9?cluster=devnet) | answer at +10 s, `releasing` at +12 s, `released` (confirmed) at +14 s |
 | Second answer to the same job | `409`, job unchanged | — | — |
@@ -37,7 +39,7 @@ Measured on 2026-10-20 against this repo's gateway (`npm start`, SLA 60 s, price
 | Preflight failing on devnet (wrong mint) | server stays up, `/health` `ready:false`, `POST /x/translate` → `503 not_ready` with reasons (no URLs), log `payouts paused` | — | — |
 | Database from an older schema | startup refused: `legacy database at <path>: delete it or set DB_PATH`, exit 1 | — | — |
 
-Not covered by this run: orphan payments on devnet (only smoke-tested with a forged settle header), RPC outage during a payout, real devnet USDC.
+Not covered by this run: orphan payments on devnet (only smoke-tested with a forged settle header), RPC outage during a payout.
 
 ## Architecture
 
@@ -107,7 +109,7 @@ Requires Node >= 22.12 and devnet only.
    ```
 
    In `.env`:
-   - `USDC_MINT`: the test mint printed by step 2 (stored in `keys/test-mint.json`), e.g. `FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c` on the maintainer's machine. Any 6-decimal SPL mint works ([ADR 0015](docs/adr/0015-devnet-test-mint-for-the-demo.md)).
+   - `USDC_MINT`: devnet USDC `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` if you can fund the agent at https://faucet.circle.com (Solana Devnet, no account, reCAPTCHA); otherwise the test mint printed by step 2 (stored in `keys/test-mint.json`), e.g. `FeyjUFJCsrdmRB7vJQqCtCXTxgKD11DfYqacVDDGRw2c` on the maintainer's machine. Any 6-decimal SPL mint works ([ADR 0015](docs/adr/0015-devnet-test-mint-for-the-demo.md)).
    - `INBOX_TOKEN` and `STATUS_SECRET`: at least 12 characters each, e.g. from `openssl rand -hex 16`.
    - `EXPERT_WALLET` may stay empty: the public key of `keys/expert.json` is used.
 
