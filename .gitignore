@@ -16,7 +16,7 @@ out/
 
 # Solana keypairs and wallets (never commit)
 keys/
-wallets/
+/wallets/
 *.keypair.json
 id.json
 
