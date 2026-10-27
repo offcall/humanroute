@@ -50,3 +50,6 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Local bb workflow library
+.bb/workflows/
