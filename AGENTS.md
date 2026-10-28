@@ -4,7 +4,7 @@ Instructions for coding agents in this repo.
 
 ## Project
 
-HumanRoute lets an AI agent pay a human expert in USDC over HTTP (x402, Solana devnet). The gateway holds the payment, then releases it to the expert or refunds the agent.
+HumanRoute lets a firm order human translation from an AI agent. The firm pays one x402 payment in USDC (Solana devnet) for an order of tasks. The gateway holds it, then pays each task's linguist, agency and fee, or refunds the firm.
 
 TypeScript, Hono, SQLite, one process. Toolchain and architecture decisions live in `docs/adr/`. Devnet only.
 
@@ -39,7 +39,7 @@ Readable, modular, easy to change, split by responsibility. No needless abstract
 - Short functions: `const name = (…) => …`. No classes, DI, factories, managers.
 - File <= ~100 lines. Comment only where the name is not enough.
 - Module = folder with `index.ts`. Modules import each other only through it; files inside a module import each other directly.
-- Allowed imports between modules are listed in ADR 0009 (module layout). Respect them; changing them requires a new ADR.
+- Allowed imports between modules are listed in ADR 0019 (module layout). Respect them; changing them requires a new ADR.
 - `agent/` and `scripts/` are never imported from `src/` and never import `src/` internals (types via `src/<module>/index.ts` are fine).
 - In a module: types in `types.ts`, SQL in `sql.ts`, functions in files by responsibility.
 
