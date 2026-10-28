@@ -7,9 +7,11 @@ import { paymentsRepo } from "./payments.js";
 import { transfersRepo } from "./transfers.js";
 import type { Store } from "./types.js";
 
+export type { SliceDefinition, SliceMigration } from "./slices.js";
+export { migrateSlices, withTransaction } from "./slices.js";
 export { openRequeueStore } from "./transfersRequeue.js";
-
 export type {
+	Database,
 	Job,
 	NewJob,
 	NewOrphan,
