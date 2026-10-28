@@ -1,7 +1,7 @@
 // Idempotent devnet wallet setup.
-// - hold/agent/expert keypairs (paths from HOLD_/AGENT_/EXPERT_KEYPAIR_PATH), created once
+// - hold/agent keypairs (paths from HOLD_/AGENT_KEYPAIR_PATH), created once
 // - airdrops devnet SOL to hold and agent when below 0.5 SOL
-// - creates the USDC_MINT ATAs for all three (hold pays rent)
+// - creates the USDC_MINT ATAs for hold and agent (hold pays rent)
 // - --fallback-mint: creates an own 6-decimal SPL mint (authority = hold), mints 100 to the agent
 //   and records it in keys/test-mint.json (deviation from real devnet USDC)
 import { Connection, type PublicKey } from "@solana/web3.js";
@@ -47,7 +47,6 @@ const main = async (): Promise<void> => {
 	const wallets: Wallets = {
 		hold: loadOrCreateKeypair(cfg.paths.hold),
 		agent: loadOrCreateKeypair(cfg.paths.agent),
-		expert: loadOrCreateKeypair(cfg.paths.expert),
 	};
 
 	await ensureSol(conn, "hold", wallets.hold.publicKey);
@@ -79,6 +78,9 @@ const main = async (): Promise<void> => {
 
 	console.log(`\nRPC ${cfg.rpcUrl}`);
 	await printSummary(conn, wallets, cfg.usdcMint, testMint);
+	console.log(
+		"demo wallets come from Phantom, not this script: firm (funded with USDC), agency, linguist; FEE_WALLET gets the fee share",
+	);
 };
 
 main().catch((err: unknown) => {

@@ -31,7 +31,6 @@ export const readWalletEnv = (): WalletEnv => ({
 	paths: {
 		hold: env("HOLD_KEYPAIR_PATH", "keys/hold.json"),
 		agent: env("AGENT_KEYPAIR_PATH", "keys/agent.json"),
-		expert: env("EXPERT_KEYPAIR_PATH", "keys/expert.json"),
 	},
 	testMintPath: "keys/test-mint.json",
 });

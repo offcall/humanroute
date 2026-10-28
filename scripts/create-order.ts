@@ -48,6 +48,8 @@ const stringField = (body: Record<string, unknown>, key: string): string => {
 };
 
 // Exact-amount policy: pay only the total the draft quoted (like the pay page).
+// The default $1 USD cap is off: the exact policy already bounds the amount,
+// and a multi-task order total is above $1.
 const payingFetch = (
 	signer: KeyPairSigner,
 	totalUnits: string,
@@ -57,6 +59,7 @@ const payingFetch = (
 	const client = x402Client.fromConfig({
 		schemes: [{ network: SOLANA_DEVNET, client: new ExactSvmScheme(signer) }],
 		policies: [exact],
+		spendControls: { maxAmountPerPayment: false },
 	});
 	return wrapFetchWithPayment(fetch, client);
 };

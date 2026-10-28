@@ -3,7 +3,6 @@ import type { Keypair, PublicKey } from "@solana/web3.js";
 export type WalletPaths = {
 	hold: string;
 	agent: string;
-	expert: string;
 };
 
 export type WalletEnv = {
@@ -13,4 +12,4 @@ export type WalletEnv = {
 	testMintPath: string;
 };
 
-export type Wallets = Record<"hold" | "agent" | "expert", Keypair>;
+export type Wallets = Record<"hold" | "agent", Keypair>;
