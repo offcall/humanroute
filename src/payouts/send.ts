@@ -1,13 +1,12 @@
 // Sends one pending transfer: sign, persist signature + blockhash as sent, THEN broadcast.
 // A crash after persisting leaves a sent row that recover.ts resolves by status and blockhash expiry.
 import { ErrorKind } from "../chain/index.js";
-import type { Transfer } from "../store/index.js";
-import type { PayoutDeps } from "./types.js";
+import type { Sendable, SendDeps } from "./types.js";
 
 const BASE_BACKOFF_MS = 2_000;
 const MAX_BACKOFF_MS = 60_000;
 
-export const isDue = (transfer: Transfer, now: number): boolean => {
+export const isDue = (transfer: Sendable, now: number): boolean => {
 	if (transfer.attempts === 0) {
 		return true;
 	}
@@ -19,23 +18,23 @@ export const isDue = (transfer: Transfer, now: number): boolean => {
 };
 
 // Logged once: only the call that moves the row to failed reports it.
-export const fail = (
-	deps: PayoutDeps,
-	transfer: Transfer,
+export const fail = <T extends Sendable = Sendable>(
+	deps: SendDeps<T>,
+	transfer: T,
 	error: string,
 ): void => {
-	if (!deps.store.transfers.markFailed(transfer.id, error, deps.now())) {
+	if (!deps.ledger.markFailed(transfer.id, error, deps.now())) {
 		return;
 	}
 	deps.log(
-		`OPERATOR ACTION REQUIRED transfer ${transfer.id} job ${transfer.jobId}: ${error}`,
+		`OPERATOR ACTION REQUIRED transfer ${transfer.id} ${deps.describe(transfer)}: ${error}`,
 	);
 };
 
 // Back to pending with attempts + 1, or failed once the attempt budget is spent.
-export const retry = (
-	deps: PayoutDeps,
-	transfer: Transfer,
+export const retry = <T extends Sendable = Sendable>(
+	deps: SendDeps<T>,
+	transfer: T,
 	error: string,
 ): void => {
 	const now = deps.now();
@@ -44,21 +43,17 @@ export const retry = (
 		fail(deps, transfer, `gave up after ${attempt} attempts: ${error}`);
 		return;
 	}
-	deps.store.transfers.backToPending(transfer.id, error, now);
+	deps.ledger.backToPending(transfer.id, error, now);
 	deps.log(
 		`transfer ${transfer.id} back to pending (attempt ${attempt}): ${error}`,
 	);
 };
 
-export const sendPending = async (
-	deps: PayoutDeps,
-	transfer: Transfer,
+export const sendPending = async <T extends Sendable = Sendable>(
+	deps: SendDeps<T>,
+	transfer: T,
 ): Promise<void> => {
-	const signed = await deps.chain.signTransfer({
-		toWallet: transfer.toWallet,
-		amount: transfer.amount,
-		memo: transfer.memo,
-	});
+	const signed = await deps.sign(transfer);
 	if (!signed.ok) {
 		if (signed.error.kind === ErrorKind.Final) {
 			fail(deps, transfer, signed.error.message);
@@ -73,11 +68,11 @@ export const sendPending = async (
 		blockhash: txn.blockhash,
 		lastValidBlockHeight: txn.lastValidBlockHeight,
 	};
-	if (!deps.store.transfers.markSent(transfer.id, sent, deps.now())) {
+	if (!deps.ledger.markSent(transfer.id, sent, deps.now())) {
 		return;
 	}
 	deps.log(
-		`sending ${transfer.kind} ${transfer.amount} to ${transfer.toWallet} job ${transfer.jobId} sig ${txn.signature}`,
+		`sending transfer ${transfer.id} ${deps.describe(transfer)} sig ${txn.signature}`,
 	);
 
 	const res = await deps.chain.broadcast(txn.bytes);

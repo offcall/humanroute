@@ -2,18 +2,18 @@
 // Sends nothing; the worker picks the pending row up. attempts is kept.
 import { type Transfer, TransferStatus } from "../store/index.js";
 import { checkExpiry } from "./recover.js";
-import type { RequeueDeps, RequeueResult } from "./types.js";
+import type { RequeueDeps, RequeueResult, Sendable } from "./types.js";
 
-const refuse = (reason: string): RequeueResult => ({
+const refuse = (reason: string): { outcome: "refused"; reason: string } => ({
 	outcome: "refused",
 	reason,
 });
 
 // null when the transfer may be sent again, else why not.
-const blocker = async (
-	deps: RequeueDeps,
-	transfer: Transfer,
-): Promise<RequeueResult | null> => {
+const blocker = async <T extends Sendable = Sendable>(
+	deps: RequeueDeps<T>,
+	transfer: T,
+): Promise<RequeueResult<T> | null> => {
 	const { txSig, lastValidBlockHeight, memo } = transfer;
 	if (txSig === null) {
 		return null;
@@ -45,13 +45,14 @@ const blocker = async (
 	}
 };
 
-export const requeueTransfer = async (
-	deps: RequeueDeps,
-	idOrJobId: string,
-): Promise<RequeueResult> => {
-	const found = deps.store.find(idOrJobId);
+// T = Transfer for v1 jobs, PayoutTransfer for v2 tasks (idOrOwnerId is then a task id).
+export const requeueTransfer = async <T extends Sendable = Transfer>(
+	deps: RequeueDeps<T>,
+	idOrOwnerId: string,
+): Promise<RequeueResult<T>> => {
+	const found = deps.store.find(idOrOwnerId);
 	if (!found) {
-		return refuse(`no transfer with id or job id ${idOrJobId}`);
+		return refuse(`no transfer with id or owner id ${idOrOwnerId}`);
 	}
 	if (found.status !== TransferStatus.Failed) {
 		return refuse(`transfer ${found.id} is ${found.status}, not failed`);

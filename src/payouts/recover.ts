@@ -1,9 +1,9 @@
 // Resolves sent transfers (ADR 0006). A signature is given up only when the chain does not know it,
 // the block height is past its last_valid_block_height, and no hold transaction carries the memo.
 import type { SolanaClient } from "../chain/index.js";
-import { type Transfer, TransferStatus } from "../store/index.js";
+import { TransferStatus } from "../store/index.js";
 import { fail, retry } from "./send.js";
-import type { Expiry, PayoutDeps } from "./types.js";
+import type { Expiry, Sendable, SendDeps } from "./types.js";
 
 // Call only after the chain reported the signature unknown.
 export const checkExpiry = async (
@@ -29,24 +29,24 @@ export const checkExpiry = async (
 	return { state: "landed", signature: found.value };
 };
 
-const confirmFromMemo = async (
-	deps: PayoutDeps,
-	transfer: Transfer,
+const confirmFromMemo = async <T extends Sendable = Sendable>(
+	deps: SendDeps<T>,
+	transfer: T,
 	signature: string,
 ): Promise<void> => {
 	const status = await deps.chain.signatureStatus(signature);
 	if (!status.ok || status.value.state !== "confirmed") {
 		return;
 	}
-	deps.store.transfers.markConfirmed(transfer.id, signature, deps.now());
+	deps.ledger.markConfirmed(transfer.id, signature, deps.now());
 	deps.log(
 		`transfer ${transfer.id} confirmed via memo ${transfer.memo} sig ${signature}`,
 	);
 };
 
-export const checkSent = async (
-	deps: PayoutDeps,
-	transfer: Transfer,
+export const checkSent = async <T extends Sendable = Sendable>(
+	deps: SendDeps<T>,
+	transfer: T,
 ): Promise<void> => {
 	const { txSig, lastValidBlockHeight } = transfer;
 	if (txSig === null || lastValidBlockHeight === null) {
@@ -59,9 +59,9 @@ export const checkSent = async (
 	}
 	const current = status.value;
 	if (current.state === "confirmed") {
-		deps.store.transfers.markConfirmed(transfer.id, txSig, deps.now());
+		deps.ledger.markConfirmed(transfer.id, txSig, deps.now());
 		return deps.log(
-			`transfer ${transfer.id} (${transfer.kind} job ${transfer.jobId}) confirmed sig ${txSig}`,
+			`transfer ${transfer.id} (${deps.describe(transfer)}) confirmed sig ${txSig}`,
 		);
 	}
 	if (current.state === "failed") {
@@ -88,10 +88,10 @@ export const checkSent = async (
 	}
 };
 
-export const recoverSent = async (deps: PayoutDeps): Promise<void> => {
-	for (const transfer of deps.store.transfers.listByStatus(
-		TransferStatus.Sent,
-	)) {
+export const recoverSent = async <T extends Sendable = Sendable>(
+	deps: SendDeps<T>,
+): Promise<void> => {
+	for (const transfer of deps.ledger.listByStatus(TransferStatus.Sent)) {
 		await checkSent(deps, transfer);
 	}
 };
