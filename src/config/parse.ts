@@ -1,6 +1,7 @@
 // env -> Config. Collects every problem so one start shows all of them.
 import { DEFAULTS } from "./defaults.js";
 import { readKeypair } from "./keypair.js";
+import { parseConfigV2 } from "./parseV2.js";
 import { Commitment, type Config, type Env, type Parsed } from "./types.js";
 import {
 	parseCommitment,
@@ -81,6 +82,12 @@ export const parseConfig = (env: Env): Parsed<Config> => {
 		commitment: take(
 			parseCommitment("COMMITMENT", get("COMMITMENT")),
 			Commitment.Confirmed,
+		),
+		...parseConfigV2(
+			get,
+			take,
+			(name) => (env[name] ?? "").trim(),
+			(message) => errors.push(message),
 		),
 	};
 	if (errors.length > 0) {

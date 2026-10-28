@@ -7,6 +7,11 @@ export enum Commitment {
 	Finalized = "finalized",
 }
 
+export enum TimerMode {
+	Video = "video",
+	Public = "public",
+}
+
 export type Env = Record<string, string | undefined>;
 
 // reason is public (503 body) and names no URL; detail goes to the server log only.
@@ -16,7 +21,7 @@ export type Parsed<T = unknown> =
 	| { ok: true; value: T }
 	| { ok: false; error: string };
 
-export type Config = {
+export type ConfigV1 = {
 	rpcUrl: string;
 	network: Network;
 	facilitatorUrl: string;
@@ -35,3 +40,22 @@ export type Config = {
 	dbPath: string;
 	commitment: Commitment;
 };
+
+export type ConfigV2 = {
+	taskPriceUnits: bigint;
+	timerMode: TimerMode;
+	claimWindowSeconds: number;
+	workWindowSeconds: number;
+	linguistShareBps: bigint;
+	agencyShareBps: bigint;
+	feeShareBps: bigint;
+	feeWallet: string;
+	publicBaseUrl: string;
+	mcpPublicUrl: string;
+	draftTtlSeconds: number;
+	sessionTtlSeconds: number;
+	nonceTtlSeconds: number;
+	webDistDir: string;
+};
+
+export type Config = ConfigV1 & ConfigV2;

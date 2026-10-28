@@ -12,4 +12,13 @@ export const DEFAULTS: Record<string, string> = {
 	PORT: "4021",
 	DB_PATH: "data/humanroute.db",
 	COMMITMENT: "confirmed",
+	TASK_PRICE_USDC: "0.50",
+	TIMER_MODE: "video",
+	LINGUIST_SHARE_BPS: "8000",
+	AGENCY_SHARE_BPS: "1800",
+	FEE_SHARE_BPS: "200",
+	DRAFT_TTL_SECONDS: "1800",
+	SESSION_TTL_SECONDS: "604800",
+	NONCE_TTL_SECONDS: "300",
+	WEB_DIST_DIR: "web/dist",
 };
