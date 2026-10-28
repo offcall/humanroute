@@ -20,21 +20,6 @@ export const parseUsdc = (name: string, raw: string): Parsed<bigint> => {
 	return succeed(whole * 10n ** BigInt(USDC_DECIMALS) + frac);
 };
 
-// "10" or "2.5" percent -> basis points as bigint (1000n, 250n). Range 0..100.
-export const parseFeeBps = (name: string, raw: string): Parsed<bigint> => {
-	const match = /^(\d{1,3})(?:\.(\d{1,2}))?$/.exec(raw);
-	if (!match) {
-		return fail(
-			`${name} must be a percent with at most 2 decimals, got "${raw}"`,
-		);
-	}
-	const bps =
-		BigInt(match[1] ?? "0") * 100n + BigInt((match[2] ?? "").padEnd(2, "0"));
-	return bps > 10_000n
-		? fail(`${name} must be between 0 and 100`)
-		: succeed(bps);
-};
-
 export const parseInteger = (
 	name: string,
 	raw: string,
@@ -89,8 +74,3 @@ export const parsePubkey = (name: string, raw: string): Parsed<string> => {
 		return fail(`${name} must be a base58 Solana address, got "${raw}"`);
 	}
 };
-
-export const parseSecretValue = (name: string, raw: string): Parsed<string> =>
-	raw.length >= 12
-		? succeed(raw)
-		: fail(`${name} is required (at least 12 characters)`);

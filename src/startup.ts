@@ -1,4 +1,4 @@
-// Startup helpers. Preflight watch: a failing check never stops the process. /x/translate answers 503 with the
+// Startup helpers. Preflight watch: a failing check never stops the process. /x/orders answers 503 with the
 // reasons until a re-check every interval passes again (ADR 0008).
 import type { PreflightProblem } from "./config/index.js";
 

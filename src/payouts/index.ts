@@ -18,10 +18,8 @@ export {
 	transferViewOf,
 } from "./totals.js";
 export type {
-	PayoutDeps,
 	RequeueDeps,
 	RequeueLedger,
 	RequeueResult,
 	Worker,
 } from "./types.js";
-export { createWorker } from "./worker.js";

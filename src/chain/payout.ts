@@ -10,8 +10,11 @@ import {
 	Transaction,
 	TransactionInstruction,
 } from "@solana/web3.js";
-import { MEMO_PROGRAM_ID } from "./transfer.js";
 import type { PayoutRequest, SignedTransfer, TransferParams } from "./types.js";
+
+export const MEMO_PROGRAM_ID = new PublicKey(
+	"MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+);
 
 export const signPayout = (
 	params: TransferParams,

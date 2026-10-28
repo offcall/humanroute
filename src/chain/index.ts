@@ -9,5 +9,4 @@ export {
 	type SignedTransfer,
 	type SolanaClient,
 	type SolanaOptions,
-	type TransferRequest,
 } from "./types.js";

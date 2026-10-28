@@ -1,14 +1,14 @@
 // orders and payments rows (ADR 0022). Callers own the transaction.
-import type { Database } from "../store/index.js";
 import {
-	asRow,
-	asRows,
+	type Database,
 	int,
 	type Row,
-	tasksByOrder,
+	row,
+	rows,
 	text,
 	units,
-} from "../tasks/index.js";
+} from "../store/index.js";
+import { tasksByOrder } from "../tasks/index.js";
 import { ORDERS_SQL } from "./sql.js";
 import type { Order, Payment, Receipt } from "./types.js";
 
@@ -26,18 +26,18 @@ export const orderById = (
 	database: Database,
 	orderId: string,
 ): Order | null => {
-	const found = asRow(database.prepare(ORDERS_SQL.orderById).get(orderId));
+	const found = row(database.prepare(ORDERS_SQL.orderById).get(orderId));
 	return found ? toOrder(found) : null;
 };
 
 export const ordersByFirm = (database: Database, firmId: string): Order[] =>
-	asRows(database.prepare(ORDERS_SQL.ordersByFirm).all(firmId)).map(toOrder);
+	rows(database.prepare(ORDERS_SQL.ordersByFirm).all(firmId)).map(toOrder);
 
 export const paymentById = (
 	database: Database,
 	paymentId: string,
 ): Payment | null => {
-	const found = asRow(database.prepare(ORDERS_SQL.paymentById).get(paymentId));
+	const found = row(database.prepare(ORDERS_SQL.paymentById).get(paymentId));
 	if (!found) {
 		return null;
 	}
@@ -62,6 +62,6 @@ export const receiptOf = (
 };
 
 export const countUnresolvedOrphans = (database: Database): number => {
-	const found = asRow(database.prepare(ORDERS_SQL.unresolvedOrphans).get());
+	const found = row(database.prepare(ORDERS_SQL.unresolvedOrphans).get());
 	return found ? int(found, "total") : 0;
 };

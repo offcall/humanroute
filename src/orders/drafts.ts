@@ -1,5 +1,5 @@
 // drafts rows: insert with the order price, read back with targets validated (ADR 0022).
-import { asRow, int, optText, type Row, text, units } from "../tasks/index.js";
+import { int, optText, type Row, row, text, units } from "../store/index.js";
 import { isRecord } from "./body.js";
 import { ORDERS_SQL } from "./sql.js";
 import type { Draft, DraftBody, DraftTarget, OrdersDeps } from "./types.js";
@@ -71,7 +71,7 @@ export const insertDraft = (
 
 // null when unknown, or unpaid and older than DRAFT_TTL_SECONDS.
 export const draftById = (deps: OrdersDeps, draftId: string): Draft | null => {
-	const found = asRow(deps.database.prepare(ORDERS_SQL.draftById).get(draftId));
+	const found = row(deps.database.prepare(ORDERS_SQL.draftById).get(draftId));
 	if (!found) {
 		return null;
 	}

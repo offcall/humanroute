@@ -1,4 +1,4 @@
-// Worker loop shared by v1 jobs and v2 tasks: every tick records decisions, then (unless the
+// Worker loop for task payouts: every tick records decisions, then (unless the
 // preflight fails) sends due pending transfers and checks sent ones. Startup recovers sent rows.
 import { TransferStatus } from "../store/index.js";
 import { checkSent, recoverSent } from "./recover.js";

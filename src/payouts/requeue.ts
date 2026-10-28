@@ -1,6 +1,6 @@
 // Operator requeue: failed -> pending, only when no earlier signature can still land (ADR 0006).
 // Sends nothing; the worker picks the pending row up. attempts is kept.
-import { type Transfer, TransferStatus } from "../store/index.js";
+import { TransferStatus } from "../store/index.js";
 import { checkExpiry } from "./recover.js";
 import type { RequeueDeps, RequeueResult, Sendable } from "./types.js";
 
@@ -45,14 +45,14 @@ const blocker = async <T extends Sendable = Sendable>(
 	}
 };
 
-// T = Transfer for v1 jobs, PayoutTransfer for v2 tasks (idOrOwnerId is then a task id).
-export const requeueTransfer = async <T extends Sendable = Transfer>(
+// idOrTaskId is a transfer id or a task id (ADR 0024).
+export const requeueTransfer = async <T extends Sendable = Sendable>(
 	deps: RequeueDeps<T>,
-	idOrOwnerId: string,
+	idOrTaskId: string,
 ): Promise<RequeueResult<T>> => {
-	const found = deps.store.find(idOrOwnerId);
+	const found = deps.store.find(idOrTaskId);
 	if (!found) {
-		return refuse(`no transfer with id or owner id ${idOrOwnerId}`);
+		return refuse(`no transfer with id or task id ${idOrTaskId}`);
 	}
 	if (found.status !== TransferStatus.Failed) {
 		return refuse(`transfer ${found.id} is ${found.status}, not failed`);

@@ -1,0 +1,30 @@
+import { SESSION_COOKIE } from "../auth/index.js";
+import type { OrdersDeps } from "../orders/index.js";
+import { transferViewOf } from "../payouts/index.js";
+import type { peopleDeps } from "./people.js";
+import type { WiringInput } from "./types.js";
+
+export const ordersDeps = (
+	input: WiringInput,
+	people: ReturnType<typeof peopleDeps>,
+): OrdersDeps => {
+	const { config, database } = input;
+	return {
+		database,
+		facilitator: input.facilitator,
+		network: config.network,
+		usdcMint: config.usdcMint,
+		payTo: input.chain.holdAddress,
+		taskPriceUnits: config.taskPriceUnits,
+		claimWindowSeconds: config.claimWindowSeconds,
+		draftTtlSeconds: config.draftTtlSeconds,
+		publicBaseUrl: config.publicBaseUrl,
+		sessionCookie: SESSION_COOKIE,
+		...people,
+		transferOf: transferViewOf(database),
+		preflightProblems: input.preflightProblems,
+		now: input.now,
+		newId: input.newId,
+		log: input.log("orders"),
+	};
+};

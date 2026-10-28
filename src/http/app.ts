@@ -1,24 +1,24 @@
-// Hono app: health, paid x402 route, expert inbox, job status.
+// Hono app: health, slice routes (composition only, ADR 0019) and the web app with SPA fallback.
 import { Hono } from "hono";
-import { paymentsRoutes } from "../payments/index.js";
-import { inboxRoutes } from "./inbox.js";
-import { statusRoutes } from "./status.js";
+import { accountsRoutes } from "../accounts/index.js";
+import { authRoutes } from "../auth/index.js";
+import { ordersRoutes } from "../orders/index.js";
+import { ratingRoutes } from "../rating/index.js";
+import { tasksRoutes } from "../tasks/index.js";
 import type { AppDeps } from "./types.js";
+import { webRoutes } from "./web.js";
 
 export const createApp = (deps: AppDeps): Hono => {
 	const app = new Hono();
-	const { store, now } = deps;
 	app.get("/health", (ctx) =>
 		ctx.json({ ok: true, ready: deps.preflightProblems().length === 0 }),
 	);
-	app.route("/", paymentsRoutes(deps));
-	app.route(
-		"/",
-		statusRoutes({ store, now, statusSecret: deps.config.statusSecret }),
-	);
-	app.route(
-		"/",
-		inboxRoutes({ store, now, inboxToken: deps.config.inboxToken }),
-	);
+	app.route("/", authRoutes(deps.auth));
+	app.route("/", accountsRoutes(deps.accounts));
+	app.route("/", ordersRoutes(deps.orders));
+	app.route("/", tasksRoutes(deps.tasks));
+	app.route("/", ratingRoutes(deps.rating));
+	// Last: every path that no route above answered.
+	app.route("/", webRoutes(deps.webDistDir));
 	return app;
 };

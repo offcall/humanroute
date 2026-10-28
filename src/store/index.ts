@@ -1,47 +1,31 @@
-// SQLite store: open, migrate, expose typed repositories.
+// SQLite store: open the database, refuse a v1 file, run the slice migrations.
 import { openDb } from "./connection.js";
-import { jobsRepo } from "./jobs.js";
-import { migrate } from "./migrate.js";
-import { orphansRepo } from "./orphans.js";
-import { paymentsRepo } from "./payments.js";
-import { transfersRepo } from "./transfers.js";
-import type { Store } from "./types.js";
+import { assertNotLegacy } from "./legacy.js";
+import { migrateSlices, type SliceDefinition } from "./slices.js";
+import type { Database } from "./types.js";
 
-export type { SliceDefinition, SliceMigration } from "./slices.js";
-export { migrateSlices, withTransaction } from "./slices.js";
-export { openRequeueStore } from "./transfersRequeue.js";
-export type {
-	Database,
-	Job,
-	NewJob,
-	NewOrphan,
-	NewTransfer,
-	Payment,
-	RequeueStore,
-	SentInfo,
-	Store,
-	Transfer,
-} from "./types.js";
 export {
-	JobState,
-	OrphanReason,
-	TransferKind,
-	TransferStatus,
-} from "./types.js";
+	int,
+	oneOf,
+	optInt,
+	optText,
+	row,
+	rows,
+	text,
+	units,
+} from "./columns.js";
+export type { SliceDefinition, SliceMigration } from "./slices.js";
+export { withTransaction } from "./slices.js";
+export type { Database, Row } from "./types.js";
+export { TransferStatus } from "./types.js";
 
 export const openStore = (
 	path: string,
 	now: () => number,
-): { store: Store; migrated: string[] } => {
+	slices: SliceDefinition[],
+): { database: Database; migrated: string[] } => {
 	const database = openDb(path);
-	const migrated = migrate(database, now);
-	const store: Store = {
-		jobs: jobsRepo(database),
-		transfers: transfersRepo(database),
-		payments: paymentsRepo(database),
-		orphans: orphansRepo(database),
-		transaction: (work) => database.transaction(work)(),
-		close: () => database.close(),
-	};
-	return { store, migrated };
+	assertNotLegacy(database);
+	const migrated = migrateSlices(database, now, slices);
+	return { database, migrated };
 };

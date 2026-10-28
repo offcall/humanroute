@@ -1,6 +1,13 @@
 // Maps a v2 transfers row to PayoutTransfer; legs JSON is validated when read back (ADR 0024).
-import { TransferStatus } from "../store/index.js";
-import { int, oneOf, optInt, optText, type Row, text } from "../tasks/index.js";
+import {
+	int,
+	oneOf,
+	optInt,
+	optText,
+	type Row,
+	TransferStatus,
+	text,
+} from "../store/index.js";
 import {
 	type Leg,
 	LegRole,

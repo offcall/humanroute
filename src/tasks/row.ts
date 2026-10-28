@@ -1,15 +1,15 @@
 // Maps a tasks row to Task; price_units TEXT -> bigint at the boundary.
 import {
-	asRow,
-	asRows,
 	int,
 	oneOf,
 	optInt,
 	optText,
 	type Row,
+	row,
+	rows,
 	text,
 	units,
-} from "./columns.js";
+} from "../store/index.js";
 import { type Task, TaskState } from "./types.js";
 
 const STATES: readonly TaskState[] = Object.values(TaskState);
@@ -38,9 +38,9 @@ const toTask = (record: Row): Task => ({
 });
 
 export const oneTask = (value: unknown): Task | null => {
-	const found = asRow(value);
+	const found = row(value);
 	return found ? toTask(found) : null;
 };
 
 export const manyTasks = (values: unknown[]): Task[] =>
-	asRows(values).map(toTask);
+	rows(values).map(toTask);

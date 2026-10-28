@@ -1,6 +1,5 @@
 // v2 transfers access for the worker, the deciders and the operator requeue.
-import type { Database } from "../store/index.js";
-import { asRow, asRows } from "../tasks/index.js";
+import { type Database, row, rows } from "../store/index.js";
 import { legsJson, toPayoutTransfer } from "./row.js";
 import { PAYOUTS_SQL } from "./sql.js";
 import type { NewPayoutTransfer, PayoutTransfer } from "./taskTypes.js";
@@ -13,7 +12,7 @@ export type TaskLedger = Ledger<PayoutTransfer> &
 	};
 
 const one = (value: unknown): PayoutTransfer | null => {
-	const found = asRow(value);
+	const found = row(value);
 	return found ? toPayoutTransfer(found) : null;
 };
 
@@ -30,7 +29,7 @@ export const taskLedger = (database: Database): TaskLedger => {
 		},
 		byTaskId: (taskId) => one(database.prepare(PAYOUTS_SQL.byTask).get(taskId)),
 		listByStatus: (status) =>
-			asRows(database.prepare(PAYOUTS_SQL.byStatus).all(status)).map(
+			rows(database.prepare(PAYOUTS_SQL.byStatus).all(status)).map(
 				toPayoutTransfer,
 			),
 		markSent: (transferId, sent, now) =>

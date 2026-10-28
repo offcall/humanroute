@@ -21,21 +21,13 @@ export type Parsed<T = unknown> =
 	| { ok: true; value: T }
 	| { ok: false; error: string };
 
-export type ConfigV1 = {
+// Chain, server and database settings shared by the gateway processes.
+export type ConfigBase = {
 	rpcUrl: string;
 	network: Network;
 	facilitatorUrl: string;
 	usdcMint: string;
 	holdKeypairPath: string;
-	expertKeypairPath: string;
-	expertWallet: string;
-	priceUnits: bigint;
-	feeBps: bigint;
-	releaseUnits: bigint;
-	refundUnits: bigint;
-	slaSeconds: number;
-	inboxToken: string;
-	statusSecret: string;
 	port: number;
 	dbPath: string;
 	commitment: Commitment;
@@ -58,4 +50,4 @@ export type ConfigV2 = {
 	webDistDir: string;
 };
 
-export type Config = ConfigV1 & ConfigV2;
+export type Config = ConfigBase & ConfigV2;

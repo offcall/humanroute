@@ -3,24 +3,13 @@ import type {
 	SignedTransfer,
 	SolanaClient,
 } from "../chain/index.js";
-import type { PayoutTerms } from "../jobs/index.js";
-import type {
-	SentInfo,
-	Store,
-	Transfer,
-	TransferStatus,
-} from "../store/index.js";
+import type { TransferStatus } from "../store/index.js";
 
-export type PayoutDeps = {
-	store: Store;
-	chain: SolanaClient;
-	terms: PayoutTerms;
-	maxAttempts: number;
-	// Non-empty while the preflight fails; the worker then sends nothing (ADR 0008).
-	preflightProblems: () => string[];
-	now: () => number;
-	newId: () => string;
-	log: (msg: string) => void;
+// Signature and blockhash persisted before broadcast (ADR 0006).
+export type SentInfo = {
+	txSig: string;
+	blockhash: string;
+	lastValidBlockHeight: number;
 };
 
 export type Worker = {
@@ -29,7 +18,7 @@ export type Worker = {
 	tick(): Promise<void>;
 };
 
-// Fields of a transfer row that sending, recovery and requeue need (v1 jobs and v2 tasks).
+// Fields of a transfer row that sending, recovery and requeue need.
 export type Sendable = {
 	id: string;
 	memo: string;
@@ -70,19 +59,19 @@ export type Expiry =
 	| { state: "unavailable"; error: string };
 
 export type RequeueLedger<T extends Sendable = Sendable> = {
-	// Transfer by its id, else by its owner (job or task) id.
-	find(idOrOwnerId: string): T | undefined;
+	// Transfer by its id, else by its task id.
+	find(idOrTaskId: string): T | undefined;
 	// failed -> pending; keeps attempts, clears last_error and the old signature.
 	requeue(transferId: string, now: number): boolean;
 };
 
-export type RequeueDeps<T extends Sendable = Transfer> = {
+export type RequeueDeps<T extends Sendable = Sendable> = {
 	store: RequeueLedger<T>;
 	chain: SolanaClient;
 	now: () => number;
 };
 
-export type RequeueResult<T extends Sendable = Transfer> =
+export type RequeueResult<T extends Sendable = Sendable> =
 	| { outcome: "requeued"; transfer: T }
 	| { outcome: "refused"; reason: string }
 	| { outcome: "error"; error: string };

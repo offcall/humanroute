@@ -3,7 +3,7 @@
 import type { FacilitatorClient } from "@x402/core/server";
 import type { SolanaClient } from "./chain/index.js";
 import type { Config, PreflightProblem } from "./config/index.js";
-import { checkFacilitator } from "./payments/index.js";
+import { checkFacilitator } from "./orders/index.js";
 import { log, type PreflightWatch, watchPreflight } from "./startup.js";
 
 const PREFLIGHT_INTERVAL_MS = 60_000;

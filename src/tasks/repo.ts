@@ -1,6 +1,5 @@
 // Reads and inserts on the tasks table. Callers own the transaction.
-import type { Database } from "../store/index.js";
-import { asRows, int, text } from "./columns.js";
+import { type Database, int, rows, text } from "../store/index.js";
 import type { Outcomes } from "./deps.js";
 import { manyTasks, oneTask } from "./row.js";
 import { TASKS_SQL } from "./sql.js";
@@ -52,7 +51,7 @@ export const listExpiredLate = (database: Database, now: number): Task[] =>
 	manyTasks(database.prepare(TASKS_SQL.expiredLate).all(now));
 
 const ids = (values: unknown[]): string[] =>
-	asRows(values).map((record) => text(record, "id"));
+	rows(values).map((record) => text(record, "id"));
 
 export const taskIdsByAgency = (
 	database: Database,
@@ -64,7 +63,7 @@ export const taskIdsByFirm = (database: Database, firmId: string): string[] =>
 
 const outcomes = (values: unknown[]): Outcomes => {
 	const counts: Outcomes = { approved: 0, rejected: 0, late: 0 };
-	for (const record of asRows(values)) {
+	for (const record of rows(values)) {
 		const state = text(record, "state");
 		const total = int(record, "total");
 		if (state === TaskState.Approved) {

@@ -48,6 +48,15 @@ export const int = (record: Row, key: string): number => {
 export const optInt = (record: Row, key: string): number | null =>
 	record[key] === null ? null : int(record, key);
 
+// Bigint amount stored as a decimal TEXT (ADR money rules).
+export const units = (record: Row, key: string): bigint => {
+	const value = text(record, key);
+	if (!/^\d+$/.test(value)) {
+		throw new Error(`column ${key} is not an integer amount: ${value}`);
+	}
+	return BigInt(value);
+};
+
 export const oneOf = <T = unknown>(
 	record: Row,
 	key: string,
