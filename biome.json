@@ -13,7 +13,9 @@
 			"!coverage",
 			"!.bb",
 			"!spike",
-			"!node_modules"
+			"!node_modules",
+			"!web/dist",
+			"!mcp/dist"
 		]
 	},
 	"formatter": {
