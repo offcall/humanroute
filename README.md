@@ -11,7 +11,7 @@ Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. Tests are d
 | Gateway | Node process: Hono HTTP API, SQLite, x402 payment route, payout worker | `src/` |
 | Web app | React + Vite, PWA manifest: landing, firm, agency, linguist, join and pay pages | `web/` |
 | MCP server | Remote MCP over Streamable HTTP, tools `post_task` and `get_task`; talks to the gateway over HTTP only | `mcp/` |
-| Scripts | Devnet wallet setup and an opt-in order-and-pay script | `scripts/` |
+| Scripts | Devnet wallet setup and an opt-in e2e flow | `scripts/` |
 
 Money moves only from `src/payouts/`. Decisions (approve, reject, timers) only record state and queue a transfer.
 
@@ -32,7 +32,7 @@ Requirements: Node 22.12 or newer, npm.
    `claude mcp add --transport http humanroute <MCP_PUBLIC_URL> --header "Authorization: Bearer <token>"`
 7. Frontend development: `npm run web:dev` (proxies `/api`, `/x`, `/health` to the gateway on port 4021).
 
-Checks: `npm run check` runs Biome, the gateway `tsc` and the web `tsc`. `npm run e2e:devnet` (opt-in, real devnet, needs `.env`, `keys/` and `FIRM_MCP_TOKEN`) starts the gateway and runs `scripts/create-order.ts`, which posts a draft and pays it with the agent key. Not part of `check` ([ADR 0011](docs/adr/0011-devnet-e2e-outside-check.md)).
+Checks: `npm run check` runs Biome, the gateway `tsc` and the web `tsc`. `npm run e2e:devnet` (opt-in, real devnet, needs `keys/hold.json`, `keys/agent.json` and about 1.5 USDC on the agent wallet) starts the gateway with a fresh database and runs `scripts/e2e-flow.ts`: SIWS sign-in, order, payment, payout and refunds, checked on chain. Not part of `check` ([ADR 0011](docs/adr/0011-devnet-e2e-outside-check.md)).
 
 A database from v1 is refused (ADR 0022). Use a fresh `DB_PATH`.
 
@@ -45,7 +45,7 @@ A database from v1 is refused (ADR 0022). Use a fresh `DB_PATH`.
 | `FACILITATOR_URL` | x402.org facilitator | verifies and settles payments |
 | `USDC_MINT` | devnet USDC | payment and payout mint |
 | `HOLD_KEYPAIR_PATH` | `keys/hold.json` | hold wallet: receives payments, sends payouts and refunds (mode 0600) |
-| `AGENT_KEYPAIR_PATH` | `keys/agent.json` | agent wallet, used only by `scripts/create-order.ts` |
+| `AGENT_KEYPAIR_PATH` | `keys/agent.json` | agent wallet, firm and payer in `scripts/e2e-flow.ts` |
 | `PORT`, `DB_PATH`, `COMMITMENT` | 4021, `data/humanroute.db`, `confirmed` | server, SQLite file, commitment |
 | `TASK_PRICE_USDC` | `0.50` | price of one task |
 | `TIMER_MODE` | `video` | `video` (claim 60 s, work 180 s) or `public` (claim 30 min, work 60 min) |
@@ -73,7 +73,7 @@ Startup: invalid configuration exits 1. A failing preflight (hold without SOL or
 src/     gateway: config, store, chain, auth, accounts, tasks, orders, payouts, rating, http, wiring
 web/     React app (landing, firm, agency, linguist, join, pay)
 mcp/     MCP server (post_task, get_task)
-scripts/ wallet setup, devnet order and pay script
+scripts/ wallet setup, devnet e2e flow
 docs/    design, ADRs, demo script, roadmap
 ```
 
