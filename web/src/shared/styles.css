@@ -1,0 +1,76 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: system-ui, sans-serif;
+	line-height: 1.4;
+	color: #1b1f24;
+	background: #fff;
+}
+
+#root {
+	max-width: 600px;
+	margin: 0 auto;
+	padding: 16px;
+}
+
+button,
+.button,
+select,
+input,
+textarea {
+	min-height: 44px;
+	padding: 8px 14px;
+	font: inherit;
+	border-radius: 6px;
+}
+
+button,
+.button {
+	display: inline-flex;
+	align-items: center;
+	color: #fff;
+	background: #1f6feb;
+	border: 0;
+	text-decoration: none;
+}
+
+button:disabled {
+	opacity: 0.5;
+}
+
+a {
+	display: inline-block;
+	min-height: 44px;
+	line-height: 44px;
+}
+
+ul {
+	padding: 0;
+	list-style: none;
+}
+
+li {
+	margin: 8px 0;
+}
+
+.error {
+	color: #b42318;
+}
+
+.split {
+	display: grid;
+	gap: 12px;
+}
+
+@media (min-width: 600px) {
+	#root {
+		padding: 32px 0;
+	}
+
+	.split {
+		grid-template-columns: 1fr 1fr;
+	}
+}

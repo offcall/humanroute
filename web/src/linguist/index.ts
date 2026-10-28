@@ -1,0 +1,1 @@
+export { Linguist } from "./LinguistHome";
