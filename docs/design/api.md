@@ -80,7 +80,7 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | `POST /api/tasks/:id/submit` | cookie, linguist (claimer) | `{result}` (non-empty) | `200 TaskView` (`submitted`) | `403`, `409 late` (after the work deadline), `409 bad_state`, `422 invalid_body` | tasks |
 | `POST /api/tasks/:id/approve` | cookie, firm (owner) | - | `200 TaskView` (`approved`, public `paying_out`) | `403`, `409 bad_state` (not `submitted` or already decided) | tasks |
 | `POST /api/tasks/:id/reject` | cookie, firm (owner) | `{reason}` (non-empty, <= 1000 chars) | `200 TaskView` (`rejected`, public `refunding`) | `403`, `409 bad_state`, `422 reason_required` | tasks |
-| `GET /api/tasks/:id` | cookie firm owner, claimer, claimer's agency; or MCP Bearer of the owner firm | - | `200 TaskView` | `403`, `404` | tasks |
+| `GET /api/tasks/:id` | cookie firm owner, claimer, claimer's agency; or MCP Bearer of the owner firm | - | `200 {serverTime, ...TaskView}`: `serverTime` as on the board, for server-based countdowns | `403`, `404` | tasks |
 
 Approve and reject come from the firm cabinet only, not MCP.
 
