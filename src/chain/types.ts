@@ -43,6 +43,16 @@ export type TransferRequest = {
 	memo: string;
 };
 
+export type PayoutLeg = {
+	ownerWallet: string;
+	amountUnits: bigint;
+};
+
+export type PayoutRequest = {
+	legs: PayoutLeg[];
+	memo: string;
+};
+
 export type SignedTransfer = {
 	signature: string;
 	blockhash: string;
@@ -62,6 +72,7 @@ export type SolanaClient = {
 	holdAddress: string;
 	// Builds and signs TransferChecked hold ATA -> recipient ATA plus Memo. Does not broadcast.
 	signTransfer(req: TransferRequest): Promise<ChainResult<SignedTransfer>>;
+	signPayout(req: PayoutRequest): Promise<ChainResult<SignedTransfer>>;
 	broadcast(bytes: Uint8Array): Promise<ChainResult<string>>;
 	signatureStatus(signature: string): Promise<ChainResult<SignatureStatus>>;
 	blockHeight(): Promise<ChainResult<number>>;

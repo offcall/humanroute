@@ -3,6 +3,8 @@ export {
 	type ChainError,
 	type ChainResult,
 	ErrorKind,
+	type PayoutLeg,
+	type PayoutRequest,
 	type SignatureStatus,
 	type SignedTransfer,
 	type SolanaClient,

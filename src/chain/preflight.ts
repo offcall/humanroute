@@ -5,8 +5,8 @@ import { type PreflightProblem, USDC_DECIMALS } from "../config/index.js";
 import { classify } from "./errors.js";
 import { Phase, type SolanaOptions } from "./types.js";
 
-// Enough SOL for a few hundred transfers at 5000 lamports each.
-const MIN_HOLD_LAMPORTS = 5_000_000;
+// Enough SOL for fees and ATA rent for a payout (ADR 0024).
+const MIN_HOLD_LAMPORTS = 50_000_000;
 
 export const preflight = async (
 	conn: Connection,

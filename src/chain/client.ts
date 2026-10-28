@@ -3,6 +3,7 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { USDC_DECIMALS } from "../config/index.js";
 import { classify } from "./errors.js";
 import { preflight } from "./preflight.js";
+import { preparePayout } from "./prepare-payout.js";
 import { blockHeight, findMemo, signatureStatus } from "./status.js";
 import { recipientAta, signTransfer } from "./transfer.js";
 import {
@@ -40,6 +41,8 @@ export const createSolanaClient = (opts: SolanaOptions): SolanaClient => {
 				return { ok: false, error: classify(err, Phase.Prepare) };
 			}
 		},
+
+		signPayout: (req) => preparePayout(conn, opts, mint, req),
 
 		broadcast: async (bytes) => {
 			try {
