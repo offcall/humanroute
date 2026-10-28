@@ -20,10 +20,11 @@ Step 4 of the demo needs Claude to post a task to HumanRoute from a chat, and th
   - `get_task` reads a draft by `draftId`; once paid it returns the `orderId` and the task statuses.
   - The `post_task` description tells Claude to use it for risky medical or drug text.
 - Pay page:
-  - Browser code in `web/src/pay/`, built by the same Vite build as the web app (no esbuild), served same-origin by the gateway at `/pay/:draftId`.
+  - A React component `PayPage` in `web/src/pay/`, mounted by the SPA router at `/pay/:draftId`. It is part of the same Vite build as the web app, not a separate HTML entry; the gateway serves `index.html` for the route through the SPA fallback.
+  - It reads the amount and `payTo` from `GET /api/orders/draft/:draftId`.
   - Wallet: injected `window.phantom` only. Wallet Standard is roadmap.
-  - One x402 payment per order; the amount is the sum of the task prices.
-  - The browser payment cap is the draft's `totalUnits`.
+  - One x402 payment per order, `POST /x/orders/:draftId`; the amount is the sum of the task prices.
+  - The browser payment cap is the draft's `totalUnits`. It is enforced through an `x402Client` policy that keeps only payment requirements whose amount equals `totalUnits`; with none left, the payment aborts before signing.
 - Import isolation: `mcp/` and `web/` follow the `agent/` rule. They never import `src/` internals; types only via `src/<module>/index.ts` if needed.
 
 ## Alternatives
@@ -36,7 +37,7 @@ Step 4 of the demo needs Claude to post a task to HumanRoute from a chat, and th
 ## Consequences
 
 - A second process and a second Coolify app to deploy and configure (gateway URL).
-- Coordinator needs in the gateway: a draft endpoint (create and read a draft with `totalUnits`, and `orderId` plus task statuses once paid) and the `/pay/:draftId` route that serves the Vite build.
+- Coordinator needs in the gateway: a draft endpoint (create and read a draft with `totalUnits`, and `orderId` plus task statuses once paid) and the SPA fallback for `/pay/:draftId`; the web router mounts `PayPage` there.
 - Claude polls `get_task` itself; there is no blocking wait.
 - Only Phantom works on the pay page until Wallet Standard lands.
 - Not verified: that the x402 client flow works from a browser with `window.phantom`.
