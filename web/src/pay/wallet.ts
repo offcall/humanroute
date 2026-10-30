@@ -31,11 +31,22 @@ export const getPhantom = (): PhantomProvider | undefined => {
 			const signed: unknown = await Reflect.apply(signTransaction, provider, [
 				tx,
 			]);
-			if (!(signed instanceof VersionedTransaction)) {
+			// Phantom builds the result with its own web3.js copy, so `instanceof` fails;
+			// re-read its wire bytes with ours instead.
+			if (signed instanceof VersionedTransaction) {
+				return signed;
+			}
+			if (!isRecord(signed) || typeof signed.serialize !== "function") {
+				throw new Error("Phantom returned an invalid transaction");
+			}
+			const bytes: unknown = Reflect.apply(signed.serialize, signed, []);
+			if (!(bytes instanceof Uint8Array) && !ArrayBuffer.isView(bytes)) {
 				throw new Error("Phantom returned an invalid transaction");
 			}
 
-			return signed;
+			return VersionedTransaction.deserialize(
+				new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
+			);
 		},
 	};
 };
