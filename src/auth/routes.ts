@@ -1,8 +1,8 @@
 import { type Context, Hono } from "hono";
-import { setCookie } from "hono/cookie";
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { parseNonceBody, parseVerifyBody, readJson } from "./body.js";
 import { consumeNonce, createNonce } from "./nonce.js";
-import { createSession } from "./session.js";
+import { createSession, endSession } from "./session.js";
 import { type AuthDeps, SESSION_COOKIE } from "./types.js";
 import { verifyEd25519 } from "./verify.js";
 
@@ -55,6 +55,19 @@ export const authRoutes = (deps: AuthDeps): Hono => {
 		});
 
 		return ctx.json({ wallet: input.wallet });
+	});
+
+	// Idempotent: a missing or unknown session still clears the cookie and returns 204.
+	app.post("/api/auth/logout", async (ctx) => {
+		const body = await readJson(ctx);
+		if (!body.ok) {
+			return ctx.json({ error: "malformed_body" }, 400);
+		}
+
+		endSession(deps.database, getCookie(ctx, SESSION_COOKIE));
+		deleteCookie(ctx, SESSION_COOKIE, { path: "/" });
+
+		return ctx.body(null, 204);
 	});
 
 	return app;

@@ -17,4 +17,5 @@ export const SESSIONS_SQL = {
 	insert:
 		"INSERT INTO sessions (token_hash, wallet, created_at, expires_at) VALUES (?, ?, ?, ?)",
 	wallet: "SELECT wallet FROM sessions WHERE token_hash = ? AND expires_at > ?",
+	delete: "DELETE FROM sessions WHERE token_hash = ?",
 };

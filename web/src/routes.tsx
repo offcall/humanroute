@@ -41,9 +41,11 @@ const Page = () => {
 
 // The signed-in wallet shows above every page; pay shows the payer itself when there is no session.
 const SessionWallet = () => {
-	const { me } = useSession();
+	const { me, signOut } = useSession();
 
-	return me === null ? null : <WalletLine wallet={me.wallet} />;
+	return me === null ? null : (
+		<WalletLine wallet={me.wallet} onSignOut={signOut} />
+	);
 };
 
 export const Routes = () => (

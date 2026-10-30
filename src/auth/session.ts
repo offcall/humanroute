@@ -18,6 +18,18 @@ export const createSession = (deps: AuthDeps, wallet: string): string => {
 	return token;
 };
 
+// Deletes the session row for the token; an unknown or missing token is a no-op.
+export const endSession = (
+	database: Database,
+	token: string | undefined,
+): void => {
+	if (token === undefined || token === "") {
+		return;
+	}
+
+	database.prepare(SESSIONS_SQL.delete).run(hashToken(token));
+};
+
 export const readSession = (
 	database: Database,
 	now: number,

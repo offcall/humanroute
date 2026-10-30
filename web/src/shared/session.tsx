@@ -9,6 +9,7 @@ import {
 } from "react";
 import { request } from "./api";
 import { parseMe } from "./parsers";
+import { navigate } from "./router";
 import { signIn as signInSiws } from "./siws";
 import type { Me } from "./types";
 import { getPhantom } from "./wallet";
@@ -18,9 +19,13 @@ type Session = {
 	loading: boolean;
 	refresh: () => Promise<void>;
 	signIn: () => Promise<string | undefined>;
+	signOut: () => Promise<void>;
 };
 
 const SessionContext = createContext<Session | undefined>(undefined);
+
+// A 204 has no body, so any success value passes the parser.
+const parseDone = (): true => true;
 
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
 	const [me, setMe] = useState<Me | null>(null);
@@ -50,13 +55,22 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 		return undefined;
 	}, [refresh]);
 
+	const signOut = useCallback(async () => {
+		const res = await request("POST", "/api/auth/logout", {}, parseDone);
+		if (!res.ok) {
+			return;
+		}
+		setMe(null);
+		navigate("/");
+	}, []);
+
 	useEffect(() => {
 		void refresh();
 	}, [refresh]);
 
 	const value = useMemo(
-		() => ({ me, loading, refresh, signIn }),
-		[me, loading, refresh, signIn],
+		() => ({ me, loading, refresh, signIn, signOut }),
+		[me, loading, refresh, signIn, signOut],
 	);
 
 	return (

@@ -3,7 +3,13 @@ import { useState } from "react";
 export const shortWallet = (wallet: string): string =>
 	`${wallet.slice(0, 4)}…${wallet.slice(-4)}`;
 
-export const WalletLine = ({ wallet }: { wallet: string }) => {
+export const WalletLine = ({
+	wallet,
+	onSignOut,
+}: {
+	wallet: string;
+	onSignOut?: () => void;
+}) => {
 	const [copied, setCopied] = useState(false);
 
 	const copy = async () => {
@@ -28,6 +34,14 @@ export const WalletLine = ({ wallet }: { wallet: string }) => {
 			>
 				Explorer
 			</a>
+			{onSignOut !== undefined && (
+				<>
+					{" "}
+					<button type="button" onClick={onSignOut}>
+						Sign out
+					</button>
+				</>
+			)}
 		</p>
 	);
 };

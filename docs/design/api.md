@@ -39,7 +39,7 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | --- | --- | --- | --- | --- | --- |
 | `POST /api/auth/nonce` | none | `{wallet}` | `200 {nonce, message}` (server-built SIWS text, nonce valid 5 min, single use) | `422 invalid_body` | auth |
 | `POST /api/auth/verify` | none | `{wallet, nonce, signature}` (base64 Ed25519 over the stored text) | `200` + cookie | `401` (one generic error for every failure) | auth |
-| `POST /api/auth/logout` | - | - | not built: ADR 0020 drops it (one browser per role) | - | auth |
+| `POST /api/auth/logout` | cookie (optional, idempotent) | `{}` (JSON) | `204`, deletes the session row, clears `hr_session` | `400 malformed_body` | auth |
 | `GET /api/me` | cookie, any | - | `200 {wallet, firm?, agency?, linguist?}` | `401` | accounts |
 
 ### accounts (stream B)
