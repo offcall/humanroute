@@ -8,7 +8,8 @@ export const createNonce = (
 	deps: AuthDeps,
 	wallet: string,
 ): { nonce: string; message: string } => {
-	const nonce = randomBytes(32).toString("base64url");
+	// SIWS allows only letters and digits in the nonce; wallets reject "-" and "_".
+	const nonce = randomBytes(32).toString("hex");
 	const issuedAt = deps.now();
 	const expiresAt = issuedAt + deps.nonceTtlSeconds * 1000;
 	const message = siwsMessage({
