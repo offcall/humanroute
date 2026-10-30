@@ -1,4 +1,4 @@
-import { parseDraft, parseDraftStatus } from "./parse.js";
+import { parseDraft, parseDraftStatus, parseOrder } from "./parse.js";
 import type { GatewayClient, Parsed } from "./types.js";
 
 const call = async <T>(
@@ -54,5 +54,12 @@ export const createGatewayClient = (baseUrl: string): GatewayClient => ({
 			{ method: "GET" },
 			200,
 			parseDraftStatus,
+		),
+	getOrder: (token, orderId) =>
+		call(
+			`${baseUrl}/api/orders/${encodeURIComponent(orderId)}`,
+			{ method: "GET", headers: { authorization: `Bearer ${token}` } },
+			200,
+			parseOrder,
 		),
 });

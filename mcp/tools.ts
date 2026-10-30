@@ -1,12 +1,9 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { GET_TASK_DESCRIPTION, POST_TASK_DESCRIPTION } from "./descriptions.js";
+import { renderDraft, renderStatus } from "./render.js";
 import type { GatewayClient } from "./types.js";
-
-const POST_TASK_DESCRIPTION =
-	"Call this whenever you are asked to publish or send risky medical or drug text, such as a patient leaflet, dosage instructions, drug labels, clinical content or medical advice, so a human expert translates it before publication. " +
-	"It creates a draft order with one task per target language. " +
-	"This tool never pays: the user must open the returned payUrl and pay in Phantom, and the tasks are not published until paid.";
 
 const targetSchema = z.object({
 	targetLang: z.string().min(1),
@@ -43,31 +40,33 @@ export const registerTools = (
 		{ description: POST_TASK_DESCRIPTION, inputSchema: postTaskShape },
 		async (input) => {
 			const created = await client.createDraft(token, input);
-			if (!created.ok) {
-				return text(created.error, true);
-			}
-			const { draftId, payUrl, taskCount, totalUnits } = created.value;
 
-			return text(
-				`draftId: ${draftId}\npayUrl: ${payUrl}\ntaskCount: ${taskCount}\ntotalUnits: ${totalUnits}\n` +
-					"The firm must open payUrl and pay in Phantom; the task is not published until paid.",
-			);
+			return created.ok
+				? text(renderDraft(created.value))
+				: text(created.error, true);
 		},
 	);
 
 	server.registerTool(
 		"get_task",
 		{
-			description:
-				"Read the state of a draft order by draftId; once paid it returns the orderId and task statuses.",
+			description: GET_TASK_DESCRIPTION,
 			inputSchema: { draftId: z.string().min(1) },
 		},
 		async ({ draftId }) => {
 			const status = await client.getDraft(draftId);
+			if (!status.ok) {
+				return text(status.error, true);
+			}
+			const { orderId } = status.value;
+			if (orderId === undefined) {
+				return text(renderStatus(status.value, undefined));
+			}
+			const order = await client.getOrder(token, orderId);
 
-			return status.ok
-				? text(JSON.stringify(status.value))
-				: text(status.error, true);
+			return order.ok
+				? text(renderStatus(status.value, order.value))
+				: text(order.error, true);
 		},
 	);
 };

@@ -25,10 +25,29 @@ export type DraftStatus = {
 	draftId: string;
 	state: DraftState;
 	orderId?: string;
-	tasks?: unknown[];
+	priceUnits: string;
+	totalUnits: string;
+	taskCount: number;
+	targetLangs: string[];
+};
+
+export type OrderTask = {
+	taskId: string;
+	targetLang: string;
+	publicState: string;
+	result: string | null;
+	reason: string | null;
+	claimDeadline: string;
+	workDeadline: string | null;
+};
+
+export type Order = {
+	orderId: string;
+	tasks: OrderTask[];
 };
 
 export type GatewayClient = {
 	createDraft: (token: string, input: DraftInput) => Promise<Parsed<Draft>>;
 	getDraft: (draftId: string) => Promise<Parsed<DraftStatus>>;
+	getOrder: (token: string, orderId: string) => Promise<Parsed<Order>>;
 };
