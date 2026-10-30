@@ -15,7 +15,7 @@ Demo steps 1-3 sign in a firm, an agency and a linguist with Phantom. Each cabin
 - `POST /api/auth/verify {wallet, nonce, signature}` marks the nonce used, verifies the Ed25519 signature over the stored text with `node:crypto`, and starts a session. The server never parses client-supplied message text. Every failure is `401` with one generic error.
 - Session: random 32-byte token in cookie `hr_session` (HttpOnly, SameSite=Lax, Path=/, Secure when `PUBLIC_BASE_URL` is https). The `sessions` table stores only the sha256 of the token. TTL 7 days. Nonce and session TTLs are constants in `src/auth`, not env.
 - CSRF: SameSite=Lax, and POST/PUT require `content-type: application/json`.
-- No logout endpoint: the demo uses one browser per role.
+- Logout: `POST /api/auth/logout` with `{}` (JSON) deletes the session row and clears `hr_session`; `204`. Idempotent. The web header has a "Sign out" button, so one browser can switch roles.
 - `auth` owns `nonces` and `sessions` and exports a session lookup (wallet or none). `http` passes it into the routes of other slices (ADR 0019); they do not import `auth`.
 - Roles are not stored in `auth`. They are derived from `accounts` (ADR 0021): a wallet is a firm, an agency and/or a linguist if the matching row exists, at most one of each. `GET /api/me` (served by `accounts`) returns `{wallet, firm?, agency?, linguist?}`.
 - Errors: `401` no or expired session, `403` wrong role.
