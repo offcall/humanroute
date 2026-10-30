@@ -1,5 +1,11 @@
 import { type ApiResult, request } from "./api";
 import { isRecord, str } from "./parse";
+import {
+	describeShape,
+	errorCode,
+	errorText,
+	parseSignature,
+} from "./signature";
 import { type Phantom, toBase64 } from "./wallet";
 
 type Challenge = { nonce: string; message: string };
@@ -24,50 +30,54 @@ const parseWallet = (raw: unknown): string | undefined => {
 	return String(raw.publicKey);
 };
 
-const parseSignature = (raw: unknown): Uint8Array | undefined => {
-	if (raw instanceof Uint8Array) {
-		return raw;
-	}
-
-	return isRecord(raw) && raw.signature instanceof Uint8Array
-		? raw.signature
-		: undefined;
-};
-
 const fail = (error: string): ApiResult<never> => ({
 	ok: false,
 	status: 0,
 	error: { error },
 });
 
-export const signIn = async (phantom: Phantom): Promise<ApiResult<true>> => {
-	try {
-		const wallet = parseWallet(await phantom.connect());
-		if (wallet === undefined) {
-			return fail("wallet_unavailable");
-		}
-		const nonce = await request(
-			"POST",
-			"/api/auth/nonce",
-			{ wallet },
-			parseChallenge,
-		);
-		if (!nonce.ok) {
-			return nonce;
-		}
-		const bytes = new TextEncoder().encode(nonce.value.message);
-		const signed = parseSignature(await phantom.signMessage(bytes));
-		if (signed === undefined) {
-			return fail("sign_rejected");
-		}
+const REJECTED_CODE = 4001;
 
-		return request(
-			"POST",
-			"/api/auth/verify",
-			{ wallet, nonce: nonce.value.nonce, signature: toBase64(signed) },
-			() => true,
-		);
-	} catch {
-		return fail("sign_rejected");
+export const signIn = async (phantom: Phantom): Promise<ApiResult<true>> => {
+	let connected: unknown;
+	try {
+		connected = await phantom.connect();
+	} catch (err) {
+		return fail(`connect_failed: ${errorText(err)}`);
 	}
+	const wallet = parseWallet(connected);
+	if (wallet === undefined) {
+		return fail("wallet_unavailable");
+	}
+	const nonce = await request(
+		"POST",
+		"/api/auth/nonce",
+		{ wallet },
+		parseChallenge,
+	);
+	if (!nonce.ok) {
+		return nonce;
+	}
+
+	let raw: unknown;
+	try {
+		raw = await phantom.signMessage(
+			new TextEncoder().encode(nonce.value.message),
+		);
+	} catch (err) {
+		return errorCode(err) === REJECTED_CODE
+			? fail("sign_rejected")
+			: fail(`sign_failed: ${errorText(err)}`);
+	}
+	const signed = parseSignature(raw);
+	if (signed === undefined) {
+		return fail(`bad_signature_shape: ${describeShape(raw)}`);
+	}
+
+	return request(
+		"POST",
+		"/api/auth/verify",
+		{ wallet, nonce: nonce.value.nonce, signature: toBase64(signed) },
+		() => true,
+	);
 };
