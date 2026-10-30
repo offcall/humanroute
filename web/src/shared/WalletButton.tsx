@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useSession } from "./session";
+import { shortWallet } from "./WalletLine";
 import { getPhantom, phantomDeepLink } from "./wallet";
-
-const shortWallet = (wallet: string): string =>
-	`${wallet.slice(0, 4)}…${wallet.slice(-4)}`;
 
 export const WalletButton = () => {
 	const { me, signIn } = useSession();

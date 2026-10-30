@@ -19,4 +19,5 @@ export { parseTask } from "./taskParsers";
 export * from "./types";
 export { usePoll } from "./usePoll";
 export { WalletButton } from "./WalletButton";
+export { WalletLine } from "./WalletLine";
 export { getPhantom, phantomDeepLink, toBase64 } from "./wallet";

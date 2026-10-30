@@ -4,14 +4,14 @@ import { Firm } from "./firm";
 import { Join } from "./join";
 import { Landing } from "./landing";
 import { Linguist } from "./linguist";
-import { matchPath, useRoute } from "./shared";
+import { matchPath, useRoute, useSession, WalletLine } from "./shared";
 
 // The pay page carries the wallet and payment code; it loads only when a /pay/ link is opened.
 const PayPage = lazy(() =>
 	import("./pay").then((module) => ({ default: module.PayPage })),
 );
 
-export const Routes = () => {
+const Page = () => {
 	const path = useRoute();
 	const join = matchPath("/join/:inviteCode", path);
 
@@ -38,3 +38,17 @@ export const Routes = () => {
 
 	return <Landing />;
 };
+
+// The signed-in wallet shows above every page; pay shows the payer itself when there is no session.
+const SessionWallet = () => {
+	const { me } = useSession();
+
+	return me === null ? null : <WalletLine wallet={me.wallet} />;
+};
+
+export const Routes = () => (
+	<>
+		<SessionWallet />
+		<Page />
+	</>
+);

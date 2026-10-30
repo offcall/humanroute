@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSession, WalletLine } from "../shared";
 import { PaidView, ReadyView } from "./PayView";
 import { parseDraftView } from "./parse";
 import { payOrder } from "./pay";
@@ -40,6 +41,8 @@ const loadDraft = async (draftId: string): Promise<Status> => {
 
 export const PayPage = ({ draftId }: { draftId: string }) => {
 	const [status, setStatus] = useState<Status>({ name: "loading" });
+	const [payer, setPayer] = useState<string>();
+	const { me } = useSession();
 	const phantom = getPhantom();
 
 	useEffect(() => {
@@ -65,6 +68,7 @@ export const PayPage = ({ draftId }: { draftId: string }) => {
 			setStatus({ name: "error", message: wallet.error, draft });
 			return;
 		}
+		setPayer(wallet.value.address);
 		const paid = await payOrder({
 			draftId,
 			totalUnits: draft.totalUnits,
@@ -88,6 +92,7 @@ export const PayPage = ({ draftId }: { draftId: string }) => {
 	return (
 		<div>
 			<h1>Pay for translation</h1>
+			{me === null && payer !== undefined && <WalletLine wallet={payer} />}
 			{status.name === "error" && <p role="alert">{status.message}</p>}
 			{draft !== undefined && (
 				<ReadyView
