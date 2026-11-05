@@ -2,7 +2,7 @@ import { navigate } from "../shared";
 import { Board } from "./Board";
 import { MyTasks } from "./MyTasks";
 import type { Cabinet } from "./parseCabinet";
-import { SubmitTask } from "./SubmitTask";
+import { TaskScreen } from "./TaskScreen";
 import { type Screen, TAB_PATH, Tab } from "./tabs";
 import type { BoardState } from "./useBoard";
 import { WalletTab } from "./WalletTab";
@@ -12,9 +12,11 @@ type BodyProps = {
 	cabinet: Cabinet;
 	board: BoardState;
 	reload: () => Promise<void>;
+	todayUnits: bigint;
 };
 
-export const LinguistBody = ({ screen, cabinet, board, reload }: BodyProps) => {
+export const LinguistBody = (props: BodyProps) => {
+	const { screen, cabinet, board, reload } = props;
 	// A claim or a pair save reloads the cabinet and applies the latest board.
 	const reloadAll = async () => {
 		await Promise.all([reload(), board.refresh(true)]);
@@ -22,11 +24,12 @@ export const LinguistBody = ({ screen, cabinet, board, reload }: BodyProps) => {
 
 	if (screen.taskId !== undefined) {
 		return (
-			<SubmitTask
+			<TaskScreen
 				key={screen.taskId}
 				taskId={screen.taskId}
-				onSubmitted={reload}
-				onClose={() => navigate(TAB_PATH[Tab.Tasks])}
+				fresh={board.fresh}
+				todayUnits={props.todayUnits}
+				onSubmitted={() => void reload()}
 			/>
 		);
 	}

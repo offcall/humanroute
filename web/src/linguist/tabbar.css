@@ -41,3 +41,26 @@
 	font: 850 19px / 1.1 var(--hr-sans);
 	margin: 0;
 }
+
+/* Second header line: pairs left, today's earnings right; zero stays muted */
+.big-sub {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 10px;
+	font-size: 13px;
+	color: var(--hr-muted);
+	margin-top: -6px;
+}
+.big-sub b {
+	color: var(--hr-ink);
+	font-weight: 750;
+	white-space: nowrap;
+}
+.big-sub__today b {
+	color: var(--hr-ok);
+	font-weight: 850;
+}
+.big-sub__today.big-sub__today--zero b {
+	color: var(--hr-muted);
+}

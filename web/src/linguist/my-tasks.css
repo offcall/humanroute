@@ -1,0 +1,42 @@
+/* My tasks: list heads and done rows with a round stamp (indigo.css §10 + page rules) */
+.list-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 10px;
+	margin-top: 8px;
+	padding-top: 12px;
+	border-top: 1px solid var(--hr-line);
+}
+.list-head__aside {
+	font: 750 13px / 1.2 var(--hr-sans);
+	color: var(--hr-muted);
+}
+.done-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	background: var(--hr-card);
+	border-radius: 14px;
+	padding: 11px 14px;
+	box-shadow: var(--hr-shadow-row);
+	flex: none;
+	min-height: 64px;
+	width: 100%;
+	text-align: left;
+	border: 0;
+	color: var(--hr-ink);
+	font: inherit;
+}
+.done-row__pair {
+	font: 850 19px / 1 var(--hr-sans);
+	white-space: nowrap;
+	display: block;
+}
+.done-row__sub {
+	font-size: 12.5px;
+	color: var(--hr-muted);
+	display: block;
+	margin-top: 4px;
+}

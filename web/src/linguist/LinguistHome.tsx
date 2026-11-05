@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { navigate, RequireSession, useRoute, useSession } from "../shared";
 import { LinguistBody } from "./LinguistBody";
+import { ShellHead } from "./ShellHead";
 import { Tabbar } from "./Tabbar";
 import { type Screen, screenOf, TAB_PATH, TAB_TITLE, Tab } from "./tabs";
+import { todayUnits } from "./taskGroups";
 import { useBoard } from "./useBoard";
 import { useCabinet } from "./useCabinet";
 
@@ -24,21 +26,25 @@ const LinguistShell = ({ screen }: { screen: Screen }) => {
 		);
 	}
 
+	const today = todayUnits(cabinet.tasks, Date.now());
+
 	return (
 		<div className="app theme-big">
 			<main className="app__main">
 				<div className="app__pad">
-					<header className="big-head">
-						<h1 className="h-title">{TAB_TITLE[screen.tab]}</h1>
-						<span>
-							{cabinet.agency.name} · translator #{cabinet.translatorNo}
-						</span>
-					</header>
+					{screen.taskId === undefined ? (
+						<ShellHead
+							title={TAB_TITLE[screen.tab]}
+							cabinet={cabinet}
+							todayUnits={today}
+						/>
+					) : null}
 					<LinguistBody
 						screen={screen}
 						cabinet={cabinet}
 						board={board}
 						reload={reload}
+						todayUnits={today}
 					/>
 				</div>
 			</main>
