@@ -1,4 +1,4 @@
-/* Bottom tab bar (indigo.css §11): sticks to the viewport bottom, above the home indicator */
+/* Bottom tab bar (indigo.css §11): sticks to the viewport bottom */
 .tabbar {
 	flex: none;
 	position: sticky;
@@ -8,7 +8,13 @@
 	justify-content: space-around;
 	border-top: 1px solid var(--hr-line);
 	background: var(--hr-card);
-	padding: 6px 6px max(6px, env(safe-area-inset-bottom));
+	padding: 4px 6px 6px;
+}
+/* Home-screen app: labels end ~16 pt above the edge; the home indicator overlaps only the bar background */
+@media (display-mode: standalone) {
+	.tabbar {
+		padding-bottom: max(6px, calc(env(safe-area-inset-bottom) - 18px));
+	}
 }
 .tabbar__tab {
 	display: flex;
