@@ -1,5 +1,11 @@
 import { useEffect } from "react";
-import { navigate, RequireSession, useRoute, useSession } from "../shared";
+import {
+	navigate,
+	PageLoading,
+	RequireSession,
+	useRoute,
+	useSession,
+} from "../shared";
 import { BoardPush } from "./BoardPush";
 import { InstallHint } from "./InstallHint";
 import { LinguistBody } from "./LinguistBody";
@@ -18,7 +24,7 @@ const LinguistShell = ({ screen }: { screen: Screen }) => {
 
 	if (cabinet === undefined) {
 		if (failed === undefined) {
-			return <p>Loading…</p>;
+			return <PageLoading />;
 		}
 		return me?.linguist ? (
 			<p className="error">

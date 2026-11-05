@@ -5,6 +5,7 @@ import {
 	navigate,
 	pairCodes,
 	pairNames,
+	Spinner,
 	TaskState,
 } from "../shared";
 import { TaskEditor } from "./TaskEditor";
@@ -51,7 +52,10 @@ export const TaskScreen = ({
 			{error === undefined ? null : <p className="error">{error}</p>}
 			{task === undefined ? (
 				error === undefined ? (
-					<p>Loading…</p>
+					<p className="loading" role="status">
+						<Spinner />
+						Loading…
+					</p>
 				) : null
 			) : (
 				<>

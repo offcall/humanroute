@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Banner, IconName, useClock } from "../shared";
+import { Banner, IconName, Spinner, useClock } from "../shared";
 import { BoardHero } from "./BoardHero";
 import { RowKind, rowsOf } from "./boardSnapshot";
 import { MoreRow } from "./MoreRow";
@@ -42,7 +42,12 @@ export const Board = ({ board, agencyName, onClaimed }: Props) => {
 			{loadError === undefined ? null : (
 				<p className="error">Board not loaded: {loadError}</p>
 			)}
-			{snap === undefined && loadError === undefined ? <p>Loading…</p> : null}
+			{snap === undefined && loadError === undefined ? (
+				<p className="loading" role="status">
+					<Spinner />
+					Loading…
+				</p>
+			) : null}
 			{snap !== undefined && open.length === 0 ? (
 				<div className="empty">
 					<p className="empty__title">No open tasks in your pairs.</p>
