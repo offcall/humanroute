@@ -51,7 +51,7 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | Route | Auth / role | Request | Response | Errors | Slice |
 | --- | --- | --- | --- | --- | --- |
 | `GET /api/push/key` | none | - | `200 {publicKey: string \| null}`; `null` = push off | - | notify |
-| `POST /api/push/subscribe` | cookie, linguist | `{endpoint, keys: {p256dh, auth}}` | `204`; upsert by endpoint | `400`, `422`, `401`, `403` | notify |
+| `POST /api/push/subscribe` | cookie, linguist | `{endpoint, keys: {p256dh, auth}}`; endpoint on a known push service only | `204`; upsert by endpoint, at most 5 devices per linguist (oldest dropped) | `400`, `422`, `401`, `403` | notify |
 | `POST /api/push/unsubscribe` | none (the endpoint is the secret) | `{endpoint}` | `204`, idempotent | `400`, `422` | notify |
 
 ### accounts (stream B)

@@ -12,13 +12,31 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isKey = (value: unknown): value is string =>
 	typeof value === "string" && value.length <= MAX_KEY && BASE64URL.test(value);
 
-// Push services are always https.
+// Known browser push services only (ADR 0029): the gateway never posts to any other host.
+const PUSH_HOSTS = [
+	"web.push.apple.com",
+	"fcm.googleapis.com",
+	"updates.push.services.mozilla.com",
+];
+const PUSH_SUFFIXES = [
+	".push.apple.com",
+	".push.services.mozilla.com",
+	".notify.windows.com",
+];
+
+const isPushHost = (host: string): boolean =>
+	PUSH_HOSTS.includes(host) ||
+	PUSH_SUFFIXES.some((suffix) => host.endsWith(suffix));
+
 const isEndpoint = (value: unknown): value is string => {
 	if (typeof value !== "string" || value.length > MAX_ENDPOINT) {
 		return false;
 	}
 	try {
-		return new URL(value).protocol === "https:";
+		const url = new URL(value);
+		return (
+			url.protocol === "https:" && url.port === "" && isPushHost(url.hostname)
+		);
 	} catch {
 		return false;
 	}
