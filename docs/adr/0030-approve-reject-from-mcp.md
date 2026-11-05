@@ -28,5 +28,5 @@ ADR 0027 gave the MCP server `post_task` and `get_task`; approve and reject live
 
 - The MCP token, stored in plaintext (ADR 0027), can now decide where a task's money goes: to the claimer's split or back to the firm. It cannot send money to any other address.
 - A wrong decision by Claude is final; there is no undo (roadmap: disputes).
-- ADR 0027's tool list is extended; its "no `wait_task`" rule is unchanged.
+- ADR 0027's tool list is extended; its "no `wait_task`" rule is unchanged (superseded by ADR 0031).
 - If the firm pre-allows all `humanroute` tools, only the descriptions stand between a linguist's text and a payout.
