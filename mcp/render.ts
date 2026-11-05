@@ -18,7 +18,9 @@ const amountLine = (amounts: Amounts): string =>
 const termLines = (): string[] => TERMS.map((term) => `- ${term}`);
 
 const renderTask = (task: OrderTask): string => {
-	const lines = [`- ${task.targetLang}: ${task.publicState}`];
+	const lines = [
+		`- ${task.targetLang}: ${task.publicState} (taskId: ${task.taskId})`,
+	];
 
 	if (task.publicState === PUBLIC_OPEN) {
 		lines.push(`  claim deadline: ${task.claimDeadline}`);
@@ -35,6 +37,9 @@ const renderTask = (task: OrderTask): string => {
 
 	return lines.join("\n");
 };
+
+export const renderDecision = (task: OrderTask): string =>
+	`Decision recorded for ${task.targetLang} (taskId: ${task.taskId}): ${task.publicState}.`;
 
 export const renderDraft = (draft: Draft): string =>
 	[

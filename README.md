@@ -10,7 +10,7 @@ Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. Tests are d
 | --- | --- | --- |
 | Gateway | Node process: Hono HTTP API, SQLite, x402 payment route, payout worker | `src/` |
 | Web app | React + Vite, PWA manifest: landing, firm, agency, linguist, join and pay pages | `web/` |
-| MCP server | Remote MCP over Streamable HTTP, tools `post_task` and `get_task`; talks to the gateway over HTTP only | `mcp/` |
+| MCP server | Remote MCP over Streamable HTTP, tools `post_task`, `get_task`, `approve_task` and `reject_task` (Claude asks the user before deciding); talks to the gateway over HTTP only | `mcp/` |
 | Scripts | Devnet wallet setup and an opt-in e2e flow | `scripts/` |
 
 Money moves only from `src/payouts/`. Decisions (approve, reject, timers) only record state and queue a transfer.
@@ -30,6 +30,7 @@ Requirements: Node 22.12 or newer, npm.
 5. `npm start`: gateway on `PORT` (default 4021). The SQLite file at `DB_PATH` is created on first start.
 6. `npm run mcp`: MCP server on `MCP_PORT` (default 4022), needs `GATEWAY_URL`. Firm cabinet shows the MCP URL and token; add them to Claude Code:
    `claude mcp add --transport http humanroute <MCP_PUBLIC_URL> --header "Authorization: Bearer <token>"`
+   Do not pre-allow `approve_task` and `reject_task` in Claude Code permissions: they pay out or refund, and the permission prompt is part of the guard (ADR 0030).
 7. Frontend development: `npm run web:dev` (proxies `/api`, `/x`, `/health` to the gateway on port 4021).
 
 Checks: `npm run check` runs Biome, the gateway `tsc` and the web `tsc`. `npm run e2e:devnet` (opt-in, real devnet, needs `keys/hold.json`, `keys/agent.json` and about 1.5 USDC on the agent wallet) starts the gateway with a fresh database and runs `scripts/e2e-flow.ts`: SIWS sign-in, order, payment, payout and refunds, checked on chain. Not part of `check` ([ADR 0011](docs/adr/0011-devnet-e2e-outside-check.md)).
@@ -72,7 +73,7 @@ Startup: invalid configuration exits 1. A failing preflight (hold without SOL or
 ```
 src/     gateway: config, store, chain, auth, accounts, tasks, orders, payouts, rating, http, wiring
 web/     React app (landing, firm, agency, linguist, join, pay)
-mcp/     MCP server (post_task, get_task)
+mcp/     MCP server (post_task, get_task, approve_task, reject_task)
 scripts/ wallet setup, devnet e2e flow
 docs/    design, ADRs, demo script, roadmap
 ```

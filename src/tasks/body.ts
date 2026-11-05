@@ -1,4 +1,5 @@
-// Request bodies of the cookie routes. A body needs content-type application/json (CSRF, api.md).
+// Request bodies of the task routes, called with the session cookie or the MCP Bearer token (ADR 0030).
+// A body needs content-type application/json, the CSRF guard for cookie callers (api.md).
 import type { Context } from "hono";
 
 export const MAX_RESULT_LENGTH = 20_000;

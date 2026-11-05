@@ -1,8 +1,9 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { registerDecisionTools } from "./decisionTools.js";
 import { GET_TASK_DESCRIPTION, POST_TASK_DESCRIPTION } from "./descriptions.js";
 import { renderDraft, renderStatus } from "./render.js";
+import { toolText } from "./result.js";
 import type { GatewayClient } from "./types.js";
 
 const targetSchema = z.object({
@@ -25,11 +26,6 @@ const postTaskShape = {
 		),
 };
 
-const text = (value: string, isError = false): CallToolResult => ({
-	content: [{ type: "text", text: value }],
-	isError,
-});
-
 export const registerTools = (
 	server: McpServer,
 	token: string,
@@ -42,8 +38,8 @@ export const registerTools = (
 			const created = await client.createDraft(token, input);
 
 			return created.ok
-				? text(renderDraft(created.value))
-				: text(created.error, true);
+				? toolText(renderDraft(created.value))
+				: toolText(created.error, true);
 		},
 	);
 
@@ -56,17 +52,19 @@ export const registerTools = (
 		async ({ draftId }) => {
 			const status = await client.getDraft(draftId);
 			if (!status.ok) {
-				return text(status.error, true);
+				return toolText(status.error, true);
 			}
 			const { orderId } = status.value;
 			if (orderId === undefined) {
-				return text(renderStatus(status.value, undefined));
+				return toolText(renderStatus(status.value, undefined));
 			}
 			const order = await client.getOrder(token, orderId);
 
 			return order.ok
-				? text(renderStatus(status.value, order.value))
-				: text(order.error, true);
+				? toolText(renderStatus(status.value, order.value))
+				: toolText(order.error, true);
 		},
 	);
+
+	registerDecisionTools(server, token, client);
 };

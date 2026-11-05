@@ -9,7 +9,7 @@ One page: order flow, task and transfer states, failure table. Decisions behind 
 3. **Order.** After settlement one SQLite transaction creates the order and one `open` task per target language. Each task snapshots the firm's refund wallet, which is the x402 payer. A payment that settles but cannot be recorded becomes an orphan (`502 orphan_payment`, [ADR 0016](../adr/0016-orphan-payments.md)).
 4. **Claim.** A linguist with a matching language pair claims an `open` task inside the claim window. The first claim wins; the claim snapshots the linguist and agency wallets.
 5. **Submit.** The linguist edits the draft and submits the result before the work window closes. After that the task is `expired_late`.
-6. **Decide.** The firm approves one result or rejects it with a required reason, in the firm cabinet only. Timers expire tasks that were never claimed or never submitted.
+6. **Decide.** The firm approves one result or rejects it with a required reason, in the firm cabinet, or through Claude after Claude shows the result and asks the user (MCP `approve_task` / `reject_task`, ADR 0030). Timers expire tasks that were never claimed or never submitted.
 7. **Pay out or refund.** Each decided task gets exactly one transfer. A payout is one transaction with three legs: linguist, agency, fee. A refund is one transaction to the firm. Money moves only in `src/payouts/` ([ADR 0024](../adr/0024-split-payout-and-ata.md)).
 8. **Read.** Cabinets and MCP `get_task` show the public state. Money shows only when the transfer is `confirmed` ([ADR 0018](../adr/0018-public-job-state-and-payout-progress.md)).
 

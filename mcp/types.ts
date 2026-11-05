@@ -50,4 +50,10 @@ export type GatewayClient = {
 	createDraft: (token: string, input: DraftInput) => Promise<Parsed<Draft>>;
 	getDraft: (draftId: string) => Promise<Parsed<DraftStatus>>;
 	getOrder: (token: string, orderId: string) => Promise<Parsed<Order>>;
+	approveTask: (token: string, taskId: string) => Promise<Parsed<OrderTask>>;
+	rejectTask: (
+		token: string,
+		taskId: string,
+		reason: string,
+	) => Promise<Parsed<OrderTask>>;
 };

@@ -1,4 +1,9 @@
-import { parseDraft, parseDraftStatus, parseOrder } from "./parse.js";
+import {
+	parseDraft,
+	parseDraftStatus,
+	parseOrder,
+	parseTask,
+} from "./parse.js";
 import type { GatewayClient, Parsed } from "./types.js";
 
 const call = async <T>(
@@ -61,5 +66,26 @@ export const createGatewayClient = (baseUrl: string): GatewayClient => ({
 			{ method: "GET", headers: { authorization: `Bearer ${token}` } },
 			200,
 			parseOrder,
+		),
+	approveTask: (token, taskId) =>
+		call(
+			`${baseUrl}/api/tasks/${encodeURIComponent(taskId)}/approve`,
+			{ method: "POST", headers: { authorization: `Bearer ${token}` } },
+			200,
+			parseTask,
+		),
+	rejectTask: (token, taskId, reason) =>
+		call(
+			`${baseUrl}/api/tasks/${encodeURIComponent(taskId)}/reject`,
+			{
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+					authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({ reason }),
+			},
+			200,
+			parseTask,
 		),
 });

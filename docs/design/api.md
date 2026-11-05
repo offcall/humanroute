@@ -78,11 +78,11 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | `GET /api/board` | cookie, linguist | - | `200 {serverTime, tasks: [{taskId, sourceLang, targetLang, priceUnits, claimDeadline, text, draft}]}`: `open` tasks in the linguist's pairs only | `403` | tasks |
 | `POST /api/tasks/:id/claim` | cookie, linguist | - | `200 TaskView` (`claimed`); first claim wins; snapshots linguist and agency wallets | `404` (unknown or outside pairs), `409 claim_taken`, `409 claim_closed` | tasks |
 | `POST /api/tasks/:id/submit` | cookie, linguist (claimer) | `{result}` (non-empty) | `200 TaskView` (`submitted`) | `403`, `409 late` (after the work deadline), `409 bad_state`, `422 invalid_body` | tasks |
-| `POST /api/tasks/:id/approve` | cookie, firm (owner) | - | `200 TaskView` (`approved`, public `paying_out`) | `403`, `409 bad_state` (not `submitted` or already decided) | tasks |
-| `POST /api/tasks/:id/reject` | cookie, firm (owner) | `{reason}` (non-empty, <= 1000 chars) | `200 TaskView` (`rejected`, public `refunding`) | `403`, `409 bad_state`, `422 reason_required` | tasks |
+| `POST /api/tasks/:id/approve` | cookie firm owner, or MCP Bearer of the owner firm | - | `200 TaskView` (`approved`, public `paying_out`) | `403`, `409 bad_state` (not `submitted` or already decided) | tasks |
+| `POST /api/tasks/:id/reject` | cookie firm owner, or MCP Bearer of the owner firm | `{reason}` (non-empty, <= 1000 chars) | `200 TaskView` (`rejected`, public `refunding`) | `403`, `409 bad_state`, `422 reason_required` | tasks |
 | `GET /api/tasks/:id` | cookie firm owner, claimer, claimer's agency; or MCP Bearer of the owner firm | - | `200 {serverTime, ...TaskView}`: `serverTime` as on the board, for server-based countdowns | `403`, `404` | tasks |
 
-Approve and reject come from the firm cabinet only, not MCP.
+Approve and reject come from the firm cabinet or from MCP `approve_task` / `reject_task`, which Claude calls only after asking the user (ADR 0030). With a Bearer header the token decides: unknown is `401`, another firm's `403`.
 
 ### rating (stream B)
 
@@ -108,7 +108,9 @@ Unknown `/api/*` and `/x/*` paths return `404 {error: "not_found"}`, never the S
 | Tool | Gateway call | Returns |
 | --- | --- | --- |
 | `post_task` | `POST /api/orders/draft` | `{draftId, payUrl, totalUnits, taskCount}`; never pays |
-| `get_task` | `GET /api/orders/draft/:draftId` | `{draftId, state, orderId?, tasks?}`; `orderId` and task statuses once paid |
+| `get_task` | `GET /api/orders/draft/:draftId`, then `GET /api/orders/:id` once paid | `{draftId, state, orderId?, tasks?}`; once paid each language's `taskId`, state, deadlines, result and reason |
+| `approve_task` | `POST /api/tasks/:id/approve` (Bearer) | the decided task; only after the user approved it in chat (ADR 0030) |
+| `reject_task` | `POST /api/tasks/:id/reject` (Bearer) `{reason}` | the decided task; only after the user rejected it in chat, with the user's reason |
 
 No `wait_task`: Claude calls `get_task` again.
 

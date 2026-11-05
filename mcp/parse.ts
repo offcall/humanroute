@@ -112,6 +112,14 @@ const parseOrderTask = (input: unknown): OrderTask | undefined => {
 	};
 };
 
+export const parseTask = (input: unknown): Parsed<OrderTask> => {
+	const task = parseOrderTask(input);
+
+	return task === undefined
+		? { ok: false, error: "gateway task has an unexpected shape" }
+		: { ok: true, value: task };
+};
+
 export const parseOrder = (input: unknown): Parsed<Order> => {
 	if (!isRecord(input)) {
 		return { ok: false, error: "gateway order is not an object" };
