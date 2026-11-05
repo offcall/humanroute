@@ -113,8 +113,10 @@ Formulas in ADR 0025: `ratingPct` = approved / (approved + rejected + late), `re
 | Route | Auth / role | Response | Slice |
 | --- | --- | --- | --- |
 | `GET /health` | none | `200`, shape unchanged from v1 | http |
-| `GET /`, `/firm` (the client redirects to `/firm/jobs`), `/firm/jobs`, `/firm/jobs/:orderId/:lang`, `/firm/review`, `/agency`, `/linguist`, `/linguist/tasks`, `/linguist/tasks/:taskId`, `/linguist/wallet`, `/join/:code`, `/pay/:draftId` | none (data calls carry auth) | `index.html` from `web/dist` (SPA fallback) | http |
+| `GET /`, `/firm` (the client redirects to `/firm/jobs`), `/firm/jobs`, `/firm/jobs/:orderId/:lang`, `/firm/review`, `/agency`, `/linguist`, `/linguist/tasks`, `/linguist/tasks/:taskId`, `/linguist/wallet`, `/join/:code`, `/approve/:id`, `/pay/:draftId` | none (data calls carry auth) | `index.html` from `web/dist` (SPA fallback) | http |
 | `GET /assets/*`, `/manifest.webmanifest` | none | static files from `web/dist` (manifest as `application/manifest+json`); other paths fall back to `index.html` | http |
+
+A fresh load of `/` sends a signed-in wallet to its cabinet (firm, else agency, else linguist); in-app links to `/` show the landing.
 
 Unknown `/api/*` and `/x/*` paths return `404 {error: "not_found"}`, never the SPA.
 

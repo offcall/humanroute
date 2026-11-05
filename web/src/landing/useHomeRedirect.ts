@@ -21,7 +21,7 @@ const cabinetPath = (me: Me | null): string | undefined => {
 	return undefined;
 };
 
-// True while the landing must stay blank: the session is loading or a redirect is under way.
+// True only while a redirect to a cabinet is under way; the landing shows while the session loads.
 export const useHomeRedirect = (): boolean => {
 	const { me, loading } = useSession();
 	const target = redirectDue && !loading ? cabinetPath(me) : undefined;
@@ -36,5 +36,5 @@ export const useHomeRedirect = (): boolean => {
 		}
 	}, [loading, target]);
 
-	return redirectDue && (loading || target !== undefined);
+	return target !== undefined;
 };
