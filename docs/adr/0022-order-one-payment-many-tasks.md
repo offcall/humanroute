@@ -15,7 +15,7 @@ In v1 one x402 payment created one job (ADRs 0003, 0004). In the v2 demo a firm 
 - Price is fixed per task from config. `totalUnits = taskCount x priceUnits`, `bigint` base units of `USDC_MINT`.
 - `POST /x/orders/:draftId` (x402, no body) requires exactly `totalUnits` to the hold wallet. After a successful settle it returns `201 {orderId, taskIds, payTx}` with `PAYMENT-RESPONSE`.
 - The order and its N `open` tasks are created in one SQLite transaction, through the `tasks` index (ADR 0019). Either all tasks exist or none.
-- The refund wallet of every task is the x402 `payer` of the order, validated as in ADR 0016.
+- The refund wallet of every task is the firm's login wallet (`firms.wallet`, ADR 0036). The x402 `payer` is still validated as in ADR 0016 and stored on the order.
 - Replay and conflicts follow ADR 0004: payment id = SHA-256 of the transaction message; the draft id takes the place of the request fingerprint.
   - Same payment, same draft: the same `201`, no new settle.
   - Same payment, other draft: `409 payment_reused`, nothing created.

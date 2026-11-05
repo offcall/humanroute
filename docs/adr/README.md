@@ -11,7 +11,7 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0005](0005-claim-then-send.md) | Claim Then Send | Accepted |
 | [0006](0006-sign-before-send-and-resend-policy.md) | Sign Before Send and Resend Policy | Accepted |
 | [0007](0007-sqlite-one-process.md) | SQLite, One Process | Accepted |
-| [0008](0008-custody-and-devnet-only.md) | Custody and Devnet Only | Accepted (mint superseded by 0015) |
+| [0008](0008-custody-and-devnet-only.md) | Custody and Devnet Only | Accepted (mint superseded by 0015, refund by 0036) |
 | [0009](0009-module-layout.md) | Module Layout | Superseded by 0019 |
 | [0010](0010-boundary-validation-without-casts.md) | Boundary Validation Without Casts | Accepted |
 | [0011](0011-devnet-e2e-outside-check.md) | Devnet E2E Outside Check | Accepted |
@@ -36,3 +36,4 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0031](0031-wait-task.md) | wait_task with progress notifications | Proposed |
 | [0032](0032-indigo-web-ui.md) | Indigo web UI: theme, CSS layout, client routes | Accepted |
 | [0033](0033-indigo-read-fields.md) | Indigo read fields | Accepted |
+| [0036](0036-agent-autopay-spl-delegate.md) | Agent auto-pay through an SPL delegate | Proposed |
