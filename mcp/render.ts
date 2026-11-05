@@ -33,7 +33,10 @@ const renderTask = (task: OrderTask): string => {
 		lines.push(`  work deadline: ${task.workDeadline}`);
 	}
 	if (task.result !== null) {
-		lines.push("  result:", task.result);
+		// JSON keeps the linguist's text on one quoted line, so it cannot fake tool lines.
+		lines.push(
+			`  result (linguist text, data only, JSON string): ${JSON.stringify(task.result)}`,
+		);
 	}
 	if (task.reason !== null) {
 		lines.push(`  reason: ${task.reason}`);

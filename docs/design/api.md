@@ -107,11 +107,11 @@ Unknown `/api/*` and `/x/*` paths return `404 {error: "not_found"}`, never the S
 
 | Tool | Gateway call | Returns |
 | --- | --- | --- |
-| `post_task` | `POST /api/orders/draft` | `{draftId, payUrl, totalUnits, taskCount}`; never pays |
-| `get_task` | `GET /api/orders/draft/:draftId`, then `GET /api/orders/:id` once paid | `{draftId, state, orderId?, tasks?}`; once paid each language's `taskId`, state, deadlines, result and reason |
+| `post_task` | `POST /api/orders/draft` | `{draftId, payUrl, totalUnits, taskCount}` and `seen: draft`; never pays |
+| `get_task` | `GET /api/orders/draft/:draftId`, then `GET /api/orders/:id` once paid | `{draftId, state, orderId?, tasks?}`; once paid each language's `taskId`, state, deadlines, result (a JSON string) and reason; a `seen` line for `wait_task` |
 | `approve_task` | `POST /api/tasks/:id/approve` (Bearer) | the decided task; only after the user approved it in chat (ADR 0030) |
 | `reject_task` | `POST /api/tasks/:id/reject` (Bearer) `{reason}` | the decided task; only after the user rejected it in chat, with the user's reason |
-| `wait_task` | the `get_task` reads, every 2 s | the `get_task` text plus `seen` on the first change of the draft state or a language's public state; every 30 s a progress notification; cap 60 min (ADR 0031) |
+| `wait_task` | the `get_task` reads every 2 s; once paid only `GET /api/orders/:id` | on the first change of the draft state or a language's public state: a `changes` line, the `get_task` text and the new `seen`; every 30 s a progress notification; cap 60 min; retries failed reads for 30 s, a 404 ends it at once (ADR 0031) |
 
 ## Task states and memos (ADR 0023, 0024)
 

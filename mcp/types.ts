@@ -1,4 +1,7 @@
-export type Parsed<T> = { ok: true; value: T } | { ok: false; error: string };
+// permanent: retrying cannot help (the gateway answered 404).
+export type Parsed<T> =
+	| { ok: true; value: T }
+	| { ok: false; error: string; permanent?: true };
 
 export type Target = { targetLang: string; draft: string };
 
@@ -31,7 +34,7 @@ export type DraftStatus = {
 	targetLangs: string[];
 };
 
-// Mirrors src/tasks/types.ts PublicState; mcp/ cannot import src/ values.
+// Mirrors src/tasks/types.ts PublicState; mcp/ cannot import src/ values, so change both together.
 export enum PublicState {
 	Open = "open",
 	Claimed = "claimed",
@@ -59,8 +62,15 @@ export type Order = {
 
 export type GatewayClient = {
 	createDraft: (token: string, input: DraftInput) => Promise<Parsed<Draft>>;
-	getDraft: (draftId: string) => Promise<Parsed<DraftStatus>>;
-	getOrder: (token: string, orderId: string) => Promise<Parsed<Order>>;
+	getDraft: (
+		draftId: string,
+		cancel?: AbortSignal,
+	) => Promise<Parsed<DraftStatus>>;
+	getOrder: (
+		token: string,
+		orderId: string,
+		cancel?: AbortSignal,
+	) => Promise<Parsed<Order>>;
 	approveTask: (token: string, taskId: string) => Promise<Parsed<OrderTask>>;
 	rejectTask: (
 		token: string,

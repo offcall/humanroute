@@ -8,21 +8,30 @@ import type { GatewayClient, Parsed } from "./types.js";
 
 // A hung gateway read must not stall wait_task past its progress notifications.
 const TIMEOUT_MS = 10_000;
+const NOT_FOUND = 404;
+
+const failure = (error: unknown): string =>
+	error instanceof DOMException && error.name === "TimeoutError"
+		? `gateway did not answer in ${TIMEOUT_MS / 1000} s; the outcome is unknown, call get_task before retrying`
+		: "gateway is unreachable";
 
 const call = async <T>(
 	url: string,
 	init: RequestInit,
 	expected: number,
 	parse: (body: unknown) => Parsed<T>,
+	cancel?: AbortSignal,
 ): Promise<Parsed<T>> => {
+	const timeout = AbortSignal.timeout(TIMEOUT_MS);
 	let response: Response;
 	try {
 		response = await fetch(url, {
 			...init,
-			signal: AbortSignal.timeout(TIMEOUT_MS),
+			signal:
+				cancel === undefined ? timeout : AbortSignal.any([cancel, timeout]),
 		});
-	} catch {
-		return { ok: false, error: "gateway is unreachable" };
+	} catch (error) {
+		return { ok: false, error: failure(error) };
 	}
 	const body: unknown = await response.json().catch(() => undefined);
 	if (response.status !== expected) {
@@ -32,10 +41,11 @@ const call = async <T>(
 				: undefined;
 		const detail = typeof code === "string" ? `: ${code}` : "";
 
-		return {
-			ok: false,
-			error: `gateway returned HTTP ${response.status}${detail}`,
-		};
+		const error = `gateway returned HTTP ${response.status}${detail}`;
+
+		return response.status === NOT_FOUND
+			? { ok: false, error, permanent: true }
+			: { ok: false, error };
 	}
 	if (body === undefined) {
 		return { ok: false, error: "gateway returned a body that is not JSON" };
@@ -59,19 +69,21 @@ export const createGatewayClient = (baseUrl: string): GatewayClient => ({
 			201,
 			parseDraft,
 		),
-	getDraft: (draftId) =>
+	getDraft: (draftId, cancel) =>
 		call(
 			`${baseUrl}/api/orders/draft/${encodeURIComponent(draftId)}`,
 			{ method: "GET" },
 			200,
 			parseDraftStatus,
+			cancel,
 		),
-	getOrder: (token, orderId) =>
+	getOrder: (token, orderId, cancel) =>
 		call(
 			`${baseUrl}/api/orders/${encodeURIComponent(orderId)}`,
 			{ method: "GET", headers: { authorization: `Bearer ${token}` } },
 			200,
 			parseOrder,
+			cancel,
 		),
 	approveTask: (token, taskId) =>
 		call(

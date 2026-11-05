@@ -52,8 +52,14 @@ export const registerTools = (
 			description: GET_TASK_DESCRIPTION,
 			inputSchema: { draftId: z.string().min(1) },
 		},
-		async ({ draftId }) => {
-			const current = await readStatus(client, token, draftId);
+		async ({ draftId }, extra) => {
+			const current = await readStatus(
+				client,
+				token,
+				draftId,
+				undefined,
+				extra.signal,
+			);
 
 			return current.ok
 				? toolText(
