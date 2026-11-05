@@ -4,13 +4,7 @@ import { Firm } from "./firm";
 import { Join } from "./join";
 import { Landing } from "./landing";
 import { Linguist } from "./linguist";
-import {
-	matchPath,
-	navigate,
-	useRoute,
-	useSession,
-	WalletLine,
-} from "./shared";
+import { matchPath, navigate, useRoute } from "./shared";
 
 // The pay page carries the wallet and payment code; it loads only when a /pay/ link is opened.
 const PayPage = lazy(() =>
@@ -54,18 +48,5 @@ const Page = () => {
 	return <Landing />;
 };
 
-// The signed-in wallet shows above every page; pay shows the payer itself when there is no session.
-const SessionWallet = () => {
-	const { me, signOut } = useSession();
-
-	return me === null ? null : (
-		<WalletLine wallet={me.wallet} onSignOut={signOut} />
-	);
-};
-
-export const Routes = () => (
-	<>
-		<SessionWallet />
-		<Page />
-	</>
-);
+// Each page draws its own wallet line (firm header, linguist Wallet tab, landing, join, agency, pay).
+export const Routes = () => <Page />;
