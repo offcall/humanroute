@@ -66,3 +66,11 @@
 .seg-bar--mini > i.is-void {
 	background: var(--hr-void);
 }
+/* Labelled bar on a 320 px screen: one-word labels fit a quarter of the width; break only as a last resort */
+@media (max-width: 400px) {
+	.seg-bar > li {
+		font-size: 10px;
+		letter-spacing: -0.01em;
+		overflow-wrap: anywhere;
+	}
+}
