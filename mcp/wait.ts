@@ -4,6 +4,7 @@ import {
 	changesSince,
 	fingerprint,
 	isSettled,
+	onlyTransient,
 	progressLine,
 } from "./status.js";
 import {
@@ -71,7 +72,11 @@ export const waitForChange = async ({
 			if (isSettled(snapshot.order)) {
 				return answer(WaitKind.Settled, snapshot, changes);
 			}
-			if (baseline !== undefined && print !== baseline) {
+			if (
+				baseline !== undefined &&
+				print !== baseline &&
+				!onlyTransient(changes)
+			) {
 				return answer(WaitKind.Changed, snapshot, changes);
 			}
 			baseline = print;

@@ -77,6 +77,14 @@ export const changesSince = (seen: string, snapshot: Snapshot): string[] => {
 	return lines;
 };
 
+// paying_out and refunding settle within seconds after a decision; waking Claude for them adds nothing.
+const TRANSIENT_STATES = [PublicState.PayingOut, PublicState.Refunding];
+
+export const onlyTransient = (changes: string[]): boolean =>
+	changes.every((change) =>
+		TRANSIENT_STATES.some((state) => change.endsWith(`-> ${state}`)),
+	);
+
 export const isSettled = (order: Order | undefined): boolean =>
 	order?.tasks.every((task) => SETTLED_STATES.has(task.publicState)) === true;
 

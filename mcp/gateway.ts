@@ -9,13 +9,15 @@ import type { GatewayClient, Parsed } from "./types.js";
 // A hung gateway read must not stall wait_task past its progress notifications.
 const TIMEOUT_MS = 10_000;
 const NOT_FOUND = 404;
+// Only the gateway's own 404 means the draft is gone; a proxy 404 during a redeploy is retried.
+const NOT_FOUND_CODE = "not_found";
 
 const failure = (error: unknown): string =>
 	error instanceof DOMException && error.name === "TimeoutError"
-		? `gateway did not answer in ${TIMEOUT_MS / 1000} s; the outcome is unknown, call get_task before retrying`
+		? `gateway did not answer in ${TIMEOUT_MS / 1000} s`
 		: "gateway is unreachable";
 
-const call = async <T>(
+const call = async <T = unknown>(
 	url: string,
 	init: RequestInit,
 	expected: number,
@@ -43,7 +45,7 @@ const call = async <T>(
 
 		const error = `gateway returned HTTP ${response.status}${detail}`;
 
-		return response.status === NOT_FOUND
+		return response.status === NOT_FOUND && code === NOT_FOUND_CODE
 			? { ok: false, error, permanent: true }
 			: { ok: false, error };
 	}

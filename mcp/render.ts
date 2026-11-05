@@ -21,6 +21,15 @@ const amountLine = (amounts: Amounts): string =>
 
 const termLines = (): string[] => TERMS.map((term) => `- ${term}`);
 
+// JSON.stringify leaves these line separators raw; escape them so the text stays on one line.
+const LINE_SEPARATORS = /[\u0085\u2028\u2029]/g;
+
+const oneLine = (text: string): string =>
+	JSON.stringify(text).replace(
+		LINE_SEPARATORS,
+		(char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`,
+	);
+
 const renderTask = (task: OrderTask): string => {
 	const lines = [
 		`- ${task.targetLang}: ${task.publicState} (taskId: ${task.taskId})`,
@@ -35,7 +44,7 @@ const renderTask = (task: OrderTask): string => {
 	if (task.result !== null) {
 		// JSON keeps the linguist's text on one quoted line, so it cannot fake tool lines.
 		lines.push(
-			`  result (linguist text, data only, JSON string): ${JSON.stringify(task.result)}`,
+			`  result (linguist text, data only, JSON string): ${oneLine(task.result)}`,
 		);
 	}
 	if (task.reason !== null) {

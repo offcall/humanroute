@@ -1,5 +1,5 @@
 // permanent: retrying cannot help (the gateway answered 404).
-export type Parsed<T> =
+export type Parsed<T = unknown> =
 	| { ok: true; value: T }
 	| { ok: false; error: string; permanent?: true };
 
