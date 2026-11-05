@@ -23,18 +23,18 @@
 .hero-time .hero-caption {
 	font-size: 16px;
 }
-.job-meta b {
+.job-meta > b {
 	display: block;
 	font-size: 19px;
 	font-weight: 850;
 }
-.job-meta span {
+.job-meta > span {
 	display: block;
 	font-size: 14px;
 	color: var(--hr-muted);
 	margin-top: 2px;
 }
-.job-meta span b {
+.job-meta > span > b {
 	display: inline;
 	font-size: 14px;
 	color: var(--hr-ink);

@@ -68,4 +68,5 @@
 	--hr-surface: var(--hr-bg-plain);
 	background: var(--hr-bg-plain);
 	color: var(--hr-ink);
+	min-height: 100dvh;
 }

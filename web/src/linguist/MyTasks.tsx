@@ -43,7 +43,7 @@ const doneAside = (tasks: Task[]): string => {
 	return parts.filter((part) => !part.startsWith("0 ")).join(" · ");
 };
 
-// In progress · Waiting for review · Done today (stamps) · Earlier
+// In progress · Waiting for review or payout · Done today (stamps) · Earlier
 export const MyTasks = ({ tasks }: Props) => {
 	const now = useClock();
 	const groups = groupTasks(tasks, now);
@@ -69,7 +69,7 @@ export const MyTasks = ({ tasks }: Props) => {
 				</>
 			)}
 			<List
-				title="Waiting for review"
+				title="Waiting for review or payout"
 				tasks={groups.waiting}
 				time={RowTime.None}
 			/>

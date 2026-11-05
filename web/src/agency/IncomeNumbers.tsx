@@ -45,7 +45,7 @@ export const IncomeNumbers = ({ rating, wallet }: Props) => (
 						rating.paidUnits === 0n ? "ag-earned is-zero" : "ag-earned"
 					}
 				>
-					{formatUsdc(rating.paidUnits)}
+					{formatUsdc(rating.paidUnits).replace(" USDC", "")}
 					<small>USDC</small>
 				</b>
 				<span className="hero-caption">

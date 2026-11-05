@@ -24,7 +24,7 @@ const byWorkDeadline = (left: Task, right: Task): number =>
 	toMs(left.workDeadline ?? left.claimDeadline) -
 	toMs(right.workDeadline ?? right.claimDeadline);
 
-// In progress (soonest first) · Waiting for review · Done today · Earlier
+// In progress (soonest first) · Waiting for review or payout · Done today · Earlier
 export const groupTasks = (tasks: Task[], now: number): TaskGroups => ({
 	inProgress: tasks
 		.filter((task) => task.state === TaskState.Claimed)
