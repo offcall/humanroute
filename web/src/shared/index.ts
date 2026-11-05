@@ -28,15 +28,14 @@ export {
 } from "./parsers";
 export { parseParties } from "./partyParser";
 export {
-	blockedHint,
 	currentPush,
 	fetchPushKey,
-	pushAvailable,
 	registerWorker,
 	resyncPush,
 	subscribePush,
 	unsubscribePush,
 } from "./push";
+export { blockedHint, pushAvailable } from "./pushPlatform";
 export { RequireSession } from "./RequireSession";
 export { parseAgencyRating, parseFirmRating } from "./ratingParsers";
 export { matchPath, navigate, type Params, useRoute } from "./router";

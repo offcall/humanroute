@@ -24,8 +24,8 @@ export const createRequest = async (): Promise<string | undefined> => {
 };
 
 // No stored time (an id from an older build) counts as old.
-export const olderThan = (ms: number): boolean =>
-	Date.now() - Number(localStorage.getItem(CREATED_KEY)) > ms;
+export const olderThan = (maxAgeMs: number): boolean =>
+	Date.now() - Number(localStorage.getItem(CREATED_KEY)) > maxAgeMs;
 
 // The stored id is shown at once only while young; an older one waits for the first claim,
 // which signs in (approved), renews (pending) or drops it (410).
