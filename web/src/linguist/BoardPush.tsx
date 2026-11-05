@@ -1,4 +1,5 @@
 import "./push.css";
+import { blockedHint } from "../shared";
 import { PushState, usePush } from "./usePush";
 
 // Top of the Board: asks once, disappears when push is on (ADR 0029).
@@ -6,12 +7,7 @@ export const BoardPush = () => {
 	const { state, busy, error, toggle } = usePush();
 
 	if (state === PushState.Blocked) {
-		return (
-			<p className="push-top__blocked">
-				Notifications are blocked. To turn them on, remove the icon and add it
-				to the Home Screen again.
-			</p>
-		);
+		return <p className="push-top__blocked">{blockedHint()}</p>;
 	}
 	if (state !== PushState.Off) {
 		return null;

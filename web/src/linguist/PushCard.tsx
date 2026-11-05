@@ -1,4 +1,5 @@
 import "./push.css";
+import { blockedHint } from "../shared";
 import { PushState, usePush } from "./usePush";
 
 const HINTS: Record<PushState, string> = {
@@ -6,8 +7,7 @@ const HINTS: Record<PushState, string> = {
 	[PushState.Off]:
 		"Get a push on this device when a new job in your pairs appears.",
 	[PushState.On]: "On for this device. A new job in your pairs sends a push.",
-	[PushState.Blocked]:
-		"Blocked for this app. To turn them on, remove the icon and add it to the Home Screen again.",
+	[PushState.Blocked]: "",
 };
 
 // Wallet tab: the place to turn push off again (ADR 0029).
@@ -23,7 +23,9 @@ export const PushCard = () => {
 			<h2 className="kicker" id="push-head">
 				Notifications
 			</h2>
-			<p className="field__hint">{HINTS[state]}</p>
+			<p className="field__hint">
+				{state === PushState.Blocked ? blockedHint() : HINTS[state]}
+			</p>
 			{state === PushState.Blocked ? null : (
 				<button
 					type="button"
