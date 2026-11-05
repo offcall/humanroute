@@ -5,6 +5,7 @@ export enum Language {
 	De = "de",
 	It = "it",
 	Pt = "pt",
+	Ru = "ru",
 }
 
 export enum TaskState {
@@ -32,6 +33,7 @@ export type Me = {
 
 export type BoardTask = {
 	taskId: string;
+	firmName: string;
 	sourceLang: string;
 	targetLang: string;
 	priceUnits: bigint;
@@ -47,9 +49,18 @@ export type Transfer = {
 	attempts: number;
 	lastError: string | null;
 	explorerUrl: string | null;
+	confirmedAt: string | null;
+	earnedUnits: bigint | null;
 };
 
-export type Task = {
+// Who ordered and who executes a task (ADR 0033); agency and translatorNo are null while open.
+export type TaskParties = {
+	firmName: string;
+	agency: Agency | null;
+	translatorNo: number | null;
+};
+
+export type Task = TaskParties & {
 	taskId: string;
 	orderId: string;
 	sourceLang: string;

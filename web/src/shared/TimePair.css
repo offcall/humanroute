@@ -1,0 +1,22 @@
+.time-pair {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px;
+}
+.time-pair b {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-variant-numeric: tabular-nums;
+}
+.time-pair.is-urgent b {
+	color: var(--hr-bad);
+}
+.time-pair .urgent {
+	display: inline-flex;
+}
+.time-pair__due {
+	color: var(--hr-muted);
+	font-variant-numeric: tabular-nums;
+}

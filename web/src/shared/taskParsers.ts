@@ -1,6 +1,8 @@
 import { parseAmount } from "./money";
-import { isRecord, num, orNull, str } from "./parse";
-import { type Task, TaskState, type Transfer } from "./types";
+import { isRecord, orNull, str } from "./parse";
+import { parseParties } from "./partyParser";
+import { parseTransfer } from "./transferParser";
+import { type Task, TaskState } from "./types";
 
 export const parseState = (raw: unknown): TaskState | undefined => {
 	for (const state of Object.values(TaskState)) {
@@ -10,30 +12,6 @@ export const parseState = (raw: unknown): TaskState | undefined => {
 	}
 
 	return undefined;
-};
-
-export const parseTransfer = (raw: unknown): Transfer | undefined => {
-	if (!isRecord(raw)) {
-		return undefined;
-	}
-	const status = str(raw.status);
-	const memo = str(raw.memo);
-	const attempts = num(raw.attempts);
-	const payTx = orNull(raw.payTx, str);
-	const lastError = orNull(raw.lastError, str);
-	const explorerUrl = orNull(raw.explorerUrl, str);
-	if (status === undefined || memo === undefined || attempts === undefined) {
-		return undefined;
-	}
-	if (
-		payTx === undefined ||
-		lastError === undefined ||
-		explorerUrl === undefined
-	) {
-		return undefined;
-	}
-
-	return { status, payTx, memo, attempts, lastError, explorerUrl };
 };
 
 export const parseTask = (raw: unknown): Task | undefined => {
@@ -54,6 +32,7 @@ export const parseTask = (raw: unknown): Task | undefined => {
 	const workDeadline = orNull(raw.workDeadline, str);
 	const reason = orNull(raw.reason, str);
 	const transfer = orNull(raw.transfer, parseTransfer);
+	const parties = parseParties(raw);
 	if (
 		taskId === undefined ||
 		orderId === undefined ||
@@ -78,11 +57,12 @@ export const parseTask = (raw: unknown): Task | undefined => {
 	) {
 		return undefined;
 	}
-	if (reason === undefined || transfer === undefined) {
+	if (reason === undefined || transfer === undefined || parties === undefined) {
 		return undefined;
 	}
 
 	return {
+		...parties,
 		taskId,
 		orderId,
 		sourceLang,

@@ -8,6 +8,7 @@ export const parseBoardTask = (raw: unknown): BoardTask | undefined => {
 		return undefined;
 	}
 	const taskId = str(raw.taskId);
+	const firmName = str(raw.firmName);
 	const sourceLang = str(raw.sourceLang);
 	const targetLang = str(raw.targetLang);
 	const priceUnits = parseAmount(raw.priceUnits);
@@ -24,12 +25,13 @@ export const parseBoardTask = (raw: unknown): BoardTask | undefined => {
 	if (priceUnits === undefined || claimDeadline === undefined) {
 		return undefined;
 	}
-	if (text === undefined || draft === undefined) {
+	if (text === undefined || draft === undefined || firmName === undefined) {
 		return undefined;
 	}
 
 	return {
 		taskId,
+		firmName,
 		sourceLang,
 		targetLang,
 		priceUnits,
