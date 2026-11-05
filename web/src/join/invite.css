@@ -24,6 +24,9 @@
 	justify-content: space-between;
 	gap: 10px;
 }
+.invite__code > div {
+	min-width: 0;
+}
 .invite__code > div > span {
 	display: block;
 	font: 850 10px / 1.2 var(--hr-sans);
@@ -33,9 +36,10 @@
 }
 .invite__code > div > b {
 	display: block;
-	font: 800 25px / 1 var(--hr-mono);
+	font: 800 18px / 1.15 var(--hr-mono);
 	letter-spacing: 0.02em;
 	margin-top: 4px;
+	overflow-wrap: anywhere;
 }
 .invite__code > div > b.is-void {
 	text-decoration: line-through;
