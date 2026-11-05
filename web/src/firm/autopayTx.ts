@@ -72,7 +72,10 @@ export const revokeTx = (status: Autopay) =>
 		data: Uint8Array.from([REVOKE]),
 	});
 
-// "2.5" -> 2_500_000n; undefined unless a positive amount with at most 6 decimals.
+// ApproveChecked carries a u64; larger values would wrap.
+const MAX_U64 = 2n ** 64n - 1n;
+
+// "2.5" -> 2_500_000n; undefined unless a positive amount with at most 6 decimals that fits a u64.
 export const parseUsdcInput = (raw: string): bigint | undefined => {
 	const match = /^(\d+)(?:\.(\d{1,6}))?$/.exec(raw.trim());
 	if (match === null) {
@@ -81,5 +84,5 @@ export const parseUsdcInput = (raw: string): bigint | undefined => {
 	const units =
 		BigInt(match[1] ?? "0") * 1_000_000n +
 		BigInt((match[2] ?? "").padEnd(6, "0"));
-	return units > 0n ? units : undefined;
+	return units > 0n && units <= MAX_U64 ? units : undefined;
 };

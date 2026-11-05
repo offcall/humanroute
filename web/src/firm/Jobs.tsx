@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type Order, useClock } from "../shared";
+import { agentFromUrl } from "./AutoPayForm";
 import { FirmRating } from "./FirmRating";
 import { JobsHead } from "./JobsHead";
 import { JobsTable } from "./JobsTable";
@@ -48,6 +49,9 @@ const Overview = ({ orders, serverTime }: OverviewProps) => {
 export const Jobs = ({ view }: { view: FirmView }) => {
 	const { orders, serverTime, error } = useOrders();
 	const [connectOpen, setConnectOpen] = useState(false);
+	// The setup command links back with ?agent=; with orders the hero is gone, so open the dialog.
+	const [agentLink, setAgentLink] = useState(agentFromUrl() !== "");
+	const dialogOpen = connectOpen || (agentLink && (orders?.length ?? 0) > 0);
 	const rating = <FirmRating firmId={view.firm.id} />;
 
 	return (
@@ -78,8 +82,14 @@ export const Jobs = ({ view }: { view: FirmView }) => {
 					<PaidOrders orders={orders}>{rating}</PaidOrders>
 				</>
 			)}
-			{connectOpen ? (
-				<ConnectDialog mcp={view.mcp} onClose={() => setConnectOpen(false)} />
+			{dialogOpen ? (
+				<ConnectDialog
+					mcp={view.mcp}
+					onClose={() => {
+						setConnectOpen(false);
+						setAgentLink(false);
+					}}
+				/>
 			) : null}
 		</>
 	);

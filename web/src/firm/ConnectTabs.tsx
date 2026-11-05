@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { agentFromUrl } from "./AutoPayForm";
 import "./tabs.css";
 
 // Two quiet tabs in the Connect Claude dialog: the MCP command first, auto-pay second.
@@ -9,7 +10,9 @@ export const ConnectTabs = ({
 	connect: ReactNode;
 	autopay: ReactNode;
 }) => {
-	const [tab, setTab] = useState<"connect" | "autopay">("connect");
+	const [tab, setTab] = useState<"connect" | "autopay">(
+		agentFromUrl() === "" ? "connect" : "autopay",
+	);
 	const tabButton = (id: "connect" | "autopay", label: string) => (
 		<button
 			type="button"
