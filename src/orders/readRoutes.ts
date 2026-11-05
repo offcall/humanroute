@@ -1,6 +1,6 @@
 // Order reads: public draft status for the pay page and MCP get_task, the firm's orders.
 import { type Context, Hono } from "hono";
-import { publicState, tasksByOrder, toView } from "../tasks/index.js";
+import { publicState, tasksByOrder, viewOf } from "../tasks/index.js";
 import { bearerFirm, cookieFirm, denied } from "./caller.js";
 import { draftById } from "./drafts.js";
 import { orderById, ordersByFirm } from "./orderRepo.js";
@@ -9,9 +9,8 @@ import { DraftState, type Order, type OrdersDeps } from "./types.js";
 export const readRoutes = (deps: OrdersDeps): Hono => {
 	const app = new Hono();
 	const taskViews = (order: Order) =>
-		tasksByOrder(deps.database, order.id).map((task) =>
-			toView(task, deps.transferOf(task.id)),
-		);
+		tasksByOrder(deps.database, order.id).map((task) => viewOf(deps, task));
+	const serverTime = () => new Date(deps.now()).toISOString();
 
 	app.get("/api/orders/draft/:draftId", (ctx) => {
 		const draft = draftById(deps, ctx.req.param("draftId"));
@@ -57,7 +56,7 @@ export const readRoutes = (deps: OrdersDeps): Hono => {
 			createdAt: new Date(order.createdAt).toISOString(),
 			tasks: taskViews(order),
 		}));
-		return ctx.json({ orders });
+		return ctx.json({ serverTime: serverTime(), orders });
 	});
 
 	app.get("/api/orders/:id", (ctx: Context) => {
@@ -71,6 +70,7 @@ export const readRoutes = (deps: OrdersDeps): Hono => {
 			return denied(ctx, caller);
 		}
 		return ctx.json({
+			serverTime: serverTime(),
 			orderId: order.id,
 			firmId: order.firmId,
 			payTx: order.payTx,

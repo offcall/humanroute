@@ -1,5 +1,6 @@
 // Ports the tasks slice needs from other slices, plus its read models (dependency injection, ADR 0019).
 import type { Database, TransferStatus } from "../store/index.js";
+import type { PartyPorts } from "./parties.js";
 import type { Claimer, LangPair } from "./types.js";
 
 // Money progress of the one transfer of a task, read from payouts.
@@ -19,7 +20,7 @@ export type Decider = {
 	reject(taskId: string, reason: string): boolean;
 };
 
-export type TasksDeps = {
+export type TasksDeps = PartyPorts & {
 	database: Database;
 	now: () => number;
 	sessionCookie: string;

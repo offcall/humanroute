@@ -38,6 +38,20 @@ export const canView = (
 	return agency !== null && agency.id === task.agencyId;
 };
 
+// True when the caller (MCP Bearer or cookie) is the firm that ordered the task.
+export const isOwnerFirm = (
+	deps: TasksDeps,
+	ctx: Context,
+	task: Task,
+): boolean => {
+	const token = bearerToken(ctx);
+	if (token !== null) {
+		return deps.firmByMcpToken(token)?.id === task.firmId;
+	}
+	const wallet = sessionWallet(deps, ctx);
+	return wallet !== null && deps.firmByWallet(wallet)?.id === task.firmId;
+};
+
 export const denied = (ctx: Context, signedIn: boolean): Response =>
 	signedIn
 		? ctx.json({ error: "forbidden" }, 403)

@@ -25,6 +25,7 @@ export const AGENCIES_SQL = {
 	insert:
 		"INSERT INTO agencies (id, wallet, name, created_at) VALUES (?, ?, ?, ?)",
 	byWallet: "SELECT id, name, wallet FROM agencies WHERE wallet = ?",
+	byId: "SELECT id, name, wallet FROM agencies WHERE id = ?",
 	insertInvite:
 		"INSERT INTO invites (code, agency_id, created_at) VALUES (?, ?, ?)",
 	inviteCode: "SELECT code FROM invites WHERE agency_id = ?",
@@ -42,4 +43,6 @@ export const LINGUISTS_SQL = {
 		"INSERT INTO linguist_languages (linguist_id, source_lang, target_lang) VALUES (?, ?, ?)",
 	pairs:
 		"SELECT source_lang, target_lang FROM linguist_languages WHERE linguist_id = ? ORDER BY rowid",
+	// 1-based rank inside the agency by rowid (ADR 0033); 0 for an unknown linguist.
+	rank: "SELECT COUNT(*) FROM linguists AS peer JOIN linguists AS self ON peer.agency_id = self.agency_id AND peer.rowid <= self.rowid WHERE self.id = ?",
 };

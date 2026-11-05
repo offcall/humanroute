@@ -1,13 +1,13 @@
 // Linguist board and claim, and GET /api/tasks/:id (api.md, ADR 0023). No route moves money.
-import { Hono } from "hono";
-import { canView, currentLinguist, denied } from "./access.js";
+import { type Context, Hono } from "hono";
+import { canView, currentLinguist, denied, isOwnerFirm } from "./access.js";
 import type { TasksDeps } from "./deps.js";
 import { firmRoutes } from "./firmRoutes.js";
 import { ClaimOutcome, claimTask } from "./lifecycle.js";
 import { linguistRoutes } from "./linguistRoutes.js";
 import { boardTasks, taskById } from "./repo.js";
 import type { LangPair, Task } from "./types.js";
-import { boardItem, toView } from "./view.js";
+import { boardItem, viewOf } from "./view.js";
 import { workRoutes } from "./workRoutes.js";
 
 export const inPairs = (pairs: LangPair[], task: Task): boolean =>
@@ -18,7 +18,11 @@ export const inPairs = (pairs: LangPair[], task: Task): boolean =>
 
 export const tasksRoutes = (deps: TasksDeps): Hono => {
 	const app = new Hono();
-	const viewOf = (task: Task) => toView(task, deps.transferOf(task.id));
+	// The claimer's pairs for the owner firm; null while open and for other callers (ADR 0033).
+	const executorPairs = (ctx: Context, task: Task): LangPair[] | null =>
+		task.linguistId !== null && isOwnerFirm(deps, ctx, task)
+			? deps.linguistPairs(task.linguistId)
+			: null;
 
 	app.get("/api/board", (ctx) => {
 		const linguist = currentLinguist(deps, ctx);
@@ -31,7 +35,10 @@ export const tasksRoutes = (deps: TasksDeps): Hono => {
 			inPairs(pairs, task),
 		);
 		const serverTime = new Date(now).toISOString();
-		return ctx.json({ serverTime, tasks: tasks.map(boardItem) });
+		return ctx.json({
+			serverTime,
+			tasks: tasks.map((task) => boardItem(deps, task)),
+		});
 	});
 
 	app.post("/api/tasks/:id/claim", (ctx) => {
@@ -59,7 +66,7 @@ export const tasksRoutes = (deps: TasksDeps): Hono => {
 		if (outcome !== ClaimOutcome.Claimed) {
 			return ctx.json({ error: outcome }, 409);
 		}
-		return ctx.json(viewOf(claimed));
+		return ctx.json(viewOf(deps, claimed));
 	});
 
 	app.get("/api/tasks/:id", (ctx) => {
@@ -72,7 +79,11 @@ export const tasksRoutes = (deps: TasksDeps): Hono => {
 			return denied(ctx, allowed === false);
 		}
 		const serverTime = new Date(deps.now()).toISOString();
-		return ctx.json({ serverTime, ...viewOf(task) });
+		return ctx.json({
+			serverTime,
+			...viewOf(deps, task),
+			executorPairs: executorPairs(ctx, task),
+		});
 	});
 
 	app.route("/", workRoutes(deps));

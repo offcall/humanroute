@@ -23,6 +23,9 @@ export const findAgencyByWallet = (
 ): Agency | null =>
 	toAgency(database.prepare(AGENCIES_SQL.byWallet).get(wallet));
 
+export const findAgencyById = (database: Database, id: string): Agency | null =>
+	toAgency(database.prepare(AGENCIES_SQL.byId).get(id));
+
 export const findLinguistByWallet = (
 	database: Database,
 	wallet: string,
@@ -53,4 +56,17 @@ export const findInviteCode = (
 		.get(agencyId);
 
 	return typeof value === "string" ? value : null;
+};
+
+// "Translator #N" inside the linguist's agency (ADR 0033), or null for an unknown linguist.
+export const findTranslatorNo = (
+	database: Database,
+	linguistId: string,
+): number | null => {
+	const value: unknown = database
+		.prepare(LINGUISTS_SQL.rank)
+		.pluck()
+		.get(linguistId);
+
+	return typeof value === "number" && value > 0 ? value : null;
 };

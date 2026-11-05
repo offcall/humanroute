@@ -1,6 +1,12 @@
 // TaskView for the API (api.md): ISO deadlines, public state from the task and its transfer.
 import { TransferStatus } from "../store/index.js";
 import type { TaskTransfer } from "./deps.js";
+import {
+	firmNameOf,
+	type PartyPorts,
+	partiesOf,
+	type TaskParties,
+} from "./parties.js";
 import { PublicState, type Task, TaskState } from "./types.js";
 
 const EXPLORER = "https://explorer.solana.com/tx";
@@ -36,9 +42,14 @@ const transferView = (transfer: TaskTransfer) => ({
 			: `${EXPLORER}/${transfer.payTx}?cluster=devnet`,
 });
 
-export const toView = (task: Task, transfer: TaskTransfer | null) => ({
+export const toView = (
+	task: Task,
+	transfer: TaskTransfer | null,
+	parties: TaskParties,
+) => ({
 	taskId: task.id,
 	orderId: task.orderId,
+	...parties,
 	sourceLang: task.sourceLang,
 	targetLang: task.targetLang,
 	text: task.text,
@@ -55,8 +66,16 @@ export const toView = (task: Task, transfer: TaskTransfer | null) => ({
 
 export type TaskView = ReturnType<typeof toView>;
 
-export const boardItem = (task: Task) => ({
+export type ViewPorts = PartyPorts & {
+	transferOf: (taskId: string) => TaskTransfer | null;
+};
+
+export const viewOf = (ports: ViewPorts, task: Task): TaskView =>
+	toView(task, ports.transferOf(task.id), partiesOf(ports, task));
+
+export const boardItem = (ports: PartyPorts, task: Task) => ({
 	taskId: task.id,
+	firmName: firmNameOf(ports, task),
 	sourceLang: task.sourceLang,
 	targetLang: task.targetLang,
 	priceUnits: task.priceUnits.toString(),

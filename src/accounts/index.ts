@@ -1,10 +1,12 @@
 export {
+	findAgencyById,
 	findAgencyByWallet,
 	findFirmById,
 	findFirmByMcpToken,
 	findFirmByWallet,
 	findLinguistByWallet,
 	findLinguistPairs,
+	findTranslatorNo,
 } from "./lookups.js";
 export { accountsSlice } from "./migrations.js";
 export { accountsRoutes } from "./routes.js";

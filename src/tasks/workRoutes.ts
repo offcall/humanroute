@@ -5,7 +5,7 @@ import { parseResult, readJson } from "./body.js";
 import type { TasksDeps } from "./deps.js";
 import { SubmitOutcome, submitTask } from "./lifecycle.js";
 import { taskById } from "./repo.js";
-import { toView } from "./view.js";
+import { viewOf } from "./view.js";
 
 export const workRoutes = (deps: TasksDeps): Hono => {
 	const app = new Hono();
@@ -41,7 +41,7 @@ export const workRoutes = (deps: TasksDeps): Hono => {
 		if (outcome !== SubmitOutcome.Submitted) {
 			return ctx.json({ error: outcome }, 409);
 		}
-		return ctx.json(toView(task, deps.transferOf(task.id)));
+		return ctx.json(viewOf(deps, task));
 	});
 
 	return app;

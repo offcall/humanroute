@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import { denied, sessionWallet } from "./access.js";
 import type { TasksDeps } from "./deps.js";
 import { tasksByLinguist } from "./repo.js";
-import { toView } from "./view.js";
+import { viewOf } from "./view.js";
 
 export const linguistRoutes = (deps: TasksDeps): Hono => {
 	const app = new Hono();
@@ -22,7 +22,7 @@ export const linguistRoutes = (deps: TasksDeps): Hono => {
 		return ctx.json({
 			pairs: deps.linguistPairs(linguist.linguistId),
 			earnedUnits: deps.earnedUnits(tasks.map((task) => task.id)).toString(),
-			tasks: tasks.map((task) => toView(task, deps.transferOf(task.id))),
+			tasks: tasks.map((task) => viewOf(deps, task)),
 		});
 	});
 

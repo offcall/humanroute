@@ -6,7 +6,7 @@ import { parseReason, readJson } from "./body.js";
 import type { TasksDeps } from "./deps.js";
 import { taskById } from "./repo.js";
 import type { Task } from "./types.js";
-import { toView } from "./view.js";
+import { viewOf } from "./view.js";
 
 export const firmRoutes = (deps: TasksDeps): Hono => {
 	const app = new Hono();
@@ -40,7 +40,7 @@ export const firmRoutes = (deps: TasksDeps): Hono => {
 		if (!done || !task) {
 			return ctx.json({ error: "bad_state" }, 409);
 		}
-		return ctx.json(toView(task, deps.transferOf(taskId)));
+		return ctx.json(viewOf(deps, task));
 	};
 
 	app.post("/api/tasks/:id/approve", (ctx) => {

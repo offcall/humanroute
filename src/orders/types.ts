@@ -2,7 +2,7 @@
 import type { FacilitatorClient } from "@x402/core/server";
 import type { Network } from "../config/index.js";
 import type { Database } from "../store/index.js";
-import type { TaskTransfer } from "../tasks/index.js";
+import type { PartyPorts, TaskTransfer } from "../tasks/index.js";
 
 export enum DraftState {
 	Draft = "draft",
@@ -65,7 +65,7 @@ export type SettlePeek = {
 	network: string | null;
 };
 
-export type OrdersDeps = {
+export type OrdersDeps = PartyPorts & {
 	database: Database;
 	facilitator: FacilitatorClient;
 	network: Network;
