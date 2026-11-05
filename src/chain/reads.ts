@@ -45,6 +45,21 @@ export const tokenAccount = async (
 	}
 };
 
+export const solBalance = async (
+	conn: Connection,
+	owner: string,
+	commitment: Commitment,
+): Promise<ChainResult<number>> => {
+	try {
+		return {
+			ok: true,
+			value: await conn.getBalance(new PublicKey(owner), commitment),
+		};
+	} catch (err) {
+		return { ok: false, error: classify(err, Phase.Prepare) };
+	}
+};
+
 export const latestBlockhash = async (
 	conn: Connection,
 	commitment: Commitment,

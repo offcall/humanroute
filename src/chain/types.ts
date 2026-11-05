@@ -87,6 +87,8 @@ export type SolanaClient = {
 	// Signature of a successful hold transaction whose memo contains `memo`, or null.
 	findMemo(memo: string): Promise<ChainResult<string | null>>;
 	tokenAccount(owner: string): Promise<ChainResult<TokenAccount>>;
+	// Lamports of a wallet: the firm pays the approve fee itself (ADR 0036).
+	solBalance(owner: string): Promise<ChainResult<number>>;
 	latestBlockhash(): Promise<ChainResult<RecentBlockhash>>;
 	// Problems that should stop the gateway from taking payments; empty when ready.
 	preflight(): Promise<PreflightProblem[]>;

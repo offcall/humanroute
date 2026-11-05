@@ -29,6 +29,10 @@ export const ordersDeps = (
 			const read = await input.chain.tokenAccount(owner);
 			return read.ok ? read : { ok: false, error: read.error.message };
 		},
+		solBalanceOf: async (owner) => {
+			const read = await input.chain.solBalance(owner);
+			return read.ok ? read : { ok: false, error: read.error.message };
+		},
 		latestBlockhash: async () => {
 			const read = await input.chain.latestBlockhash();
 			return read.ok ? read : { ok: false, error: read.error.message };

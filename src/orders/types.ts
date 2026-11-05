@@ -96,6 +96,7 @@ export type OrdersDeps = PartyPorts & {
 	// The firm's login wallet: the refund wallet of its tasks (ADR 0036).
 	firmWallet: (firmId: string) => string | null;
 	tokenAccountOf: (owner: string) => Promise<ChainRead<FirmTokenAccount>>;
+	solBalanceOf: (owner: string) => Promise<ChainRead<number>>;
 	latestBlockhash: () => Promise<
 		ChainRead<{ blockhash: string; lastValidBlockHeight: number }>
 	>;

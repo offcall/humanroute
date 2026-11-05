@@ -18,11 +18,12 @@ export const autopayRoutes = (deps: OrdersDeps): Hono => {
 		if (wallet === null) {
 			return denied(ctx, caller);
 		}
-		const [account, blockhash] = await Promise.all([
+		const [account, blockhash, sol] = await Promise.all([
 			deps.tokenAccountOf(wallet),
 			deps.latestBlockhash(),
+			deps.solBalanceOf(wallet),
 		]);
-		if (!account.ok || !blockhash.ok) {
+		if (!account.ok || !blockhash.ok || !sol.ok) {
 			return ctx.json(CHAIN_DOWN, 502);
 		}
 		const usdc = account.value;
@@ -38,7 +39,15 @@ export const autopayRoutes = (deps: OrdersDeps): Hono => {
 			new PublicKey(mint),
 			new PublicKey(payTo),
 		).toBase58();
-		const base = { wallet, mint, payTo, payToAccount, ...blockhash.value };
+		const solLamports = sol.value;
+		const base = {
+			wallet,
+			mint,
+			payTo,
+			payToAccount,
+			solLamports,
+			...blockhash.value,
+		};
 		return ctx.json({
 			...base,
 			account: usdc.address,
