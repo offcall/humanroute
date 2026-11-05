@@ -13,7 +13,8 @@ import {
 	type Receipt,
 } from "./types.js";
 
-// Runs after the 201 is returned; an error is only logged.
+// Deferred with setImmediate, so the task reads and push work start after the 201 is
+// written; fire-and-forget, an error is only logged.
 const announce = (deps: OrdersDeps, orderId: string): void => {
 	const { onTasksCreated } = deps;
 	if (onTasksCreated === undefined) {
@@ -26,13 +27,15 @@ const announce = (deps: OrdersDeps, orderId: string): void => {
 			target: task.targetLang,
 			claimDeadline: task.claimDeadline,
 		}));
-	void Promise.resolve()
-		.then(() => onTasksCreated(created()))
-		.catch((err: unknown) =>
-			deps.log(
-				`tasks created hook failed order ${orderId}: ${err instanceof Error ? err.message : String(err)}`,
-			),
-		);
+	setImmediate(() => {
+		Promise.resolve()
+			.then(() => onTasksCreated(created()))
+			.catch((err: unknown) =>
+				deps.log(
+					`tasks created hook failed order ${orderId}: ${err instanceof Error ? err.message : String(err)}`,
+				),
+			);
+	});
 };
 
 export const settled = (

@@ -40,12 +40,16 @@ export const notifyNewTasks =
 			return;
 		}
 
-		for (const task of tasks) {
-			const pair = { source: task.source, target: task.target };
-			const linguistIds = findLinguistIdsByPair(deps.database, pair);
-			const targets = subscriptionsOf(deps.database, linguistIds);
-			await Promise.all(
-				targets.map((target) => deliver(deps, sender, target, task)),
-			);
-		}
+		// Tasks in parallel; allSettled, so one failing task never stops the others.
+		await Promise.allSettled(
+			tasks.map((task) => {
+				const pair = { source: task.source, target: task.target };
+				const linguistIds = findLinguistIdsByPair(deps.database, pair);
+				const targets = subscriptionsOf(deps.database, linguistIds);
+
+				return Promise.all(
+					targets.map((target) => deliver(deps, sender, target, task)),
+				);
+			}),
+		);
 	};
