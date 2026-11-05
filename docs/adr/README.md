@@ -32,6 +32,7 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0026](0026-frontend-react-vite-pwa-hono-static.md) | Frontend stack: React + Vite, PWA manifest, served by Hono | Proposed |
 | [0027](0027-remote-mcp-and-browser-pay-page.md) | Remote MCP as a separate process and browser pay page | Proposed |
 | [0028](0028-demo-vs-public-timers.md) | Demo vs public timers in config | Proposed |
+| [0029](0029-web-push.md) | Web Push for new tasks | Proposed |
 | [0030](0030-approve-reject-from-mcp.md) | Approve and reject from MCP after asking the user | Proposed |
 | [0031](0031-wait-task.md) | wait_task with progress notifications | Proposed |
 | [0032](0032-indigo-web-ui.md) | Indigo web UI: theme, CSS layout, client routes | Accepted (deeplink sign-in superseded by 0034) |

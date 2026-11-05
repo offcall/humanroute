@@ -19,7 +19,7 @@ The v2 demo script shows a firm cabinet, an agency cabinet and a linguist cabine
 - Amounts: they arrive as decimal strings of base units and are parsed to `bigint`, never `number`.
 - Live state: polling every 3 s. No SSE or websocket.
 - Countdowns: computed from server deadlines plus `serverTime`, not from the client clock alone.
-- PWA: a manifest, icons and `display: standalone` only. No service worker, no offline cache, no push (an optional ADR 0029 may add them later).
+- PWA: a manifest, icons and `display: standalone`. No offline cache. ADR 0029 adds a push-only service worker.
 
 ## Alternatives
 
