@@ -9,7 +9,7 @@ type LoginLinkProps = { className: string; onSignedIn?: () => void };
 
 // No injected provider (Safari, home-screen icon): approve in Phantom, then come back (ADR 0034).
 export const LoginLink = ({ className, onSignedIn }: LoginLinkProps) => {
-	const { link, failed } = useLoginRequest(onSignedIn);
+	const { link, failed, opened } = useLoginRequest(onSignedIn);
 
 	if (link === undefined) {
 		return (
@@ -21,7 +21,7 @@ export const LoginLink = ({ className, onSignedIn }: LoginLinkProps) => {
 	}
 
 	return (
-		<a className={className} href={link}>
+		<a className={className} href={link} onClick={opened}>
 			Sign in with Phantom
 		</a>
 	);

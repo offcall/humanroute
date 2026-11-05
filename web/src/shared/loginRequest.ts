@@ -1,51 +1,27 @@
 // Sign-in via approve in Phantom (ADR 0034): the waiting tab creates a login request,
 // the user approves it in Phantom, and the tab claims its session when visible again.
 import { useCallback, useRef, useState } from "react";
-import { request } from "./api";
-import { isRecord, str } from "./parse";
+import {
+	approveLink,
+	CREATED_KEY,
+	claimRequest,
+	createRequest,
+	olderThan,
+	RENEW_AFTER_MS,
+	STORAGE_KEY,
+} from "./loginApi";
 import { useSession } from "./session";
 import { usePoll } from "./usePoll";
-import { phantomDeepLink } from "./wallet";
 
-const STORAGE_KEY = "hr_login_request";
-const LOGIN_PATH = "/api/auth/login-request";
-
-const parseCreated = (raw: unknown): string | undefined =>
-	isRecord(raw) ? str(raw.id) : undefined;
-
-const createRequest = async (): Promise<string | undefined> => {
-	const res = await request("POST", LOGIN_PATH, {}, parseCreated);
-	if (!res.ok) {
-		return undefined;
-	}
-	localStorage.setItem(STORAGE_KEY, res.value);
-
-	return res.value;
+// opened: call on the link tap; the request is not renewed while the user may be in Phantom.
+type LoginRequest = {
+	link: string | undefined;
+	failed: boolean;
+	opened: () => void;
 };
 
-// 200 carries the wallet; 202 pending has none.
-const parseClaim = (
-	raw: unknown,
-): { wallet: string | undefined } | undefined =>
-	isRecord(raw) ? { wallet: str(raw.wallet) } : undefined;
-
-const claimRequest = (requestId: string) =>
-	request(
-		"POST",
-		`${LOGIN_PATH}/${encodeURIComponent(requestId)}/claim`,
-		{},
-		parseClaim,
-	);
-
-export const approveLink = (requestId: string): string =>
-	phantomDeepLink(
-		`${window.location.origin}/approve/${encodeURIComponent(requestId)}`,
-	);
-
-type LoginRequest = { link: string | undefined; failed: boolean };
-
 // Keeps one live request: claims it on load, on visible and every 3 s while visible;
-// 200 signs the tab in, 410 drops the request and opens a fresh one.
+// 200 signs the tab in, 410 or an old pending request is replaced by a fresh one.
 export const useLoginRequest = (onSignedIn?: () => void): LoginRequest => {
 	const { refresh } = useSession();
 	const [requestId, setRequestId] = useState(() =>
@@ -54,11 +30,13 @@ export const useLoginRequest = (onSignedIn?: () => void): LoginRequest => {
 	const [failed, setFailed] = useState(false);
 	const busy = useRef(false);
 	const done = useRef(false);
+	const openedAt = useRef(0);
 	const signedIn = useRef(onSignedIn);
 	signedIn.current = onSignedIn;
 
 	const renew = useCallback(async () => {
 		localStorage.removeItem(STORAGE_KEY);
+		localStorage.removeItem(CREATED_KEY);
 		const created = await createRequest();
 		setFailed(created === undefined);
 		setRequestId(created ?? null);
@@ -78,6 +56,12 @@ export const useLoginRequest = (onSignedIn?: () => void): LoginRequest => {
 			signedIn.current?.();
 		} else if (!res.ok && res.status === 410) {
 			await renew();
+		} else if (
+			res.ok &&
+			olderThan(RENEW_AFTER_MS) &&
+			Date.now() - openedAt.current > RENEW_AFTER_MS * 2
+		) {
+			await renew();
 		}
 	}, [refresh, renew]);
 
@@ -96,5 +80,8 @@ export const useLoginRequest = (onSignedIn?: () => void): LoginRequest => {
 	return {
 		link: requestId === null ? undefined : approveLink(requestId),
 		failed,
+		opened: () => {
+			openedAt.current = Date.now();
+		},
 	};
 };

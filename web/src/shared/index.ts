@@ -14,7 +14,8 @@ export {
 	pairLabel,
 	pairNames,
 } from "./languages";
-export { approveLink, useLoginRequest } from "./loginRequest";
+export { approveLink } from "./loginApi";
+export { useLoginRequest } from "./loginRequest";
 export { formatUsdc, parseAmount } from "./money";
 export { PageLoading } from "./PageLoading";
 export { arr, isRecord, num, orNull, type Parse, str } from "./parse";
