@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AgentSetup } from "./AgentSetup";
-import { AutoPayForm, agentFromUrl } from "./AutoPayForm";
+import { AutoPayForm, agentFromUrl, clearAgentLink } from "./AutoPayForm";
 import { AutoPayOff } from "./AutoPayOff";
 import { AutoPayOn } from "./AutoPayOn";
 import { rememberLimit } from "./autopayLimit";
@@ -31,8 +31,13 @@ export const AutoPay = ({ control }: { control: AutopayControl }) => {
 	const approve = async (agent: string, units: bigint) => {
 		if (await run((current) => approveTx(current, agent, units))) {
 			rememberLimit(agent, units);
+			clearAgentLink();
 			setView(View.Summary);
 		}
+	};
+	const cancel = () => {
+		clearAgentLink();
+		setView(View.Summary);
 	};
 	const { delegate } = status;
 	const on = delegate !== null && status.allowanceUnits > 0n;
@@ -40,14 +45,14 @@ export const AutoPay = ({ control }: { control: AutopayControl }) => {
 	if (view === View.Key) {
 		body = (
 			<>
-				<SetupHead step={1} onCancel={() => setView(View.Summary)} />
+				<SetupHead step={1} onCancel={cancel} />
 				<AgentSetup status={status} onDone={() => setView(View.Limit)} />
 			</>
 		);
 	} else if (view === View.Limit) {
 		body = (
 			<>
-				<SetupHead step={2} onCancel={() => setView(View.Summary)} />
+				<SetupHead step={2} onCancel={cancel} />
 				<AutoPayForm
 					status={status}
 					busy={busy}

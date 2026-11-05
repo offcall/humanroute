@@ -8,6 +8,11 @@ import { WalletFunds } from "./WalletFunds";
 // The setup command opens the cabinet with ?agent=<public key>.
 export const agentFromUrl = (): string =>
 	new URLSearchParams(window.location.search).get("agent") ?? "";
+// Drop ?agent= once it has done its job, so a reload or the first order does not reopen step 2.
+// The client router reads only the pathname.
+export const clearAgentLink = () => {
+	window.history.replaceState(null, "", window.location.pathname);
+};
 const BASE58_KEY = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const PRESETS = ["1", "5", "10"];
 

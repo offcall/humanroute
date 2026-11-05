@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type Order, useClock } from "../shared";
-import { agentFromUrl } from "./AutoPayForm";
+import { agentFromUrl, clearAgentLink } from "./AutoPayForm";
 import { FirmRating } from "./FirmRating";
 import { JobsHead } from "./JobsHead";
 import { JobsTable } from "./JobsTable";
@@ -50,8 +50,13 @@ export const Jobs = ({ view }: { view: FirmView }) => {
 	const { orders, serverTime, error } = useOrders();
 	const [connectOpen, setConnectOpen] = useState(false);
 	// The setup command links back with ?agent=; with orders the hero is gone, so open the dialog.
-	const [agentLink, setAgentLink] = useState(agentFromUrl() !== "");
-	const dialogOpen = connectOpen || (agentLink && (orders?.length ?? 0) > 0);
+	// Opened once from the link; a later approve clears the link but keeps the dialog open.
+	const hasOrders = (orders?.length ?? 0) > 0;
+	useEffect(() => {
+		if (hasOrders && agentFromUrl() !== "") {
+			setConnectOpen(true);
+		}
+	}, [hasOrders]);
 	const rating = <FirmRating firmId={view.firm.id} />;
 
 	return (
@@ -82,12 +87,12 @@ export const Jobs = ({ view }: { view: FirmView }) => {
 					<PaidOrders orders={orders}>{rating}</PaidOrders>
 				</>
 			)}
-			{dialogOpen ? (
+			{connectOpen ? (
 				<ConnectDialog
 					mcp={view.mcp}
 					onClose={() => {
 						setConnectOpen(false);
-						setAgentLink(false);
+						clearAgentLink();
 					}}
 				/>
 			) : null}
