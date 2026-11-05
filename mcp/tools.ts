@@ -4,7 +4,9 @@ import { registerDecisionTools } from "./decisionTools.js";
 import { GET_TASK_DESCRIPTION, POST_TASK_DESCRIPTION } from "./descriptions.js";
 import { renderDraft, renderStatus } from "./render.js";
 import { toolText } from "./result.js";
-import type { GatewayClient } from "./types.js";
+import { readStatus } from "./status.js";
+import type { GatewayClient, WaitDeps } from "./types.js";
+import { registerWaitTool } from "./waitTool.js";
 
 const targetSchema = z.object({
 	targetLang: z.string().min(1),
@@ -30,6 +32,7 @@ export const registerTools = (
 	server: McpServer,
 	token: string,
 	client: GatewayClient,
+	deps: WaitDeps,
 ) => {
 	server.registerTool(
 		"post_task",
@@ -50,21 +53,14 @@ export const registerTools = (
 			inputSchema: { draftId: z.string().min(1) },
 		},
 		async ({ draftId }) => {
-			const status = await client.getDraft(draftId);
-			if (!status.ok) {
-				return toolText(status.error, true);
-			}
-			const { orderId } = status.value;
-			if (orderId === undefined) {
-				return toolText(renderStatus(status.value, undefined));
-			}
-			const order = await client.getOrder(token, orderId);
+			const current = await readStatus(client, token, draftId);
 
-			return order.ok
-				? toolText(renderStatus(status.value, order.value))
-				: toolText(order.error, true);
+			return current.ok
+				? toolText(renderStatus(current.value.status, current.value.order))
+				: toolText(current.error, true);
 		},
 	);
 
 	registerDecisionTools(server, token, client);
+	registerWaitTool(server, token, client, deps);
 };

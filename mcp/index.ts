@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { systemClock } from "./clock.js";
 import { loadConfig } from "./config.js";
 import { SERVER_INSTRUCTIONS } from "./descriptions.js";
 import { createGatewayClient } from "./gateway.js";
@@ -78,7 +79,7 @@ const server = createServer(async (req, res) => {
 			{ name: "humanroute", version: "2.0.0" },
 			{ instructions: SERVER_INSTRUCTIONS },
 		);
-		registerTools(mcp, token, client);
+		registerTools(mcp, token, client, systemClock);
 		// no sessionIdGenerator: stateless mode
 		const transport = new StreamableHTTPServerTransport({});
 		res.on("close", () => {

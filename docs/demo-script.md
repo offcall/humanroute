@@ -7,7 +7,7 @@ Setup before recording: gateway and MCP server running ([README](../README.md)),
 | Target time | Window | Step | What the viewer sees |
 | --- | --- | --- | --- |
 | 0:00 | Browser 1 | Open the landing page, click "Register firm", sign in with Phantom (Sign-In With Solana). | Firm cabinet with the MCP URL and token. |
-| 0:20 | Terminal | Add the MCP server to Claude Code with the URL and token from the cabinet. | Claude Code lists `post_task`, `get_task`, `approve_task` and `reject_task`. |
+| 0:20 | Terminal | Add the MCP server to Claude Code with the URL and token from the cabinet. | Claude Code lists `post_task`, `get_task`, `wait_task`, `approve_task` and `reject_task`. |
 | 0:35 | Browser 2 | Register the agency with its wallet, then "Add linguist". | One permanent invite link. |
 | 0:50 | Phone | Open the invite link, sign in with Phantom, set EN to ES and EN to FR. | Linguist cabinet with the two pairs. |
 | 1:05 | Terminal | Prompt: "A pharmacy chain publishes this drug leaflet in 3 languages, translate it and prepare it for publication." Claude drafts the three translations and calls `post_task`. | Claude returns the pay link. |

@@ -57,3 +57,28 @@ export type GatewayClient = {
 		reason: string,
 	) => Promise<Parsed<OrderTask>>;
 };
+
+// One read of a draft and, once paid, its order.
+export type Snapshot = { status: DraftStatus; order: Order | undefined };
+
+export type WaitDeps = {
+	now: () => number;
+	sleep: (ms: number, signal: AbortSignal) => Promise<void>;
+};
+
+export enum WaitKind {
+	Changed = "changed",
+	Settled = "settled",
+	Cap = "cap",
+	Error = "error",
+	Aborted = "aborted",
+}
+
+export type WaitOutcome =
+	| {
+			kind: WaitKind.Changed | WaitKind.Settled | WaitKind.Cap;
+			text: string;
+			seen: string;
+	  }
+	| { kind: WaitKind.Error; message: string }
+	| { kind: WaitKind.Aborted };
