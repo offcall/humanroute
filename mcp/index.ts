@@ -5,6 +5,8 @@ import { systemClock } from "./clock.js";
 import { loadConfig } from "./config.js";
 import { SERVER_INSTRUCTIONS } from "./descriptions.js";
 import { createGatewayClient } from "./gateway.js";
+import { createPayClient } from "./payGateway.js";
+import { registerPayTools } from "./payTools.js";
 import { registerTools } from "./tools.js";
 
 const MAX_BODY_BYTES = 1_048_576;
@@ -22,6 +24,7 @@ if (!config.ok) {
 	process.exit(1);
 }
 const client = createGatewayClient(config.value.gatewayUrl);
+const payClient = createPayClient(config.value.gatewayUrl);
 
 const parseBearer = (header: string | undefined): string | undefined => {
 	const match = /^Bearer (\S+)$/.exec(header ?? "");
@@ -80,6 +83,7 @@ const server = createServer(async (req, res) => {
 			{ instructions: SERVER_INSTRUCTIONS },
 		);
 		registerTools(mcp, token, client, systemClock);
+		registerPayTools(mcp, token, payClient, systemClock.now);
 		// no sessionIdGenerator: stateless mode
 		const transport = new StreamableHTTPServerTransport({});
 		res.on("close", () => {

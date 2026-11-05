@@ -10,7 +10,7 @@ Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. Tests are d
 | --- | --- | --- |
 | Gateway | Node process: Hono HTTP API, SQLite, x402 payment route, payout worker | `src/` |
 | Web app | React + Vite, PWA manifest, Indigo UI (ADR 0032): landing, firm (jobs, review, task detail), agency, linguist (board, my tasks, wallet), join and pay pages | `web/` |
-| MCP server | Remote MCP over Streamable HTTP, tools `post_task`, `get_task`, `wait_task` (waits for the next change) and `approve_task` and `reject_task` (Claude asks the user before deciding); talks to the gateway over HTTP only | `mcp/` |
+| MCP server | Remote MCP over Streamable HTTP, tools `post_task`, `get_task`, `wait_task` (waits for the next change) and `approve_task` and `reject_task` (Claude asks the user before deciding), `prepare_payment` and `pay_task` (auto-pay: Claude signs the order payment locally with the firm's agent key, ADR 0036); talks to the gateway over HTTP only | `mcp/` |
 | Scripts | Devnet wallet setup and an opt-in e2e flow | `scripts/` |
 
 Money moves only from `src/payouts/`. Decisions (approve, reject, timers) only record state and queue a transfer.
@@ -74,7 +74,7 @@ Startup: invalid configuration exits 1. A failing preflight (hold without SOL or
 ```
 src/     gateway: config, store, chain, auth, accounts, tasks, orders, payouts, rating, http, wiring
 web/     React app (landing, firm, agency, linguist, join, pay)
-mcp/     MCP server (post_task, get_task, wait_task, approve_task, reject_task)
+mcp/     MCP server (post_task, get_task, wait_task, approve_task, reject_task, prepare_payment, pay_task)
 scripts/ wallet setup, devnet e2e flow
 docs/    design, ADRs, demo script, roadmap
 ```

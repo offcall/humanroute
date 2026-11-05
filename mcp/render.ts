@@ -9,7 +9,7 @@ import {
 
 const TERMS = [
 	"Paid once through the pay link, with the firm's Phantom wallet on Solana devnet (test money).",
-	"Per language: approved pays the linguist, agency and fee; rejected, unclaimed or late refunds the full amount to the payer.",
+	"Per language: approved pays the linguist, agency and fee; rejected, unclaimed or late refunds the full amount to the firm wallet.",
 	"Claim and work deadlines start when paid; get_task shows them.",
 	"The pay link expires 30 minutes after creation if unpaid.",
 ];
