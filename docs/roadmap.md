@@ -33,4 +33,5 @@ Not built in the hackathon version. Each item is a product or architecture chang
 - **Signed receipts and self-facilitation** ([ADR 0013](adr/0013-signed-receipt.md), [ADR 0014](adr/0014-self-facilitation-fallback.md)): deferred.
 - **Web playground.** Dropped for the hackathon; `scripts/create-order.ts` plays the agent's role on devnet.
 - **Observability.** Logs only; no metrics or alerting beyond `/health`.
+- **Push re-detect.** The web re-reads and re-posts this device's push subscription on every Board or Wallet mount; once per app session is enough.
 - **Push log text.** A failed push logs the push service's body or error message, which AGENTS.md's logging rule (public keys, signatures, ids only) does not allow; reduce it to a status and a known reason code.
