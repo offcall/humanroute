@@ -1,0 +1,36 @@
+/* Reject sheet: chips, note and its footer */
+.reject-sheet {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 18px 20px;
+	border-radius: 18px;
+	background: var(--hr-card);
+	border: 2px solid var(--hr-bad);
+}
+.reject-sheet__title {
+	font: 850 19px / 1.2 var(--hr-sans);
+}
+.fb-note {
+	min-height: 76px;
+}
+.fb-note-foot {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+}
+.fb-count {
+	margin-left: auto;
+}
+fieldset.chips {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+}
+@media (max-width: 760px) {
+	.reject-sheet .row {
+		flex-wrap: wrap;
+	}
+}

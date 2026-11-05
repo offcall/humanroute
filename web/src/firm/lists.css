@@ -1,0 +1,54 @@
+/* Task lists: siblings on task detail, decisions on "All reviewed" (indigo.css §15) */
+.sib-list {
+	border-top: 1px solid var(--hr-line);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.sib-list > li {
+	display: grid;
+	grid-template-columns: 110px 150px minmax(0, 1fr) auto;
+	gap: 16px;
+	align-items: center;
+	padding: 11px 0;
+	border-bottom: 1px solid var(--hr-line);
+	font-size: 15px;
+	min-height: 56px;
+}
+.sib-list > li > b {
+	font-weight: 850;
+}
+.fb-decided > li {
+	grid-template-columns: 90px minmax(0, 1fr) auto 64px;
+}
+.fb-decided .who {
+	font-size: 15px;
+}
+.fb-amt {
+	text-align: right;
+	font-size: 20px;
+}
+.fb-done {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 10px 0 4px;
+}
+.fb-done__mark {
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	background: var(--hr-ok);
+	color: var(--hr-on-accent);
+	display: grid;
+	place-items: center;
+}
+@media (max-width: 760px) {
+	.sib-list > li {
+		grid-template-columns: 1fr auto;
+	}
+	.fb-decided > li {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+}

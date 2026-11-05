@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
-import { type ApiResult, navigate, request } from "../shared";
+import {
+	type ApiResult,
+	matchPath,
+	navigate,
+	request,
+	useRoute,
+} from "../shared";
 import { Jobs } from "./Jobs";
 import { parseFirmView } from "./parseFirmView";
+import { Review } from "./Review";
 import type { FirmView } from "./types";
 
 const goHome = (event: React.MouseEvent) => {
@@ -20,8 +27,12 @@ const Loading = () => (
 	</>
 );
 
-// Sub-routes: /firm/jobs now; /firm/review and /firm/jobs/:orderId/:lang show the jobs until they are built.
-const FirmPage = ({ view }: { view: FirmView }) => <Jobs view={view} />;
+// Sub-routes: /firm/review; /firm/jobs (and /firm/jobs/:orderId/:lang until the task detail is built).
+const FirmPage = ({ view }: { view: FirmView }) => {
+	const path = useRoute();
+
+	return matchPath("/firm/review", path) ? <Review /> : <Jobs view={view} />;
+};
 
 export const FirmBody = () => {
 	const [res, setRes] = useState<ApiResult<FirmView> | undefined>(undefined);

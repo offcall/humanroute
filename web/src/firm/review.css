@@ -1,0 +1,85 @@
+/* Review one by one + reject sheet (indigo.css §16) */
+.review-title {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+.review-title__of {
+	font: 850 28px / 1 var(--hr-sans);
+	color: var(--hr-muted);
+	letter-spacing: -0.02em;
+}
+.exec-line {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 16px;
+	color: var(--hr-muted);
+}
+.exec-line b {
+	font-weight: 850;
+	color: var(--hr-ink);
+}
+.review-cols {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 26px;
+}
+.review-cols > div {
+	font-size: 18px;
+	line-height: 1.55;
+	white-space: pre-wrap;
+}
+.review-cols .kicker {
+	display: block;
+	margin-bottom: 6px;
+	white-space: normal;
+}
+.review-actions {
+	display: flex;
+	gap: 12px;
+}
+.review-actions > .btn {
+	flex: 1;
+	min-height: 62px;
+	font-size: 18px;
+}
+.review-actions .btn--ghost[aria-disabled="true"] {
+	background: transparent;
+	border: 2px solid var(--hr-muted);
+	color: var(--hr-ink);
+	opacity: 0.45;
+	cursor: progress;
+}
+.review-card:focus-visible {
+	outline-offset: 8px;
+	border-radius: 8px;
+}
+.next-link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 14px 0 0;
+	border-top: 1px solid var(--hr-line);
+	font-size: 15px;
+	color: var(--hr-muted);
+	text-decoration: none;
+	min-height: 44px;
+	margin: 0;
+}
+.next-link b {
+	color: var(--hr-ink);
+}
+.fb-act-err {
+	font-size: 15px;
+}
+@media (max-width: 760px) {
+	.review-cols {
+		grid-template-columns: 1fr;
+	}
+	.review-actions {
+		flex-direction: column;
+	}
+}
