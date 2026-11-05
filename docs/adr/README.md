@@ -36,4 +36,4 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0031](0031-wait-task.md) | wait_task with progress notifications | Proposed |
 | [0032](0032-indigo-web-ui.md) | Indigo web UI: theme, CSS layout, client routes | Accepted |
 | [0033](0033-indigo-read-fields.md) | Indigo read fields | Accepted |
-| [0036](0036-agent-autopay-spl-delegate.md) | Agent auto-pay through an SPL delegate | Proposed |
+| [0036](0036-agent-autopay-spl-delegate.md) | Agent auto-pay through an SPL delegate | Accepted |
