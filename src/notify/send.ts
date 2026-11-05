@@ -26,7 +26,9 @@ const deliver = async (
 		removeSubscription(deps.database, target.endpoint);
 	}
 	if (outcome.kind === "failed") {
-		deps.log(`push failed task ${task.taskId} status ${outcome.status ?? "?"}`);
+		deps.log(
+			`push failed task ${task.taskId} status ${outcome.status ?? "?"} ${outcome.reason}`,
+		);
 	}
 };
 

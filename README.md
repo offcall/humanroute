@@ -59,7 +59,7 @@ A database from v1 is refused (ADR 0022). Use a fresh `DB_PATH`.
 | `MCP_PUBLIC_URL` | required | MCP URL shown to firms |
 | `DRAFT_TTL_SECONDS`, `SESSION_TTL_SECONDS`, `NONCE_TTL_SECONDS` | 1800, 604800, 300 | lifetimes |
 | `WEB_DIST_DIR` | `web/dist` | built web app |
-| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | empty | Web Push for new tasks (ADR 0029); all three or none, none = push off; keys from `npx web-push generate-vapid-keys` |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | empty | Web Push for new tasks (ADR 0029); all three or none, none = push off; the subject must be a real `mailto:` or `https:` (Apple rejects placeholder domains); keys from `npx web-push generate-vapid-keys` |
 | `GATEWAY_URL`, `MCP_PORT` | required, 4022 | MCP process only |
 
 Startup: invalid configuration exits 1. A failing preflight (hold without SOL or token account, facilitator without devnet) keeps the server up: `/health` shows `ready: false`, payments answer `503 not_ready` with the reasons, and payouts pause.

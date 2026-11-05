@@ -7,7 +7,7 @@ export type PushTarget = { endpoint: string; p256dh: string; auth: string };
 export type SendOutcome =
 	| { kind: "sent" }
 	| { kind: "gone" }
-	| { kind: "failed"; status: number | null };
+	| { kind: "failed"; status: number | null; reason: string };
 
 // Delivers one encrypted payload; never throws.
 export type PushSender = (

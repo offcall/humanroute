@@ -5,14 +5,22 @@ import type { PushSender, SendOutcome } from "./types.js";
 
 const GONE = new Set([404, 410]);
 
+// The push service body, e.g. Apple's {"reason":"BadJwtToken"}; one short line for the log.
+const reasonOf = (body: string): string =>
+	body.replace(/\s+/g, " ").trim().slice(0, 120);
+
 const outcomeOf = (err: unknown): SendOutcome => {
 	if (err instanceof webpush.WebPushError) {
 		return GONE.has(err.statusCode)
 			? { kind: "gone" }
-			: { kind: "failed", status: err.statusCode };
+			: { kind: "failed", status: err.statusCode, reason: reasonOf(err.body) };
 	}
 
-	return { kind: "failed", status: null };
+	return {
+		kind: "failed",
+		status: null,
+		reason: err instanceof Error ? err.message : String(err),
+	};
 };
 
 export const createPushSender =
