@@ -1,0 +1,64 @@
+/* Below the jobs table: guarantee, quiet line, paid orders */
+.fb-main .num-money {
+	font-size: clamp(56px, 8vw, 76px);
+}
+.fb-quiet {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--hr-muted);
+	font-size: 15px;
+	font-weight: 650;
+	padding: 14px 16px;
+	border-radius: var(--hr-radius-card);
+	border: 1.5px dashed var(--hr-dash);
+}
+.guarantee.fb-guarantee {
+	border-top: 0;
+	padding-top: 0;
+	margin-top: -6px;
+	font-size: 14.5px;
+	color: var(--hr-muted);
+	align-items: center;
+}
+.fb-orders {
+	border-top: 1px solid var(--hr-line);
+	padding-top: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.fb-orders ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.fb-orders li {
+	display: grid;
+	grid-template-columns: 90px minmax(0, 1fr) 62px 84px 236px 104px;
+	gap: 12px;
+	align-items: center;
+	min-height: 40px;
+	font-size: 14px;
+	border-bottom: 1px solid var(--hr-hair);
+}
+.fb-orders li code {
+	font-size: 13px;
+	font-weight: 650;
+}
+.fb-orders__title {
+	font-weight: 750;
+}
+.fb-orders li > b {
+	text-align: right;
+}
+@media (max-width: 760px) {
+	.fb-orders li {
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 2px 12px;
+		padding: 8px 0;
+	}
+	.cta-banner {
+		flex-wrap: wrap;
+	}
+}

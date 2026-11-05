@@ -1,9 +1,15 @@
 import { useState } from "react";
+import { type Order, useClock } from "../shared";
 import { FirmRating } from "./FirmRating";
 import { JobsHead } from "./JobsHead";
+import { JobsTable } from "./JobsTable";
 import { ConnectDialog, ConnectHero } from "./McpConnection";
+import { MoneyHero } from "./MoneyHero";
 import { NotUpdated } from "./NotUpdated";
-import { OrderList } from "./OrderList";
+import { PaidOrders } from "./PaidOrders";
+import { ReviewBanner } from "./ReviewBanner";
+import { sortTasks } from "./sortTasks";
+import { summaryOf } from "./summary";
 import type { FirmView } from "./types";
 import { useOrders } from "./useOrders";
 
@@ -17,10 +23,32 @@ const NoOrders = () => (
 	</div>
 );
 
+type OverviewProps = { orders: Order[]; serverTime: string | undefined };
+
+const Overview = ({ orders, serverTime }: OverviewProps) => {
+	const now = useClock(serverTime);
+	const summary = summaryOf(orders, now);
+
+	return (
+		<>
+			<MoneyHero summary={summary} />
+			<ReviewBanner toReview={summary.toReview} running={summary.running} />
+			<JobsTable tasks={sortTasks(orders)} now={now} />
+			{summary.escrowUnits === 0n ? null : (
+				<p className="guarantee fb-guarantee">
+					Every unfinished job refunds to you automatically at its due time if
+					there is no valid answer.
+				</p>
+			)}
+		</>
+	);
+};
+
 // /firm/jobs
 export const Jobs = ({ view }: { view: FirmView }) => {
-	const { orders, serverTime, error, reload } = useOrders();
+	const { orders, serverTime, error } = useOrders();
 	const [connectOpen, setConnectOpen] = useState(false);
+	const rating = <FirmRating firmId={view.firm.id} />;
 
 	return (
 		<>
@@ -41,12 +69,15 @@ export const Jobs = ({ view }: { view: FirmView }) => {
 				<>
 					<ConnectHero mcp={view.mcp} />
 					<NoOrders />
+					{rating}
 				</>
 			) : null}
 			{orders === undefined || orders.length === 0 ? null : (
-				<OrderList orders={orders} onDone={reload} />
+				<>
+					<Overview orders={orders} serverTime={serverTime} />
+					<PaidOrders orders={orders}>{rating}</PaidOrders>
+				</>
 			)}
-			<FirmRating firmId={view.firm.id} />
 			{connectOpen ? (
 				<ConnectDialog mcp={view.mcp} onClose={() => setConnectOpen(false)} />
 			) : null}

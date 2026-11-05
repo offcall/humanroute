@@ -1,0 +1,94 @@
+/* Firm Big jobs table (indigo.css §14) */
+.fb-table {
+	display: flex;
+	flex-direction: column;
+}
+.jobs-table {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.jobs-table__head,
+.jobs-table__row {
+	display: grid;
+	grid-template-columns: 190px 140px minmax(0, 1fr) 210px 70px;
+	gap: 18px;
+	align-items: center;
+}
+.jobs-table__head {
+	font: 750 12px / 1.2 var(--hr-sans);
+	color: var(--hr-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	padding: 0 0 8px;
+	border-bottom: 2px solid var(--hr-ink);
+}
+.jobs-table__row {
+	position: relative;
+	padding: 15px 0;
+	border-bottom: 1px solid var(--hr-line);
+}
+.jobs-table__row:last-child {
+	border-bottom: 0;
+}
+.cell-status b {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font: 850 25px / 1 var(--hr-sans);
+	letter-spacing: -0.025em;
+}
+.cell-status b svg {
+	flex: none;
+}
+.cell-pair b {
+	display: block;
+	font: 850 20px / 1.1 var(--hr-sans);
+}
+.cell-pair span {
+	display: block;
+	font-size: 13px;
+	color: var(--hr-muted);
+}
+.cell-time b {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font: 850 25px / 1 var(--hr-sans);
+	letter-spacing: -0.02em;
+}
+.cell-time > span {
+	display: block;
+	font-size: 12.5px;
+	color: var(--hr-muted);
+	margin-top: 4px;
+}
+.cell-amt b {
+	display: block;
+	font: 850 22px / 1 var(--hr-sans);
+}
+.cell-time.is-urgent b,
+.cell-time.is-urgent > span {
+	color: var(--hr-bad);
+}
+.cell-time.is-urgent > span {
+	font-weight: 750;
+}
+.cell-amt {
+	text-align: right;
+}
+@media (max-width: 760px) {
+	.jobs-table__head {
+		display: none;
+	}
+	.jobs-table__row {
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 8px 14px;
+	}
+	.jobs-table__row > .cell-pair,
+	.jobs-table__row > .who {
+		grid-column: 1 / -1;
+	}
+}

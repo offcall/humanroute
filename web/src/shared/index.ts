@@ -48,5 +48,6 @@ export {
 } from "./viewParsers";
 export { WalletButton } from "./WalletButton";
 export { shortWallet, WalletLine } from "./WalletLine";
+export { Who } from "./Who";
 export { getPhantom, phantomDeepLink, toBase64 } from "./wallet";
 export { wordCount, wordsLabel } from "./words";

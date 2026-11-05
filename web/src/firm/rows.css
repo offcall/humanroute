@@ -1,0 +1,100 @@
+/* Jobs rows: the pair link covers the row, tx links and stamps sit above it */
+.fb-row-link {
+	color: inherit;
+	text-decoration: none;
+}
+.fb-row-link::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 10px;
+}
+.fb-row-link:focus-visible {
+	outline: none;
+}
+.fb-row-link:focus-visible::after {
+	outline: var(--hr-focus);
+	outline-offset: 2px;
+}
+.jobs-table__row .proof,
+.jobs-table__row .stamp {
+	position: relative;
+	z-index: 1;
+}
+.fb-dot--amber {
+	color: var(--hr-amber);
+	width: 10px;
+	height: 10px;
+}
+.is-final .cell-pair b,
+.is-final .who__name {
+	color: var(--hr-void);
+}
+.cell-time b.fb-time-word {
+	font-size: 20px;
+	color: var(--hr-amber-ink);
+}
+.cell-time .proof {
+	font-size: 14px;
+}
+.fb-final {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.fb-final .stamp {
+	margin-left: 0;
+	padding: 4px 9px 3px;
+}
+.fb-final .stamp b {
+	font-size: 12.5px;
+}
+.fb-final .stamp small {
+	font-size: 8.5px;
+}
+.fb-row-err {
+	grid-column: 1 / -1;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+	margin: -4px 0 0;
+	padding: 10px 12px;
+	border-radius: 12px;
+	background: var(--hr-bad-tint);
+	color: var(--hr-bad);
+	font: 750 14px / 1.35 var(--hr-sans);
+}
+.fb-row-err__memo {
+	flex-basis: 100%;
+	color: var(--hr-ink);
+	font-weight: 500;
+	font-size: 13.5px;
+	padding-left: 24px;
+}
+.fb-row-note {
+	grid-column: 1 / -1;
+	position: relative;
+	margin: -6px 0 0;
+	padding: 8px 12px;
+	border-radius: 10px;
+	background: var(--hr-hair);
+	color: var(--hr-ink);
+	font-size: 14px;
+	line-height: 1.4;
+}
+.fb-row-note span {
+	font-weight: 750;
+	color: var(--hr-void);
+	margin-right: 6px;
+}
+.jobs-table__row:hover .fb-row-link b {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+.fb-final > div > span {
+	display: block;
+	font-size: 12px;
+	color: var(--hr-muted);
+	margin-top: 3px;
+}
