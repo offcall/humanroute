@@ -54,7 +54,11 @@ export const WalletLine = ({ wallet, onSignOut, signOutDisabled }: Props) => {
 			<code className="wallet-line__addr" title={wallet}>
 				{shortWallet(wallet)}
 			</code>
-			<button type="button" className="btn btn--ghost" onClick={copy}>
+			<button
+				type="button"
+				className="btn btn--ghost wallet-line__copy"
+				onClick={copy}
+			>
 				<CopyLabel state={copyState} />
 				<span className="visually-hidden"> wallet address</span>
 			</button>
@@ -63,7 +67,7 @@ export const WalletLine = ({ wallet, onSignOut, signOutDisabled }: Props) => {
 				{copyState === CopyState.Failed ? "Copy failed" : ""}
 			</span>
 			<a
-				className="btn btn--text"
+				className="btn btn--text wallet-line__explorer"
 				href={`https://explorer.solana.com/address/${wallet}?cluster=devnet`}
 				target="_blank"
 				rel="noreferrer"
@@ -75,7 +79,7 @@ export const WalletLine = ({ wallet, onSignOut, signOutDisabled }: Props) => {
 			{onSignOut === undefined ? null : (
 				<button
 					type="button"
-					className="btn btn--ghost"
+					className="btn btn--ghost wallet-line__signout"
 					disabled={signOutDisabled === true}
 					onClick={onSignOut}
 				>

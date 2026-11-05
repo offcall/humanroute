@@ -17,3 +17,27 @@
 	padding-top: 12px;
 	border-top: 1px solid var(--hr-line);
 }
+/* Wallet row on a phone: label, address, Copy; then Explorer left, Sign out right */
+.wallet-row .wallet-line {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 10px;
+}
+.wallet-row .wallet-line__addr {
+	justify-self: start;
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 12px;
+	border-radius: 999px;
+}
+.wallet-row .wallet-line__explorer {
+	grid-column: 1 / 3;
+	justify-self: start;
+	padding-left: 0;
+}
+.wallet-row .wallet-line__signout {
+	grid-column: 3;
+	justify-self: end;
+}

@@ -27,7 +27,9 @@ export const WalletTab = ({ cabinet, reload }: Props) => {
 				<span className="plate__aside">translator #{cabinet.translatorNo}</span>
 			</div>
 			{me === null ? null : (
-				<WalletLine wallet={me.wallet} onSignOut={signOut} />
+				<div className="wallet-row">
+					<WalletLine wallet={me.wallet} onSignOut={signOut} />
+				</div>
 			)}
 			<section className="pairs" aria-labelledby="pairs-head">
 				<h2 className="kicker" id="pairs-head">
