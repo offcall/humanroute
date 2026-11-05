@@ -1,11 +1,14 @@
-/* Bottom tab bar (indigo.css §11) */
+/* Bottom tab bar (indigo.css §11): sticks to the viewport bottom, above the home indicator */
 .tabbar {
 	flex: none;
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
 	display: flex;
 	justify-content: space-around;
 	border-top: 1px solid var(--hr-line);
 	background: var(--hr-card);
-	padding: 6px 6px 12px;
+	padding: 6px 6px calc(12px + env(safe-area-inset-bottom));
 }
 .tabbar__tab {
 	display: flex;
