@@ -4,7 +4,7 @@ export { type ApiResult, request } from "./api";
 export { Banner, CtaBanner } from "./Banner";
 export { parseBoard, parseOrder } from "./boardParsers";
 export { Countdown } from "./Countdown";
-export { Icon, IconName } from "./Icon";
+export { Icon, IconName, Spinner } from "./Icon";
 export { LangPair } from "./LangPair";
 export { LanguagePairs } from "./LanguagePairs";
 export {
@@ -47,6 +47,6 @@ export {
 	parseTaskDetail,
 } from "./viewParsers";
 export { WalletButton } from "./WalletButton";
-export { WalletLine } from "./WalletLine";
+export { shortWallet, WalletLine } from "./WalletLine";
 export { getPhantom, phantomDeepLink, toBase64 } from "./wallet";
 export { wordCount, wordsLabel } from "./words";

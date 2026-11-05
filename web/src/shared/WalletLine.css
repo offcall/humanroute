@@ -1,0 +1,14 @@
+/* Copy / Copied / Copy failed stacked in one cell: the widest sets the width */
+.copy-label {
+	display: inline-grid;
+}
+.copy-label > span {
+	grid-area: 1 / 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+}
+.copy-label > .is-off {
+	visibility: hidden;
+}

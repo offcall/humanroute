@@ -1,15 +1,20 @@
-import { useState } from "react";
+import "./LanguagePairs.css";
+import { type ReactNode, useState } from "react";
+import { Icon, IconName } from "./Icon";
+import { LangSelect } from "./LangSelect";
+import { pairCodes, pairLabel, pairNames } from "./languages";
 import { Language, type LanguagePair } from "./types";
 
 const MAX_PAIRS = 10;
-const languages: string[] = Object.values(Language);
 
 type Props = {
 	value: LanguagePair[];
 	onChange: (pairs: LanguagePair[]) => void;
+	// save error shown under the Add row
+	error?: ReactNode;
 };
 
-export const LanguagePairs = ({ value, onChange }: Props) => {
+export const LanguagePairs = ({ value, onChange, error }: Props) => {
 	const [source, setSource] = useState<string>(Language.En);
 	const [target, setTarget] = useState<string>(Language.Es);
 
@@ -22,40 +27,44 @@ export const LanguagePairs = ({ value, onChange }: Props) => {
 		onChange(value.filter((_pair, at) => at !== index));
 
 	return (
-		<div>
-			<ul>
+		<div className="stack">
+			<ul className="pair-list">
 				{value.map((pair, index) => (
 					<li key={`${pair.source}-${pair.target}`}>
-						{pair.source} → {pair.target}{" "}
-						<button type="button" onClick={() => remove(index)}>
+						<span>
+							<b>{pairCodes(pair.source, pair.target)}</b>
+							<span className="muted pair-list__names">
+								{pairNames(pair.source, pair.target)}
+							</span>
+						</span>
+						<button
+							type="button"
+							className="btn btn--ghost btn--sm"
+							aria-label={`Remove ${pairLabel(pair.source, pair.target)}`}
+							onClick={() => remove(index)}
+						>
 							Remove
 						</button>
 					</li>
 				))}
 			</ul>
-			<select
-				value={source}
-				onChange={(event) => setSource(event.target.value)}
-			>
-				{languages.map((code) => (
-					<option key={code}>{code}</option>
-				))}
-			</select>
-			<select
-				value={target}
-				onChange={(event) => setTarget(event.target.value)}
-			>
-				{languages.map((code) => (
-					<option key={code}>{code}</option>
-				))}
-			</select>
-			<button
-				type="button"
-				disabled={!canAdd}
-				onClick={() => onChange([...value, { source, target }])}
-			>
-				Add
-			</button>
+			<div className="pair-add">
+				<LangSelect label="From" value={source} onChange={setSource} />
+				<span className="pair-add__arrow" aria-hidden="true">
+					<Icon name={IconName.Arrow} size={20} />
+				</span>
+				<LangSelect label="To" value={target} onChange={setTarget} />
+				<button
+					type="button"
+					className="btn btn--primary btn--sm"
+					disabled={!canAdd}
+					onClick={() => onChange([...value, { source, target }])}
+				>
+					<Icon name={IconName.Plus} />
+					Add
+				</button>
+			</div>
+			{error}
 		</div>
 	);
 };
