@@ -15,6 +15,7 @@ A task waits for a claim only for the claim window (ADR 0028). A linguist on a p
 - `notify` owns `push_subscriptions` (endpoint PK, linguist_id, p256dh, auth, created_at) and imports only `store`, `config` and `accounts`, as in ADR 0019. Routes, with the session lookup passed in by `http`:
   - `GET /api/push/key` → `{publicKey: string | null}`;
   - `POST /api/push/subscribe {endpoint, keys: {p256dh, auth}}` → `204`; linguist role required (`401`/`403`); upsert by endpoint, so one device belongs to the last linguist who subscribed on it, and a linguist may have several devices;
+  - the endpoint must be https on a known push service (`web.push.apple.com` and `*.push.apple.com`, `fcm.googleapis.com`, `updates.push.services.mozilla.com` and `*.push.services.mozilla.com`, `*.notify.windows.com`), else `422`; at most 5 devices per linguist, a new one drops the oldest. The gateway never posts to other hosts;
   - `POST /api/push/unsubscribe {endpoint}` → `204`, idempotent. Before logout the web unsubscribes this device and calls this route.
 - Trigger: `OrdersDeps.onTasksCreated(tasks)` with each task's id, language pair and claim deadline. `orders/settled.ts` calls it after the order is committed, fire-and-forget; an error is only logged and never changes the `201`. `src/wiring` connects it to `notify`; `orders` never imports `notify`.
 - Recipients: every linguist with the task's language pair (a task has no agency before claim), all their subscriptions. One push per task and subscription.
