@@ -18,6 +18,7 @@ const LinguistHome = () => {
 	const [failed, setFailed] = useState<string>();
 	const [edited, setEdited] = useState<LanguagePair[]>();
 	const [saveError, setSaveError] = useState<string>();
+	const [saved, setSaved] = useState(0);
 
 	const load = useCallback(async () => {
 		const res = await request("GET", "/api/linguist", undefined, parseCabinet);
@@ -45,20 +46,28 @@ const LinguistHome = () => {
 	}
 
 	const pairs = edited ?? cabinet.pairs;
-	const save = async () => {
+	// Every Add / Remove is saved at once; the API needs at least one pair.
+	const save = async (next: LanguagePair[]) => {
+		if (next.length === 0) {
+			setSaveError("keep at least one language pair");
+			return;
+		}
+		setEdited(next);
 		const res = await request(
 			"PUT",
 			"/api/linguist/languages",
-			{ pairs },
+			{ pairs: next },
 			parsePairs,
 		);
 		if (!res.ok) {
+			setEdited(undefined);
 			setSaveError(res.error.message ?? res.error.error);
 			return;
 		}
 		setSaveError(undefined);
-		setEdited(undefined);
 		await load();
+		setEdited(undefined);
+		setSaved((count) => count + 1);
 	};
 
 	return (
@@ -66,16 +75,10 @@ const LinguistHome = () => {
 			<h1>Linguist cabinet</h1>
 			<p>Earned: {formatUsdc(cabinet.earnedUnits)}</p>
 			<h2>Language pairs</h2>
-			<LanguagePairs value={pairs} onChange={setEdited} />
-			<button
-				type="button"
-				disabled={edited === undefined || pairs.length === 0}
-				onClick={save}
-			>
-				Save pairs
-			</button>
+			<LanguagePairs value={pairs} onChange={(next) => void save(next)} />
 			{saveError === undefined ? null : <p className="error">{saveError}</p>}
-			<Board onClaimed={load} />
+			{/* Remounting reloads the board for the saved pairs. */}
+			<Board key={saved} onClaimed={load} />
 			<MyTasks tasks={cabinet.tasks} onChanged={load} />
 		</div>
 	);
