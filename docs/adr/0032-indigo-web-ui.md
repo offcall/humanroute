@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. The "No deeplink sign-in" sentence is superseded by ADR 0034.
 
 ## Context
 

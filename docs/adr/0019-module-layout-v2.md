@@ -17,7 +17,7 @@ ADR 0009 split `src/` into seven layered modules for v1: one expert, one job per
 | config | - | none |
 | store | schema_migrations | config |
 | chain | - | config |
-| auth | nonces, sessions | store, config |
+| auth | nonces, sessions, login_requests (ADR 0034) | store, config |
 | accounts | firms, agencies, linguists, memberships, invites, linguist_languages, mcp_tokens | store |
 | orders (from payments) | orders, payments, orphans | store, config, accounts, tasks |
 | tasks (from jobs) | tasks | store, accounts |
