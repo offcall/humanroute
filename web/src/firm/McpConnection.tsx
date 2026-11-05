@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Icon, IconName } from "../shared";
+import { AutoPay } from "./AutoPay";
 import { McpBlock } from "./McpBlock";
 import type { Mcp } from "./types";
 import "./connect.css";
@@ -41,6 +42,7 @@ export const ConnectHero = ({ mcp }: { mcp: Mcp }) => (
 				</span>
 			</li>
 		</ol>
+		<AutoPay />
 	</div>
 );
 
@@ -79,6 +81,7 @@ export const ConnectDialog = ({ mcp, onClose }: DialogProps) => {
 				sends you a pay link.
 			</p>
 			<McpBlock mcp={mcp} />
+			<AutoPay />
 		</dialog>
 	);
 };
