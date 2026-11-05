@@ -31,6 +31,7 @@ export const readRoutes = (deps: OrdersDeps): Hono => {
 					};
 		return ctx.json({
 			draftId: draft.id,
+			payUrl: `${deps.publicBaseUrl.replace(/\/$/, "")}/pay/${draft.id}`,
 			state: draft.orderId === null ? DraftState.Draft : DraftState.Paid,
 			sourceLang: draft.sourceLang,
 			targetLangs: draft.targets.map((target) => target.targetLang),

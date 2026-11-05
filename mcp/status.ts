@@ -77,9 +77,12 @@ export const onlyTransient = (changes: string[]): boolean =>
 export const isSettled = (order: Order | undefined): boolean =>
 	order?.tasks.every((task) => SETTLED_STATES.has(task.publicState)) === true;
 
-export const progressLine = ({ order }: Snapshot): string =>
+// Claude Code shows this line under the running call, so the pay link stays visible while it waits.
+export const progressLine = ({ status, order }: Snapshot): string =>
 	order === undefined
-		? AWAITING
+		? status.payUrl === undefined
+			? AWAITING
+			: `${AWAITING}: ${status.payUrl}`
 		: order.tasks
 				.map((task) => `${task.targetLang}: ${task.publicState}`)
 				.join(", ");

@@ -51,13 +51,21 @@ export const parseDraftStatus = (input: unknown): Parsed<DraftStatus> => {
 	if (!isRecord(input)) {
 		return { ok: false, error: "gateway status is not an object" };
 	}
-	const { draftId, orderId, priceUnits, totalUnits, taskCount, targetLangs } =
-		input;
+	const {
+		draftId,
+		orderId,
+		payUrl,
+		priceUnits,
+		totalUnits,
+		taskCount,
+		targetLangs,
+	} = input;
 	const state = stateOf(input.state);
 	if (
 		typeof draftId !== "string" ||
 		state === undefined ||
 		(orderId !== undefined && typeof orderId !== "string") ||
+		(payUrl !== undefined && typeof payUrl !== "string") ||
 		!isUnits(priceUnits) ||
 		!isUnits(totalUnits) ||
 		typeof taskCount !== "number" ||
@@ -75,6 +83,9 @@ export const parseDraftStatus = (input: unknown): Parsed<DraftStatus> => {
 	};
 	if (orderId !== undefined) {
 		status.orderId = orderId;
+	}
+	if (payUrl !== undefined) {
+		status.payUrl = payUrl;
 	}
 
 	return { ok: true, value: status };

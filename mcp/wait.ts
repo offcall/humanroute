@@ -53,7 +53,8 @@ export const waitForChange = async ({
 	let baseline = seen;
 	let failingSince: number | undefined;
 	let line = "waiting";
-	let reportedAt = started;
+	// The first progress goes out on the first read, so the pay link shows at once.
+	let reportedAt = started - PROGRESS_MS;
 
 	while (!signal.aborted) {
 		const readAt = deps.now();

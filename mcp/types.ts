@@ -28,6 +28,8 @@ export type DraftStatus = {
 	draftId: string;
 	state: DraftState;
 	orderId?: string;
+	// Absent from a gateway older than ADR 0031's pay link change.
+	payUrl?: string;
 	priceUnits: string;
 	totalUnits: string;
 	taskCount: number;

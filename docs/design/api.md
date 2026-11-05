@@ -62,7 +62,7 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | Route | Auth / role | Request | Response | Errors | Slice |
 | --- | --- | --- | --- | --- | --- |
 | `POST /api/orders/draft` | MCP Bearer, firm | `{text, sourceLang, targets: [{targetLang, draft}], meta?}` (1..5 targets, distinct) | `201 {draftId, payUrl, priceUnits, totalUnits, taskCount}`; `payUrl` = `<PUBLIC_BASE_URL>/pay/<draftId>` | `422 invalid_body` | orders |
-| `GET /api/orders/draft/:draftId` | none (`draftId` is unguessable) | - | `200 {draftId, state: "draft" \| "paid", sourceLang, targetLangs, taskCount, priceUnits, totalUnits, payTo, mint, network, orderId?, tasks?: [{taskId, targetLang, publicState}]}`; `orderId` and `tasks` once paid | `404` (unknown or older than 30 min and unpaid) | orders |
+| `GET /api/orders/draft/:draftId` | none (`draftId` is unguessable) | - | `200 {draftId, payUrl, state: "draft" \| "paid", sourceLang, targetLangs, taskCount, priceUnits, totalUnits, payTo, mint, network, orderId?, tasks?: [{taskId, targetLang, publicState}]}`; `orderId` and `tasks` once paid | `404` (unknown or older than 30 min and unpaid) | orders |
 | `POST /x/orders/:draftId` | x402, any wallet | no body (content is in the draft) | `201 {orderId, taskIds, payTx}` + `PAYMENT-RESPONSE`; replay of the same payment returns the same `201` | `402`, `404`, `409 draft_paid` (other payment), `409 payment_reused` (other draft), `502 orphan_payment`, `503 not_ready` | orders |
 | `GET /api/orders` | cookie, firm | - | `200 {orders: [{orderId, payTx, totalUnits, createdAt, tasks: [TaskView]}]}`: the firm's orders | `403` | orders |
 | `GET /api/orders/:id` | cookie firm owner, or MCP Bearer of the same firm | - | `200 {orderId, firmId, payTx, payer, totalUnits, createdAt, tasks: [TaskView]}` | `403`, `404` | orders |
@@ -111,7 +111,7 @@ Unknown `/api/*` and `/x/*` paths return `404 {error: "not_found"}`, never the S
 | `get_task` | `GET /api/orders/draft/:draftId`, then `GET /api/orders/:id` once paid | `{draftId, state, orderId?, tasks?}`; once paid each language's `taskId`, state, deadlines, result (a JSON string) and reason; a `seen` line for `wait_task` |
 | `approve_task` | `POST /api/tasks/:id/approve` (Bearer) | the decided task; only after the user approved it in chat (ADR 0030) |
 | `reject_task` | `POST /api/tasks/:id/reject` (Bearer) `{reason}` | the decided task; only after the user rejected it in chat, with the user's reason |
-| `wait_task` | the `get_task` reads, every 2 s | on the first change of the draft state or a language's public state (a change only to `paying_out` or `refunding` does not count): a `changes` line, the `get_task` text and the new `seen`; every 30 s a progress notification; cap 60 min; retries failed reads for 30 s, the gateway's 404 `not_found` ends it at once (ADR 0031) |
+| `wait_task` | the `get_task` reads, every 2 s | on the first change of the draft state or a language's public state (a change only to `paying_out` or `refunding` does not count): a `changes` line, the `get_task` text and the new `seen`; a progress notification at once and every 30 s (with the pay link while unpaid); cap 60 min; retries failed reads for 30 s, the gateway's 404 `not_found` ends it at once (ADR 0031) |
 
 ## Task states and memos (ADR 0023, 0024)
 
