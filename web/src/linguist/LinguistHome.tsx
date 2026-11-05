@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { navigate, RequireSession, useRoute, useSession } from "../shared";
+import { InstallHint } from "./InstallHint";
 import { LinguistBody } from "./LinguistBody";
 import { ShellHead } from "./ShellHead";
+import { SignedOut } from "./SignedOut";
 import { Tabbar } from "./Tabbar";
 import { type Screen, screenOf, TAB_PATH, TAB_TITLE, Tab } from "./tabs";
 import { todayUnits } from "./taskGroups";
@@ -33,11 +35,14 @@ const LinguistShell = ({ screen }: { screen: Screen }) => {
 			<main className="app__main">
 				<div className="app__pad">
 					{screen.taskId === undefined ? (
-						<ShellHead
-							title={TAB_TITLE[screen.tab]}
-							cabinet={cabinet}
-							todayUnits={today}
-						/>
+						<>
+							<ShellHead
+								title={TAB_TITLE[screen.tab]}
+								cabinet={cabinet}
+								todayUnits={today}
+							/>
+							<InstallHint />
+						</>
 					) : null}
 					<LinguistBody
 						screen={screen}
@@ -62,6 +67,11 @@ const BoardRedirect = () => {
 
 export const Linguist = () => {
 	const screen = screenOf(useRoute());
+	const { me, loading } = useSession();
+
+	if (!loading && me === null) {
+		return <SignedOut />;
+	}
 
 	return (
 		<RequireSession>

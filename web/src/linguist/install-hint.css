@@ -1,0 +1,18 @@
+/* "Add to Home Screen" hint, iOS Safari only (ADR 0034). */
+.install-hint {
+	display: flex;
+	gap: 8px;
+	align-items: flex-start;
+	padding: 12px 14px;
+	border-radius: 14px;
+	border: 1.5px solid var(--hr-accent);
+	background: var(--hr-accent-soft);
+	font-size: 15px;
+	line-height: 1.4;
+}
+.install-hint p {
+	flex: 1;
+}
+.install-hint b {
+	font-weight: 850;
+}
