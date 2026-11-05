@@ -41,7 +41,9 @@ export const registerTools = (
 			const created = await client.createDraft(token, input);
 
 			return created.ok
-				? toolText(`${renderDraft(created.value)}\nseen: ${DraftState.Draft}`)
+				? toolText(
+						`${renderDraft(created.value)}\nseen: ${DraftState.Draft}\nNext: first write the pay link to the user in a message, then call wait_task with this seen.`,
+					)
 				: toolText(created.error, true);
 		},
 	);
