@@ -68,7 +68,7 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | `GET /api/orders` | cookie, firm | - | `200 {serverTime, orders: [{orderId, payTx, totalUnits, createdAt, tasks: [TaskView]}]}`: the firm's orders; `serverTime` as on the board | `403` | orders |
 | `GET /api/orders/:id` | cookie firm owner, or MCP Bearer of the same firm | - | `200 {serverTime, orderId, firmId, payTx, payer, totalUnits, createdAt, tasks: [TaskView]}` | `403`, `404` | orders |
 
-`GET /api/orders/draft/:draftId` serves the pay page and MCP `get_task` (ADR 0027). Drafts live 30 min. `PAYMENT-REQUIRED` for `/x/orders/:draftId`: exact scheme, `amount = totalUnits = taskCount x priceUnits` of `USDC_MINT`, `payTo` = hold wallet. The x402 payer becomes every task's refund wallet. Price is fixed per task from config (`TASK_PRICE_USDC`). Paying creates the order and its N `open` tasks in one SQLite transaction (ADR 0022).
+`GET /api/orders/draft/:draftId` serves the pay page and MCP `get_task` (ADR 0027). Drafts live 30 min. `PAYMENT-REQUIRED` for `/x/orders/:draftId`: exact scheme, `amount = totalUnits = taskCount x priceUnits` of `USDC_MINT`, `payTo` = hold wallet. Every task refunds to the firm's login wallet (ADR 0036); the x402 payer is stored on the order as the signer. Price is fixed per task from config (`TASK_PRICE_USDC`). Paying creates the order and its N `open` tasks in one SQLite transaction (ADR 0022).
 
 ### tasks (stream A)
 

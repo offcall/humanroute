@@ -21,6 +21,10 @@ export const ordersDeps = (
 		publicBaseUrl: config.publicBaseUrl,
 		sessionCookie: SESSION_COOKIE,
 		...people,
+		firmWallet: (firmId) => {
+			const firm = people.firmById(firmId);
+			return firm === null ? null : firm.wallet;
+		},
 		transferOf: transferViewOf(database),
 		preflightProblems: input.preflightProblems,
 		now: input.now,

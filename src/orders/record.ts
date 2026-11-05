@@ -1,5 +1,5 @@
 // After settlement: the order, its N open tasks and the payment identity commit in one SQLite
-// transaction (ADR 0022). Every task refunds to the x402 payer.
+// transaction (ADR 0022). Every task refunds to the firm's login wallet (ADR 0036).
 import { withTransaction } from "../store/index.js";
 import { insertTasks, type NewTask } from "../tasks/index.js";
 import { ORDERS_SQL } from "./sql.js";
@@ -13,6 +13,10 @@ export const recordOrder = (
 ): Receipt =>
 	withTransaction(deps.database, () => {
 		const { database } = deps;
+		const refundWallet = deps.firmWallet(draft.firmId);
+		if (refundWallet === null) {
+			throw new Error(`firm ${draft.firmId} of draft ${draft.id} not found`);
+		}
 		const now = deps.now();
 		const orderId = deps.newId();
 		const paid = database.prepare(ORDERS_SQL.markPaid).run(orderId, draft.id);
@@ -39,7 +43,7 @@ export const recordOrder = (
 			text: draft.text,
 			draft: target.draft,
 			priceUnits: draft.priceUnits,
-			refundWallet: settlement.payer,
+			refundWallet,
 			claimDeadline: now + deps.claimWindowSeconds * 1000,
 		}));
 		insertTasks(database, tasks, now);

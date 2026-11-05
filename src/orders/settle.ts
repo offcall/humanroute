@@ -71,7 +71,7 @@ export const parseSettleHeader = (
 		const error = `settlement on unexpected network ${network}`;
 		return { reason: OrphanReason.WrongNetwork, error };
 	}
-	// The payer becomes the refund wallet of every task (ADR 0016, ADR 0022).
+	// The payer is stored on the order; refunds go to the firm's wallet (ADR 0036).
 	if (typeof payer !== "string" || !isPublicKey(payer)) {
 		const error = "settlement payer is not a base58 public key";
 		return { reason: OrphanReason.InvalidPayer, error };

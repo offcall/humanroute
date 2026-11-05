@@ -79,6 +79,8 @@ export type OrdersDeps = PartyPorts & {
 	lookupSession: (token: string | undefined) => string | null;
 	firmByWallet: (wallet: string) => { id: string } | null;
 	firmByMcpToken: (token: string) => { id: string } | null;
+	// The firm's login wallet: the refund wallet of its tasks (ADR 0036).
+	firmWallet: (firmId: string) => string | null;
 	transferOf: (taskId: string) => TaskTransfer | null;
 	preflightProblems: () => string[];
 	now: () => number;
