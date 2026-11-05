@@ -1,24 +1,34 @@
 // Gateway calls for agent auto-pay (ADR 0036): the gateway's own 402 offer, the unsigned
 // delegate payment, and the x402 payment itself.
 import { failureReason, fieldOf, readOffer } from "./payHeaders.js";
-import { parsePaid, parseUnsigned } from "./payParse.js";
+import {
+	orphanText,
+	PAY_TIMED_OUT,
+	PAY_TIMEOUT_MS,
+	parsePaid,
+	parseUnsigned,
+	STILL_SETTLING,
+} from "./payParse.js";
 import { type PayClient, PayOutcome } from "./payTypes.js";
 import type { Parsed } from "./types.js";
 
 const TIMEOUT_MS = 15_000;
-
 const send = async (
 	url: string,
 	init: RequestInit,
+	timeoutMs = TIMEOUT_MS,
 ): Promise<Parsed<Response>> => {
 	try {
 		const response = await fetch(url, {
 			...init,
-			signal: AbortSignal.timeout(TIMEOUT_MS),
+			signal: AbortSignal.timeout(timeoutMs),
 		});
 		return { ok: true, value: response };
-	} catch {
-		return { ok: false, error: "gateway is unreachable or did not answer" };
+	} catch (error) {
+		const timedOut =
+			error instanceof DOMException && error.name === "TimeoutError";
+		const reason = timedOut ? "did not answer in time" : "is unreachable";
+		return { ok: false, error: `gateway ${reason}` };
 	}
 };
 
@@ -63,12 +73,14 @@ export const createPayClient = (baseUrl: string): PayClient => {
 			return parseUnsigned(sent.value.status, body);
 		},
 		pay: async (draftId, paymentHeader) => {
-			const sent = await send(payUrl(draftId), {
-				method: "POST",
-				headers: { "PAYMENT-SIGNATURE": paymentHeader },
-			});
+			const sent = await send(
+				payUrl(draftId),
+				{ method: "POST", headers: { "PAYMENT-SIGNATURE": paymentHeader } },
+				PAY_TIMEOUT_MS,
+			);
 			if (!sent.ok) {
-				return sent;
+				const timedOut = sent.error.includes("in time");
+				return { ok: false, error: timedOut ? PAY_TIMED_OUT : sent.error };
 			}
 			const response = sent.value;
 			if (response.status === 402) {
@@ -79,9 +91,18 @@ export const createPayClient = (baseUrl: string): PayClient => {
 			}
 			if (response.status === 409) {
 				const code = await errorCode(response);
-				return code === "draft_paid" || code === "payment_in_progress"
-					? { ok: true, value: { outcome: PayOutcome.AlreadyPaid } }
+				if (code === "draft_paid") {
+					return { ok: true, value: { outcome: PayOutcome.AlreadyPaid } };
+				}
+				return code === "payment_in_progress"
+					? { ok: false, error: STILL_SETTLING }
 					: { ok: false, error: `payment refused: ${code}` };
+			}
+			if (response.status === 502) {
+				const body: unknown = await response.json().catch(() => undefined);
+				if (fieldOf(body, "error") === "orphan_payment") {
+					return { ok: false, error: orphanText(fieldOf(body, "payTx")) };
+				}
 			}
 			if (response.status !== 201) {
 				return {

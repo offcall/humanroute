@@ -4,6 +4,18 @@ import type { PaidOrder, PayResult, Unsigned } from "./payTypes.js";
 import { PayOutcome } from "./payTypes.js";
 import type { Parsed } from "./types.js";
 
+// Verify plus settle through the facilitator can take longer than a plain read.
+export const PAY_TIMEOUT_MS = 45_000;
+// No automatic second payment: a timed-out one may have settled, even as an orphan.
+export const PAY_TIMED_OUT = `the gateway did not answer in ${PAY_TIMEOUT_MS / 1000} s; the payment may have settled. Call get_task. If it shows no order, tell the user the outcome is unknown and ask before calling prepare_payment or pay_task again`;
+
+export const STILL_SETTLING =
+	"the payment is still settling: call get_task in a few seconds; do not call prepare_payment";
+
+// Settled but not recorded (ADR 0016): another payment would charge the firm twice.
+export const orphanText = (payTx: string | undefined) =>
+	`the money was taken (payTx ${payTx ?? "unknown"}) but no order was recorded. Do NOT pay again: tell the user; the operator refunds it by hand`;
+
 const stringOf = (body: unknown, key: string): string | undefined => {
 	const value =
 		typeof body === "object" && body !== null
