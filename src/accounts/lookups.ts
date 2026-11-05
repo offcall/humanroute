@@ -43,6 +43,17 @@ export const findLinguistPairs = (
 	linguistId: string,
 ): LangPair[] => toPairs(database.prepare(LINGUISTS_SQL.pairs).all(linguistId));
 
+// Linguists who work in the pair: the push recipients of a new task (ADR 0029).
+export const findLinguistIdsByPair = (
+	database: Database,
+	pair: LangPair,
+): string[] =>
+	database
+		.prepare(LINGUISTS_SQL.byPair)
+		.pluck()
+		.all(pair.source, pair.target)
+		.filter((value) => typeof value === "string");
+
 export const findMcpToken = (
 	database: Database,
 	firmId: string,

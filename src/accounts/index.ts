@@ -5,6 +5,7 @@ export {
 	findFirmByMcpToken,
 	findFirmByWallet,
 	findLinguistByWallet,
+	findLinguistIdsByPair,
 	findLinguistPairs,
 	findTranslatorNo,
 } from "./lookups.js";

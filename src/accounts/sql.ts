@@ -43,6 +43,8 @@ export const LINGUISTS_SQL = {
 		"INSERT INTO linguist_languages (linguist_id, source_lang, target_lang) VALUES (?, ?, ?)",
 	pairs:
 		"SELECT source_lang, target_lang FROM linguist_languages WHERE linguist_id = ? ORDER BY rowid",
+	byPair:
+		"SELECT linguist_id FROM linguist_languages WHERE source_lang = ? AND target_lang = ?",
 	// 1-based rank inside the agency by rowid (ADR 0033); 0 for an unknown linguist.
 	rank: "SELECT COUNT(*) FROM linguists AS peer JOIN linguists AS self ON peer.agency_id = self.agency_id AND peer.rowid <= self.rowid WHERE self.id = ?",
 };
