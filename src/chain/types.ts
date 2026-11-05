@@ -62,6 +62,17 @@ export type SignatureStatus =
 	| { state: "confirmed" }
 	| { state: "failed"; error: string };
 
+// A wallet's associated token account for the configured mint (ADR 0036).
+export type TokenAccount =
+	| { exists: false; address: string }
+	| {
+			exists: true;
+			address: string;
+			amount: bigint;
+			delegate: string | null;
+			delegatedAmount: bigint;
+	  };
+
 export type SolanaClient = {
 	holdAddress: string;
 	signPayout(req: PayoutRequest): Promise<ChainResult<SignedTransfer>>;
@@ -70,6 +81,8 @@ export type SolanaClient = {
 	blockHeight(): Promise<ChainResult<number>>;
 	// Signature of a successful hold transaction whose memo contains `memo`, or null.
 	findMemo(memo: string): Promise<ChainResult<string | null>>;
+	tokenAccount(owner: string): Promise<ChainResult<TokenAccount>>;
+	latestBlockhash(): Promise<ChainResult<string>>;
 	// Problems that should stop the gateway from taking payments; empty when ready.
 	preflight(): Promise<PreflightProblem[]>;
 };

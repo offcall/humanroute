@@ -9,4 +9,5 @@ export {
 	type SignedTransfer,
 	type SolanaClient,
 	type SolanaOptions,
+	type TokenAccount,
 } from "./types.js";
