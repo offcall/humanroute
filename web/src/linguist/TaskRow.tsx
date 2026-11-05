@@ -4,17 +4,16 @@ import {
 	pairLabel,
 	Stamp,
 	StatusTag,
-	statusOf,
 	type Task,
 } from "../shared";
-import { type RowTime, rowStamp, rowTime } from "./rowText";
+import { linguistStatus, type RowTime, rowStamp, rowTime } from "./rowText";
 import { TAB_PATH, Tab } from "./tabs";
 
 type Props = { task: Task; time: RowTime };
 
 // One button per task; the tx link lives on the task screen, never inside the row.
 export const TaskRow = ({ task, time }: Props) => {
-	const status = statusOf(task.state, task.publicState);
+	const status = linguistStatus(task);
 	const stamp = rowStamp(task);
 	const when = rowTime(task, time);
 	const sub = when === undefined ? task.firmName : `${task.firmName} · ${when}`;

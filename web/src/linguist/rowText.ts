@@ -1,12 +1,23 @@
 import {
 	formatUsdc,
 	StampKind,
+	type Status,
 	statusOf,
 	TagKind,
 	type Task,
 	TaskState,
 	toMs,
 } from "../shared";
+
+// The linguist reads a firm's reject as "Rejected"; firm and agency views keep "Refunded".
+export const linguistStatus = (task: Task): Status => {
+	const status = statusOf(task.state, task.publicState);
+
+	return task.state === TaskState.Rejected &&
+		status.tagKind === TagKind.Refunded
+		? { ...status, word: "Rejected" }
+		: status;
+};
 
 export enum RowTime {
 	None = "none",

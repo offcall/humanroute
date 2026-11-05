@@ -1,20 +1,14 @@
-import {
-	languageName,
-	SegBar,
-	Stamp,
-	StatusTag,
-	statusOf,
-	type Task,
-} from "../shared";
+import { languageName, SegBar, Stamp, StatusTag, type Task } from "../shared";
 import { outcomeText } from "./outcomeText";
 import { PayoutLine } from "./PayoutLine";
+import { linguistStatus } from "./rowText";
 import { TaskFacts } from "./TaskFacts";
 
 type Props = { task: Task; todayUnits: bigint };
 
 // Submitted / paying out / paid / rejected / late: read-only.
 export const TaskOutcome = ({ task, todayUnits }: Props) => {
-	const status = statusOf(task.state, task.publicState);
+	const status = linguistStatus(task);
 	const outcome = outcomeText(task, status, todayUnits);
 
 	return (
