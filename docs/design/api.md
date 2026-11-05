@@ -71,7 +71,7 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 
 ### tasks (stream A)
 
-`TaskView` = `{taskId, orderId, firmName, agency, translatorNo, sourceLang, targetLang, text, draft, result, state, publicState, priceUnits, claimDeadline, workDeadline, reason, transfer}`; `result`, `workDeadline`, `reason`, `transfer` may be null. `firmName` is the ordering firm; `agency` = `{id, name}` of the claimer's agency and `translatorNo` = the claimer's 1-based rank inside it by join order, both null while `open` (ADR 0033). `transfer` = `{status, payTx, memo, attempts, lastError, explorerUrl}` (`?cluster=devnet`).
+`TaskView` = `{taskId, orderId, firmName, agency, translatorNo, sourceLang, targetLang, text, draft, result, state, publicState, priceUnits, claimDeadline, workDeadline, reason, transfer}`; `result`, `workDeadline`, `reason`, `transfer` may be null. `firmName` is the ordering firm; `agency` = `{id, name}` of the claimer's agency and `translatorNo` = the claimer's 1-based rank inside it by join order, both null while `open` (ADR 0033). `transfer` = `{status, payTx, memo, attempts, lastError, explorerUrl, confirmedAt, earnedUnits}` (`?cluster=devnet`); `confirmedAt` = ISO time of a `confirmed` transfer, else null; `earnedUnits` = the linguist leg of a payout, only in the claimer's own views (`GET /api/linguist`, the claimer's `GET /api/tasks/:id`, claim, submit), null for refunds and for every other caller (ADR 0033).
 
 | Route | Auth / role | Request | Response | Errors | Slice |
 | --- | --- | --- | --- | --- | --- |

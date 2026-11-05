@@ -11,12 +11,8 @@ export type {
 } from "./taskTypes.js";
 export { LegRole, PayoutKind } from "./taskTypes.js";
 export { createTaskWorker } from "./taskWorker.js";
-export {
-	confirmedUnits,
-	moneyByAgency,
-	moneyByFirm,
-	transferViewOf,
-} from "./totals.js";
+export { confirmedUnits, moneyByAgency, moneyByFirm } from "./totals.js";
+export { transferViewOf } from "./transferView.js";
 export type {
 	RequeueDeps,
 	RequeueLedger,

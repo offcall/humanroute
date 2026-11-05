@@ -52,6 +52,20 @@ export const isOwnerFirm = (
 	return wallet !== null && deps.firmByWallet(wallet)?.id === task.firmId;
 };
 
+// True when the session linguist is the task's claimer; an MCP Bearer caller is a firm.
+export const isClaimer = (
+	deps: TasksDeps,
+	ctx: Context,
+	task: Task,
+): boolean => {
+	if (bearerToken(ctx) !== null) {
+		return false;
+	}
+	const wallet = sessionWallet(deps, ctx);
+	const linguist = wallet === null ? null : deps.linguistByWallet(wallet);
+	return linguist !== null && linguist.linguistId === task.linguistId;
+};
+
 export const denied = (ctx: Context, signedIn: boolean): Response =>
 	signedIn
 		? ctx.json({ error: "forbidden" }, 403)

@@ -1,6 +1,12 @@
 // Linguist board and claim, and GET /api/tasks/:id (api.md, ADR 0023). No route moves money.
 import { type Context, Hono } from "hono";
-import { canView, currentLinguist, denied, isOwnerFirm } from "./access.js";
+import {
+	canView,
+	currentLinguist,
+	denied,
+	isClaimer,
+	isOwnerFirm,
+} from "./access.js";
 import type { TasksDeps } from "./deps.js";
 import { firmRoutes } from "./firmRoutes.js";
 import { ClaimOutcome, claimTask } from "./lifecycle.js";
@@ -66,7 +72,7 @@ export const tasksRoutes = (deps: TasksDeps): Hono => {
 		if (outcome !== ClaimOutcome.Claimed) {
 			return ctx.json({ error: outcome }, 409);
 		}
-		return ctx.json(viewOf(deps, claimed));
+		return ctx.json(viewOf(deps, claimed, true));
 	});
 
 	app.get("/api/tasks/:id", (ctx) => {
@@ -81,7 +87,7 @@ export const tasksRoutes = (deps: TasksDeps): Hono => {
 		const serverTime = new Date(deps.now()).toISOString();
 		return ctx.json({
 			serverTime,
-			...viewOf(deps, task),
+			...viewOf(deps, task, isClaimer(deps, ctx, task)),
 			executorPairs: executorPairs(ctx, task),
 		});
 	});

@@ -10,6 +10,10 @@ export type TaskTransfer = {
 	memo: string;
 	attempts: number;
 	lastError: string | null;
+	// updated_at of a confirmed transfer, else null.
+	confirmedAt: number | null;
+	// Linguist leg of a payout; null for a refund. Shown to the claimer only.
+	linguistUnits: bigint | null;
 };
 
 export type Outcomes = { approved: number; rejected: number; late: number };

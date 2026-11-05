@@ -22,7 +22,7 @@ export const linguistRoutes = (deps: TasksDeps): Hono => {
 		return ctx.json({
 			pairs: deps.linguistPairs(linguist.linguistId),
 			earnedUnits: deps.earnedUnits(tasks.map((task) => task.id)).toString(),
-			tasks: tasks.map((task) => viewOf(deps, task)),
+			tasks: tasks.map((task) => viewOf(deps, task, true)),
 		});
 	});
 

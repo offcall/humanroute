@@ -1,10 +1,6 @@
 // Confirmed money per leg role over a set of tasks (cabinets count confirmed transfers only, ADR 0018).
 import { type Database, TransferStatus } from "../store/index.js";
-import {
-	type TaskTransfer,
-	taskIdsByAgency,
-	taskIdsByFirm,
-} from "../tasks/index.js";
+import { taskIdsByAgency, taskIdsByFirm } from "../tasks/index.js";
 import { taskLedger } from "./ledger.js";
 import { LegRole } from "./taskTypes.js";
 
@@ -56,15 +52,3 @@ export const moneyByFirm = (
 		refundedUnits: confirmedUnits(database, taskIds, LegRole.Refund),
 	};
 };
-
-// The tasks slice's view of a task's transfer (TasksDeps.transferOf).
-export const transferViewOf =
-	(database: Database) =>
-	(taskId: string): TaskTransfer | null => {
-		const transfer = taskLedger(database).byTaskId(taskId);
-		if (!transfer) {
-			return null;
-		}
-		const { status, txSig, memo, attempts, lastError } = transfer;
-		return { status, payTx: txSig, memo, attempts, lastError };
-	};

@@ -7,9 +7,8 @@ import {
 	partiesOf,
 	type TaskParties,
 } from "./parties.js";
+import { transferView } from "./transfer.js";
 import { PublicState, type Task, TaskState } from "./types.js";
-
-const EXPLORER = "https://explorer.solana.com/tx";
 
 const iso = (millis: number): string => new Date(millis).toISOString();
 
@@ -34,18 +33,11 @@ export const publicState = (
 	}
 };
 
-const transferView = (transfer: TaskTransfer) => ({
-	...transfer,
-	explorerUrl:
-		transfer.payTx === null
-			? null
-			: `${EXPLORER}/${transfer.payTx}?cluster=devnet`,
-});
-
 export const toView = (
 	task: Task,
 	transfer: TaskTransfer | null,
 	parties: TaskParties,
+	forClaimer: boolean,
 ) => ({
 	taskId: task.id,
 	orderId: task.orderId,
@@ -61,7 +53,7 @@ export const toView = (
 	claimDeadline: iso(task.claimDeadline),
 	workDeadline: task.workDeadline === null ? null : iso(task.workDeadline),
 	reason: task.reason,
-	transfer: transfer === null ? null : transferView(transfer),
+	transfer: transfer === null ? null : transferView(transfer, forClaimer),
 });
 
 export type TaskView = ReturnType<typeof toView>;
@@ -70,8 +62,13 @@ export type ViewPorts = PartyPorts & {
 	transferOf: (taskId: string) => TaskTransfer | null;
 };
 
-export const viewOf = (ports: ViewPorts, task: Task): TaskView =>
-	toView(task, ports.transferOf(task.id), partiesOf(ports, task));
+// forClaimer: the caller is the task's linguist, who also sees their share (earnedUnits).
+export const viewOf = (
+	ports: ViewPorts,
+	task: Task,
+	forClaimer = false,
+): TaskView =>
+	toView(task, ports.transferOf(task.id), partiesOf(ports, task), forClaimer);
 
 export const boardItem = (ports: PartyPorts, task: Task) => ({
 	taskId: task.id,

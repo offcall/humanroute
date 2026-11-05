@@ -41,7 +41,7 @@ export const workRoutes = (deps: TasksDeps): Hono => {
 		if (outcome !== SubmitOutcome.Submitted) {
 			return ctx.json({ error: outcome }, 409);
 		}
-		return ctx.json(viewOf(deps, task));
+		return ctx.json(viewOf(deps, task, true));
 	});
 
 	return app;
