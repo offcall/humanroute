@@ -1,6 +1,6 @@
 # Demo script (3-minute video)
 
-Owner records alone in three windows: browser 1 is the firm cabinet next to Claude Code, browser 2 is the agency cabinet, and the phone is the linguist web app, opened in Phantom's in-app browser (the installed PWA has no Phantom provider, ADR 0032). Wallets are prepared in advance on devnet: the firm has USDC, the hold wallet has SOL. Timers run in `TIMER_MODE=video` (claim 60 s, work 180 s).
+Owner records alone in three windows: browser 1 is the firm cabinet next to Claude Code, browser 2 is the agency cabinet, and the phone is the linguist web app, opened in Phantom's in-app browser. Safari and the home-screen icon also work: "Sign in with Phantom" opens an approve page in Phantom, and the tab gets its session after "◀ Safari" (ADR 0034). Push for new tasks (ADR 0029) is not part of the video. Wallets are prepared in advance on devnet: the firm has USDC, the hold wallet has SOL. Timers run in `TIMER_MODE=video` (claim 60 s, work 180 s).
 
 Setup before recording: gateway and MCP server running ([README](../README.md)), `FEE_WALLET` set, fresh database.
 

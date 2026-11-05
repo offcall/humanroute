@@ -9,7 +9,7 @@ Not built in the hackathon version. Each item is a product or architecture chang
 - **Linguist removal and filters.** The firm cannot exclude a linguist or filter by rating; the board shows every linguist in the matching pair.
 - **Public feed and auction.** Tasks are visible only to linguists with a matching pair. No open feed, no bidding, no price discovery.
 - **Disputes.** A rejected result is refunded in full; there is no appeal or mediation.
-- **Push notifications** for linguists and firms. Not built; the cabinets poll the gateway.
+- **Push notifications for firms**, and for linguists beyond new tasks. Linguists get a Web Push for each new task in their pair (ADR 0029); everything else polls the gateway.
 
 ## Identity and wallets
 

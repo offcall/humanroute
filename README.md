@@ -9,7 +9,7 @@ Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. Tests are d
 | Part | What | Where |
 | --- | --- | --- |
 | Gateway | Node process: Hono HTTP API, SQLite, x402 payment route, payout worker | `src/` |
-| Web app | React + Vite, PWA manifest, Indigo UI (ADR 0032): landing, firm (jobs, review, task detail), agency, linguist (board, my tasks, wallet), join and pay pages | `web/` |
+| Web app | React + Vite, PWA manifest, Indigo UI (ADR 0032): landing, firm (jobs, review, task detail), agency, linguist (board, my tasks, wallet), join, approve and pay pages; sign-in from Safari or the home-screen icon via approve in Phantom (ADR 0034); Web Push for new tasks (ADR 0029) | `web/` |
 | MCP server | Remote MCP over Streamable HTTP, tools `post_task`, `get_task`, `wait_task` (waits for the next change) and `approve_task` and `reject_task` (Claude asks the user before deciding), `prepare_payment` and `pay_task` (auto-pay: Claude signs the order payment locally with the firm's agent key, ADR 0036); talks to the gateway over HTTP only | `mcp/` |
 | Scripts | Devnet wallet setup and an opt-in e2e flow | `scripts/` |
 
@@ -35,7 +35,7 @@ Requirements: Node 22.12 or newer, npm.
    Auto-pay (optional, ADR 0036): in the cabinet's Connect Claude panel, run the shown command on the Claude Code machine. It downloads `sign.mjs` and `setup.mjs` from the gateway and creates `~/.humanroute/agent-key.json` (mode 0600). Then enable auto-pay with a limit (the firm wallet needs a little devnet SOL for the fee, from faucet.solana.com): Phantom (on devnet) signs an SPL approve that lets the agent key spend up to the limit from the firm's own USDC account. Claude asks before paying, signs locally with `sign.mjs` and pays through `prepare_payment` and `pay_task`; the pay link stays valid. Refunds always go to the firm's login wallet.
 7. Frontend development: `npm run web:dev` (proxies `/api`, `/x`, `/health` to the gateway on port 4021).
 
-Checks: `npm run check` runs Biome, the gateway `tsc` and the web `tsc`. `npm run e2e:devnet` (opt-in, real devnet, needs `keys/hold.json`, `keys/agent.json` and about 1.5 USDC on the agent wallet) starts the gateway with a fresh database and runs `scripts/e2e-flow.ts`: SIWS sign-in, order, payment, payout and refunds, checked on chain. Not part of `check` ([ADR 0011](docs/adr/0011-devnet-e2e-outside-check.md)).
+Checks: `npm run check` runs Biome, the gateway `tsc`, the web `tsc` and the service worker `tsc`. `npm run e2e:devnet` (opt-in, real devnet, needs `keys/hold.json`, `keys/agent.json` and about 1.5 USDC on the agent wallet) starts the gateway with a fresh database and runs `scripts/e2e-flow.ts`: SIWS sign-in, order, payment, payout and refunds, checked on chain. Not part of `check` ([ADR 0011](docs/adr/0011-devnet-e2e-outside-check.md)).
 
 A database from v1 is refused (ADR 0022). Use a fresh `DB_PATH`.
 
@@ -59,6 +59,7 @@ A database from v1 is refused (ADR 0022). Use a fresh `DB_PATH`.
 | `MCP_PUBLIC_URL` | required | MCP URL shown to firms |
 | `DRAFT_TTL_SECONDS`, `SESSION_TTL_SECONDS`, `NONCE_TTL_SECONDS` | 1800, 604800, 300 | lifetimes |
 | `WEB_DIST_DIR` | `web/dist` | built web app |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | empty | Web Push for new tasks (ADR 0029); all three or none, none = push off; keys from `npx web-push generate-vapid-keys` |
 | `GATEWAY_URL`, `MCP_PORT` | required, 4022 | MCP process only |
 
 Startup: invalid configuration exits 1. A failing preflight (hold without SOL or token account, facilitator without devnet) keeps the server up: `/health` shows `ready: false`, payments answer `503 not_ready` with the reasons, and payouts pause.

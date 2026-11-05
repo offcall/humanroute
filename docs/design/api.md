@@ -40,7 +40,19 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | `POST /api/auth/nonce` | none | `{wallet}` | `200 {nonce, message}` (server-built SIWS text, nonce valid 5 min, single use) | `422 invalid_body` | auth |
 | `POST /api/auth/verify` | none | `{wallet, nonce, signature}` (base64 Ed25519 over the stored text) | `200` + cookie | `401` (one generic error for every failure) | auth |
 | `POST /api/auth/logout` | cookie (optional, idempotent) | `{}` (JSON) | `204`, deletes the session row, clears `hr_session` | `400 malformed_body` | auth |
+| `POST /api/auth/login-request` | none | `{}` | `201 {id, expiresAt}` + cookie `hr_login` (secret, `Path=/api/auth/login-request`, 2 min) (ADR 0034) | `400` | auth |
+| `POST /api/auth/login-request/:id/approve` | none, SIWS in Phantom | `{wallet, nonce, signature}` | `200 {}`, records the wallet; no session in Phantom | `401` bad signature, `409` already approved or rejected, `410` expired or unknown | auth |
+| `POST /api/auth/login-request/:id/reject` | none | `{}` | `204` | `409`, `410` as approve | auth |
+| `POST /api/auth/login-request/:id/claim` | cookie `hr_login` | `{}` | `200 {wallet}` + `hr_session`, once; `202 {status: "pending"}`; `no-store` | `410 {status: "gone"}` rejected, expired, consumed or wrong secret | auth |
 | `GET /api/me` | cookie, any | - | `200 {wallet, firm?, agency?, linguist?}` | `401` | accounts |
+
+### notify (ADR 0029)
+
+| Route | Auth / role | Request | Response | Errors | Slice |
+| --- | --- | --- | --- | --- | --- |
+| `GET /api/push/key` | none | - | `200 {publicKey: string \| null}`; `null` = push off | - | notify |
+| `POST /api/push/subscribe` | cookie, linguist | `{endpoint, keys: {p256dh, auth}}` | `204`; upsert by endpoint | `400`, `422`, `401`, `403` | notify |
+| `POST /api/push/unsubscribe` | none (the endpoint is the secret) | `{endpoint}` | `204`, idempotent | `400`, `422` | notify |
 
 ### accounts (stream B)
 
@@ -149,6 +161,7 @@ Each decided task gets exactly one transfer (unique `task_id`); `transfers.statu
 | `AGENCY_SHARE_BPS`, `FEE_SHARE_BPS` | split shares, 1800 and 200; linguist gets the rest (8000) and the rounding remainder (ADR 0024) |
 | `FEE_WALLET` | fee leg recipient |
 | `PUBLIC_BASE_URL`, `MCP_PUBLIC_URL` | base for pay and invite links, SIWS domain; MCP URL shown in the firm cabinet |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Web Push keys (ADR 0029); all three or none, none = push off |
 
 ## Removed endpoints
 
