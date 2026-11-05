@@ -18,13 +18,13 @@ A stateless server on SDK 1.32.2 streams progress notifications on the POST resp
 ## Decision
 
 - MCP tool `wait_task {draftId, seen?}`:
-  - `mcp/` polls the gateway every 2 s, using the same two reads as `get_task`. Once the draft is paid it reads only the order, because a paid draft no longer changes.
+  - `mcp/` polls the gateway every 2 s, using the same two reads as `get_task`.
   - It returns on the first change of a fingerprint: the draft state plus each language's `publicState`, including `open -> claimed`. A change only to `paying_out` or `refunding` does not wake Claude: it follows a decision within seconds and `paid_out` or `refunded` comes next. The answer is a `changes` line (for example `de: claimed -> submitted`), the `get_task` text and the new `seen`. Claude asks about approve or reject only for a language that changed to `submitted`.
   - The baseline is `seen` if given, else the first read. Calling again with the same `seen` is always safe. `post_task` and `get_task` also print `seen`, so no change between two calls is lost.
   - It returns at once when every language is paid out or refunded.
   - It sends `notifications/progress` every 30 s when the request carries a `progressToken`.
   - Cap 60 min. On the cap it returns "still waiting" with the unchanged `seen`.
-  - Each gateway read times out after 10 s and is cancelled when the call is aborted. A failed read does not end the wait: it keeps polling, and returns an error with the last `seen` once reads have failed for 30 s (enough for a gateway redeploy; at most about 34 s with hung reads). The gateway's own HTTP 404 `{error: "not_found"}` (expired or unknown draft) ends it at once; any other 404, such as a proxy's during a redeploy, is retried. A timed-out read is reported as "gateway did not answer in 10 s".
+  - Each gateway read times out after 10 s; after an abort the read in flight finishes or times out, then polling stops. A failed read does not end the wait: it keeps polling, and returns an error with the last `seen` once reads have failed for 30 s (enough for a gateway redeploy; at most about 34 s with hung reads). The gateway's own HTTP 404 `{error: "not_found"}` (expired or unknown draft) ends it at once; any other 404, such as a proxy's during a redeploy, is retried. A timed-out read is reported as "gateway did not answer in 10 s".
   - It stops polling when the call is aborted (Esc, `/tasks` stop, a dropped connection).
 - The tool descriptions give one start rule: start a `wait_task` only if none is running for this draft in this conversation, with the latest `seen` (from `post_task`, `get_task` or the last `wait_task`), and end the turn while it waits. The running one also reports the payout or refund that follows `approve_task` or `reject_task`.
 - `get_task` and `wait_task` print the linguist's result as a JSON string on one line, marked as data, so the text cannot fake tool lines such as `seen:` or the settled message.
