@@ -15,7 +15,7 @@ Step 4 of the demo needs Claude to post a task to HumanRoute from a chat, and th
   - Remote Streamable HTTP transport at `/mcp`, stateless mode.
   - Requests need `Authorization: Bearer <mcpToken>`. One token per firm, stored in the accounts DB in plaintext and shown in the firm cabinet (ADR 0021). The MCP process forwards it to the gateway, which resolves it to the firm.
   - Talks to the gateway only over HTTP.
-  - Tools: `post_task` and `get_task`. No `wait_task`.
+  - Tools: `post_task` and `get_task`. No `wait_task`. `approve_task` and `reject_task` are added by ADR 0030.
   - `post_task` never pays. It creates a draft order and returns a pay link to `/pay/:draftId`.
   - `get_task` reads a draft by `draftId`; once paid it returns the `orderId` and the task statuses.
   - The `post_task` description tells Claude to use it for risky medical or drug text.
