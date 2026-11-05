@@ -1,20 +1,5 @@
-import { useEffect, useState } from "react";
-import {
-	currentPush,
-	fetchPushKey,
-	pushAvailable,
-	registerWorker,
-	subscribePush,
-	unsubscribePush,
-} from "../shared";
 import "./push.css";
-
-enum PushState {
-	Hidden = "hidden",
-	Off = "off",
-	On = "on",
-	Blocked = "blocked",
-}
+import { PushState, usePush } from "./usePush";
 
 const HINTS: Record<PushState, string> = {
 	[PushState.Hidden]: "",
@@ -22,73 +7,12 @@ const HINTS: Record<PushState, string> = {
 		"Get a push on this device when a new job in your pairs appears.",
 	[PushState.On]: "On for this device. A new job in your pairs sends a push.",
 	[PushState.Blocked]:
-		"Blocked in the settings for this site. Allow notifications there to turn them on.",
+		"Blocked for this app. To turn them on, remove the icon and add it to the Home Screen again.",
 };
 
-const stateOf = (subscription: PushSubscription | null): PushState => {
-	if (Notification.permission === "denied") {
-		return PushState.Blocked;
-	}
-
-	return subscription !== null && Notification.permission === "granted"
-		? PushState.On
-		: PushState.Off;
-};
-
-// Hidden when the server has no key, the browser has no Push, or iOS runs outside the home-screen icon.
+// Wallet tab: the place to turn push off again (ADR 0029).
 export const PushCard = () => {
-	const [publicKey, setPublicKey] = useState<string | null>(null);
-	const [state, setState] = useState(PushState.Hidden);
-	const [busy, setBusy] = useState(false);
-	const [error, setError] = useState<string | undefined>(undefined);
-
-	useEffect(() => {
-		if (!pushAvailable()) {
-			return;
-		}
-		let live = true;
-		const detect = async () => {
-			const key = await fetchPushKey();
-			if (key === null) {
-				return;
-			}
-			await registerWorker();
-			const subscription = await currentPush();
-			if (live) {
-				setPublicKey(key);
-				setState(stateOf(subscription));
-			}
-		};
-		detect().catch(() => undefined);
-
-		return () => {
-			live = false;
-		};
-	}, []);
-
-	// Permission is asked only here, on a tap.
-	const toggle = async () => {
-		if (publicKey === null) {
-			return;
-		}
-		setBusy(true);
-		setError(undefined);
-		try {
-			if (state === PushState.On) {
-				await unsubscribePush();
-			} else if (!(await subscribePush(publicKey))) {
-				setError(
-					Notification.permission === "granted"
-						? "Could not turn on notifications. Try again."
-						: undefined,
-				);
-			}
-			setState(stateOf(await currentPush()));
-		} catch {
-			setError("Could not change notifications. Try again.");
-		}
-		setBusy(false);
-	};
+	const { state, busy, error, toggle } = usePush();
 
 	if (state === PushState.Hidden) {
 		return null;

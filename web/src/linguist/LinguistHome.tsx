@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { navigate, RequireSession, useRoute, useSession } from "../shared";
+import { BoardPush } from "./BoardPush";
 import { InstallHint } from "./InstallHint";
 import { LinguistBody } from "./LinguistBody";
 import { ShellHead } from "./ShellHead";
@@ -42,6 +43,7 @@ const LinguistShell = ({ screen }: { screen: Screen }) => {
 								todayUnits={today}
 							/>
 							<InstallHint />
+							{screen.tab === Tab.Board ? <BoardPush /> : null}
 						</>
 					) : null}
 					<LinguistBody

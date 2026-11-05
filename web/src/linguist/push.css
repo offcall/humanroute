@@ -7,3 +7,23 @@
 	padding-top: 12px;
 	border-top: 1px solid var(--hr-line);
 }
+/* Push prompt at the top of the Board */
+.push-top {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 12px 14px;
+	border-radius: 14px;
+	border: 1.5px solid var(--hr-accent);
+	background: var(--hr-accent-soft);
+	font-size: 15px;
+	line-height: 1.4;
+}
+.push-top b {
+	font-weight: 850;
+}
+.push-top__blocked {
+	font-size: 13.5px;
+	color: var(--hr-muted);
+}
