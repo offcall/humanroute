@@ -65,6 +65,20 @@ export type SettlePeek = {
 	network: string | null;
 };
 
+// The firm's USDC token account and a chain read result (ADR 0036); wired from chain.
+export type FirmTokenAccount =
+	| { exists: false; address: string }
+	| {
+			exists: true;
+			address: string;
+			amount: bigint;
+			delegate: string | null;
+			delegatedAmount: bigint;
+	  };
+export type ChainRead<T = unknown> =
+	| { ok: true; value: T }
+	| { ok: false; error: string };
+
 export type OrdersDeps = PartyPorts & {
 	database: Database;
 	facilitator: FacilitatorClient;
@@ -81,6 +95,8 @@ export type OrdersDeps = PartyPorts & {
 	firmByMcpToken: (token: string) => { id: string } | null;
 	// The firm's login wallet: the refund wallet of its tasks (ADR 0036).
 	firmWallet: (firmId: string) => string | null;
+	tokenAccountOf: (owner: string) => Promise<ChainRead<FirmTokenAccount>>;
+	latestBlockhash: () => Promise<ChainRead<string>>;
 	transferOf: (taskId: string) => TaskTransfer | null;
 	preflightProblems: () => string[];
 	now: () => number;

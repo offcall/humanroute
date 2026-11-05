@@ -25,6 +25,14 @@ export const ordersDeps = (
 			const firm = people.firmById(firmId);
 			return firm === null ? null : firm.wallet;
 		},
+		tokenAccountOf: async (owner) => {
+			const read = await input.chain.tokenAccount(owner);
+			return read.ok ? read : { ok: false, error: read.error.message };
+		},
+		latestBlockhash: async () => {
+			const read = await input.chain.latestBlockhash();
+			return read.ok ? read : { ok: false, error: read.error.message };
+		},
 		transferOf: transferViewOf(database),
 		preflightProblems: input.preflightProblems,
 		now: input.now,

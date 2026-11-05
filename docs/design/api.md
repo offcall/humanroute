@@ -18,7 +18,7 @@ HTTP contract of the v2 gateway: routes, auth, shapes, memos, timers. Draft: str
 | `404` | Unknown id, or not visible to this caller. |
 | `409` | State conflict: lost compare-and-set, already done, late, account exists. |
 | `422` | Body or id fails validation (`invalid_body` or a route-specific code). |
-| `502` | Payment settled but not recorded (`orphan_payment`, ADR 0016). |
+| `502` | Payment settled but not recorded (`orphan_payment`, ADR 0016), or a chain read failed (`chain_unavailable`). |
 | `503` | Preflight failing (`not_ready`, with reasons, ADR 0008). |
 
 ## Auth
@@ -65,8 +65,10 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | `POST /api/orders/draft` | MCP Bearer, firm | `{text, sourceLang, targets: [{targetLang, draft}], meta?}` (1..5 targets, distinct) | `201 {draftId, payUrl, priceUnits, totalUnits, taskCount}`; `payUrl` = `<PUBLIC_BASE_URL>/pay/<draftId>` | `422 invalid_body` | orders |
 | `GET /api/orders/draft/:draftId` | none (`draftId` is unguessable) | - | `200 {draftId, payUrl, state: "draft" \| "paid", sourceLang, targetLangs, taskCount, priceUnits, totalUnits, payTo, mint, network, orderId?, tasks?: [{taskId, targetLang, publicState}]}`; `orderId` and `tasks` once paid | `404` (unknown or older than 30 min and unpaid) | orders |
 | `POST /x/orders/:draftId` | x402, any wallet | no body (content is in the draft) | `201 {orderId, taskIds, payTx}` + `PAYMENT-RESPONSE`; replay of the same payment returns the same `201` | `402`, `404`, `409 draft_paid` (other payment), `409 payment_reused` (other draft), `502 orphan_payment`, `503 not_ready` | orders |
+| `GET /api/firm/autopay` | cookie, firm | - | `200 {wallet, mint, blockhash, account, exists, balanceUnits?, delegate?, allowanceUnits?}`: the firm's USDC token account, its SPL delegate and remaining allowance, read from chain (ADR 0036); `blockhash` for the cabinet's approve and revoke | `401`, `403`, `502 chain_unavailable` | orders |
+| `POST /api/orders/draft/:draftId/unsigned` | MCP Bearer, owner firm | `{feePayer}` from the gateway's `402` for `/x/orders/:draftId` | `200 {transaction, message, signer, amountUnits, payTo}`: unsigned x402 exact payment (base64), source = the firm's USDC account, authority = its delegate (ADR 0036); nothing is stored | `403`, `404`, `409 draft_paid {orderId}`, `409 no_usdc_account`, `409 autopay_off`, `409 autopay_limit {leftUnits}`, `409 insufficient_usdc {balanceUnits}`, `422 invalid_body`, `502 chain_unavailable`, `503 not_ready` | orders |
 | `GET /api/orders` | cookie, firm | - | `200 {serverTime, orders: [{orderId, payTx, totalUnits, createdAt, tasks: [TaskView]}]}`: the firm's orders; `serverTime` as on the board | `403` | orders |
-| `GET /api/orders/:id` | cookie firm owner, or MCP Bearer of the same firm | - | `200 {serverTime, orderId, firmId, payTx, payer, totalUnits, createdAt, tasks: [TaskView]}` | `403`, `404` | orders |
+| `GET /api/orders/:id` | cookie firm owner, or MCP Bearer of the same firm | - | `200 {serverTime, orderId, firmId, payTx, payer, totalUnits, createdAt, tasks: [TaskView]}`; `payer` = the x402 signer (the delegate for auto-pay, ADR 0036) | `403`, `404` | orders |
 
 `GET /api/orders/draft/:draftId` serves the pay page and MCP `get_task` (ADR 0027). Drafts live 30 min. `PAYMENT-REQUIRED` for `/x/orders/:draftId`: exact scheme, `amount = totalUnits = taskCount x priceUnits` of `USDC_MINT`, `payTo` = hold wallet. Every task refunds to the firm's login wallet (ADR 0036); the x402 payer is stored on the order as the signer. Price is fixed per task from config (`TASK_PRICE_USDC`). Paying creates the order and its N `open` tasks in one SQLite transaction (ADR 0022).
 

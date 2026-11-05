@@ -1,5 +1,6 @@
 // Orders routes (api.md, ADR 0022): draft by MCP Bearer, x402 payment, order reads.
 import { Hono } from "hono";
+import { autopayRoutes } from "./autopayRoutes.js";
 import { parseDraftBody } from "./body.js";
 import { bearerFirm, denied } from "./caller.js";
 import { insertDraft } from "./drafts.js";
@@ -39,6 +40,7 @@ export const ordersRoutes = (deps: OrdersDeps): Hono<OrdersEnv> => {
 		);
 	});
 
+	app.route("/", autopayRoutes(deps));
 	app.route("/", payRoute(deps));
 	app.route("/", readRoutes(deps));
 	return app;
