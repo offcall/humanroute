@@ -1,8 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { parseBoard, request, toMs, usePoll } from "../shared";
 import {
 	applyLatest,
 	firstSnapshot,
+	hasOpen,
 	markTaken,
 	newCount,
 	type Snapshot,
@@ -42,11 +43,23 @@ export const useBoard = (): BoardState => {
 			}
 			const next = withLatest(prev, tasks, serverMs);
 
-			return apply ? applyLatest(next) : next;
+			return apply || !hasOpen(next, serverMs) ? applyLatest(next) : next;
 		});
 	}, []);
 
 	usePoll(() => void refresh(false));
+
+	// Back to the app (also opened from a push): show the latest list at once.
+	useEffect(() => {
+		const onVisible = () => {
+			if (document.visibilityState === "visible") {
+				void refresh(true);
+			}
+		};
+		document.addEventListener("visibilitychange", onVisible);
+
+		return () => document.removeEventListener("visibilitychange", onVisible);
+	}, [refresh]);
 
 	const show = () => setSnap((prev) => prev && applyLatest(prev));
 	const lose = (taskId: string) =>

@@ -93,3 +93,7 @@ export const rowsOf = (snap: Snapshot, now: number): BoardRow[] => {
 		return { task, kind: gone ? RowKind.Taken : RowKind.Open, seenAt };
 	});
 };
+
+// No Open row on screen: nothing can move under the finger, so a poll may replace the list.
+export const hasOpen = (snap: Snapshot, now: number): boolean =>
+	rowsOf(snap, now).some((row) => row.kind === RowKind.Open);
