@@ -1,6 +1,7 @@
 // After x402 settled: order from PAYMENT-RESPONSE -> 201, or orphan row + 502 when no order can be
 // recorded (bad settle response, recordOrder failure). transaction and payer are logged first.
 import type { Context } from "hono";
+import { tasksByOrder } from "../tasks/index.js";
 import { orphanBody, recordOrphan } from "./orphan.js";
 import { recordOrder } from "./record.js";
 import { parseSettleHeader, peekSettle } from "./settle.js";
@@ -11,6 +12,28 @@ import {
 	OrphanReason,
 	type Receipt,
 } from "./types.js";
+
+// Runs after the 201 is returned; an error is only logged.
+const announce = (deps: OrdersDeps, orderId: string): void => {
+	const { onTasksCreated } = deps;
+	if (onTasksCreated === undefined) {
+		return;
+	}
+	const created = () =>
+		tasksByOrder(deps.database, orderId).map((task) => ({
+			taskId: task.id,
+			source: task.sourceLang,
+			target: task.targetLang,
+			claimDeadline: task.claimDeadline,
+		}));
+	void Promise.resolve()
+		.then(() => onTasksCreated(created()))
+		.catch((err: unknown) =>
+			deps.log(
+				`tasks created hook failed order ${orderId}: ${err instanceof Error ? err.message : String(err)}`,
+			),
+		);
+};
 
 export const settled = (
 	deps: OrdersDeps,
@@ -40,5 +63,6 @@ export const settled = (
 	deps.log(
 		`paid order ${receipt.orderId} draft ${draft.id} tasks ${receipt.taskIds.length} pay_tx ${parsed.transaction} payer ${parsed.payer}`,
 	);
+	announce(deps, receipt.orderId);
 	return ctx.json(receipt, 201, { "PAYMENT-RESPONSE": header });
 };

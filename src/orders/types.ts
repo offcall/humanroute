@@ -79,6 +79,14 @@ export type ChainRead<T = unknown> =
 	| { ok: true; value: T }
 	| { ok: false; error: string };
 
+// One new open task, reported after the order commits (ADR 0029). claimDeadline: Unix ms.
+export type CreatedTask = {
+	taskId: string;
+	source: string;
+	target: string;
+	claimDeadline: number;
+};
+
 export type OrdersDeps = PartyPorts & {
 	database: Database;
 	facilitator: FacilitatorClient;
@@ -105,6 +113,8 @@ export type OrdersDeps = PartyPorts & {
 	now: () => number;
 	newId: () => string;
 	log: (msg: string) => void;
+	// Fire-and-forget after commit; absent when push is not wired (ADR 0029).
+	onTasksCreated?: (tasks: CreatedTask[]) => Promise<void>;
 };
 
 export type OrdersEnv = { Variables: { draft: Draft | undefined } };
