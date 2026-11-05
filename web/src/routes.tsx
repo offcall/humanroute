@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Agency } from "./agency";
+import { ApprovePage } from "./approve";
 import { Firm } from "./firm";
 import { Join } from "./join";
 import { Landing } from "./landing";
@@ -35,6 +36,9 @@ const Page = () => {
 	}
 	if (join) {
 		return <Join />;
+	}
+	if (matchPath("/approve/:id", path)) {
+		return <ApprovePage />;
 	}
 	const draftId = matchPath("/pay/:draftId", path)?.draftId;
 	if (draftId !== undefined) {

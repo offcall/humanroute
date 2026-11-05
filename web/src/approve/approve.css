@@ -1,0 +1,19 @@
+/* Approve page (ADR 0034): runs inside Phantom's in-app browser. */
+.approve {
+	padding: 24px 18px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	max-width: 480px;
+	width: 100%;
+	margin: 0 auto;
+}
+.approve h1 {
+	font: 850 clamp(28px, 8vw, 34px) / 1.05 var(--hr-sans);
+	letter-spacing: -0.03em;
+}
+.approve__note {
+	font-size: 15px;
+	line-height: 1.45;
+	color: var(--hr-muted);
+}

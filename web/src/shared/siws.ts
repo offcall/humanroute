@@ -38,7 +38,11 @@ const fail = (error: string): ApiResult<never> => ({
 
 const REJECTED_CODE = 4001;
 
-export const signIn = async (phantom: Phantom): Promise<ApiResult<true>> => {
+// The signed proof goes to /api/auth/verify, or to a login request approve (ADR 0034).
+export const signIn = async (
+	phantom: Phantom,
+	path = "/api/auth/verify",
+): Promise<ApiResult<true>> => {
 	let connected: unknown;
 	try {
 		connected = await phantom.connect();
@@ -76,7 +80,7 @@ export const signIn = async (phantom: Phantom): Promise<ApiResult<true>> => {
 
 	return request(
 		"POST",
-		"/api/auth/verify",
+		path,
 		{ wallet, nonce: nonce.value.nonce, signature: toBase64(signed) },
 		() => true,
 	);

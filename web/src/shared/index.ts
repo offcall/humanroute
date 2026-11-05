@@ -14,6 +14,7 @@ export {
 	pairLabel,
 	pairNames,
 } from "./languages";
+export { approveLink, useLoginRequest } from "./loginRequest";
 export { formatUsdc, parseAmount } from "./money";
 export { arr, isRecord, num, orNull, type Parse, str } from "./parse";
 export {
@@ -39,6 +40,7 @@ export { SegBar } from "./SegBar";
 export { Stamp, StampKind } from "./Stamp";
 export { StatusTag } from "./StatusTag";
 export { SessionProvider, useSession } from "./session";
+export { signIn as signInSiws } from "./siws";
 export { type Status, statusOf, TagKind } from "./status";
 export { TimePair, URGENT_MS } from "./TimePair";
 export { shortSig, TxLink, txUrl } from "./TxLink";
@@ -54,7 +56,7 @@ export {
 	parseOrderView,
 	parseTaskDetail,
 } from "./viewParsers";
-export { WalletButton } from "./WalletButton";
+export { LoginLink, WalletButton } from "./WalletButton";
 export { shortWallet, WalletLine } from "./WalletLine";
 export { Who } from "./Who";
 export { getPhantom, phantomDeepLink, toBase64 } from "./wallet";
