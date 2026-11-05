@@ -1,7 +1,25 @@
 import { Avatar, languageName, pairCodes, type Task } from "../shared";
 import { usdcNumber } from "./format";
 
-// Who delivered and the two texts side by side, each with its lang attribute.
+// Source and translation side by side, each with its lang attribute.
+export const TextCols = ({ task }: { task: Task }) => (
+	<div className="review-cols">
+		<div lang={task.sourceLang} dir="auto">
+			<span className="kicker" lang="en">
+				{languageName(task.sourceLang)}
+			</span>
+			{task.text}
+		</div>
+		<div lang={task.targetLang} dir="auto">
+			<span className="kicker" lang="en">
+				{languageName(task.targetLang)}
+			</span>
+			{task.result}
+		</div>
+	</div>
+);
+
+// Who delivered and the two texts.
 export const ReviewTexts = ({ task }: { task: Task }) => (
 	<>
 		<div className="exec-line">
@@ -21,19 +39,6 @@ export const ReviewTexts = ({ task }: { task: Task }) => (
 				<b>{usdcNumber(task.priceUnits)} USDC</b>
 			</span>
 		</div>
-		<div className="review-cols">
-			<div lang={task.sourceLang} dir="auto">
-				<span className="kicker" lang="en">
-					{languageName(task.sourceLang)}
-				</span>
-				{task.text}
-			</div>
-			<div lang={task.targetLang} dir="auto">
-				<span className="kicker" lang="en">
-					{languageName(task.targetLang)}
-				</span>
-				{task.result}
-			</div>
-		</div>
+		<TextCols task={task} />
 	</>
 );

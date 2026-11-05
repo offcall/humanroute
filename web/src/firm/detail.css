@@ -1,0 +1,81 @@
+/* Task detail: status row, Executing card, source and result (indigo.css §15) */
+.fb-status-row {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	flex-wrap: wrap;
+}
+.exec {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	gap: 18px;
+	align-items: center;
+	padding: 18px 20px;
+	border-radius: 18px;
+	background: var(--hr-bg);
+}
+.exec > .avatar {
+	width: 60px;
+	height: 60px;
+	font-size: 19px;
+}
+.exec__name {
+	display: block;
+	font: 850 30px / 1.05 var(--hr-sans);
+	letter-spacing: -0.02em;
+}
+.exec__sub {
+	font-size: 15px;
+	color: var(--hr-muted);
+	margin-top: 4px;
+}
+.exec--none .exec__name {
+	color: var(--hr-void);
+}
+.fb-memo {
+	font-size: 13px;
+}
+.fb-src {
+	border-top: 1px solid var(--hr-line);
+	padding-top: 12px;
+}
+.fb-src summary {
+	cursor: pointer;
+	font-weight: 750;
+	font-size: 15px;
+	min-height: 32px;
+	display: flex;
+	align-items: center;
+	color: var(--hr-accent-strong);
+}
+.fb-src p {
+	max-width: 70ch;
+	padding-top: 6px;
+	white-space: pre-wrap;
+}
+.fb-result {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 18px 20px 16px;
+	border-radius: 18px;
+	background: var(--hr-card);
+	box-shadow: var(--hr-shadow-card);
+}
+.fb-result .review-cols > div {
+	font-size: 17px;
+}
+.fb-sib-title {
+	margin-bottom: 6px;
+}
+.sib-list .tag {
+	justify-self: start;
+}
+@media (max-width: 760px) {
+	.exec {
+		grid-template-columns: auto minmax(0, 1fr);
+	}
+	.exec .stats {
+		grid-column: 1 / -1;
+	}
+}

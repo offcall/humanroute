@@ -9,6 +9,7 @@ import {
 import { Jobs } from "./Jobs";
 import { parseFirmView } from "./parseFirmView";
 import { Review } from "./Review";
+import { TaskDetail } from "./TaskDetail";
 import type { FirmView } from "./types";
 
 const goHome = (event: React.MouseEvent) => {
@@ -27,11 +28,20 @@ const Loading = () => (
 	</>
 );
 
-// Sub-routes: /firm/review; /firm/jobs (and /firm/jobs/:orderId/:lang until the task detail is built).
+// Sub-routes: /firm/review, /firm/jobs/:orderId/:lang, else /firm/jobs.
 const FirmPage = ({ view }: { view: FirmView }) => {
 	const path = useRoute();
+	const detail = matchPath("/firm/jobs/:orderId/:lang", path);
+	if (matchPath("/firm/review", path)) {
+		return <Review />;
+	}
+	if (detail?.orderId !== undefined && detail.lang !== undefined) {
+		return (
+			<TaskDetail key={path} orderId={detail.orderId} lang={detail.lang} />
+		);
+	}
 
-	return matchPath("/firm/review", path) ? <Review /> : <Jobs view={view} />;
+	return <Jobs view={view} />;
 };
 
 export const FirmBody = () => {
