@@ -16,6 +16,9 @@ Not built in the hackathon version. Each item is a product or architecture chang
 - **Wallet Standard.** Only the injected Phantom wallet is supported. Wallet Standard discovery is the next step.
 - **Real identity.** Linguists and agencies sign in with a wallet only; no legal identity, KYC or agency verification.
 - **Agency languages.** Agencies do not declare languages; only linguists do.
+- **Two signed-out tabs.** Two tabs waiting on a login request share the `hr_login` cookie and the stored request id, so they replace each other's request (ADR 0034).
+- **Sign out and push.** Sign out unsubscribes this device's push before the logout call succeeds; a failed logout leaves the session without push.
+- **Login request and nonce cleanup.** Expired `login_requests` and `nonces` rows are never purged.
 
 ## Custody and money
 
@@ -30,3 +33,4 @@ Not built in the hackathon version. Each item is a product or architecture chang
 - **Signed receipts and self-facilitation** ([ADR 0013](adr/0013-signed-receipt.md), [ADR 0014](adr/0014-self-facilitation-fallback.md)): deferred.
 - **Web playground.** Dropped for the hackathon; `scripts/create-order.ts` plays the agent's role on devnet.
 - **Observability.** Logs only; no metrics or alerting beyond `/health`.
+- **Push log text.** A failed push logs the push service's body or error message, which AGENTS.md's logging rule (public keys, signatures, ids only) does not allow; reduce it to a status and a known reason code.
