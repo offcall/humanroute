@@ -2,6 +2,7 @@
 import { renderStatus } from "./render.js";
 import { fingerprint, isSettled, progressLine } from "./status.js";
 import {
+	type DraftStatus,
 	type Parsed,
 	type Snapshot,
 	type WaitDeps,
@@ -11,10 +12,12 @@ import {
 
 const POLL_MS = 2000;
 const PROGRESS_MS = 30_000;
-const CAP_MS = 3_600_000;
+export const CAP_MS = 3_600_000;
+// Failed reads in a row before giving up: about 30 s, enough for a gateway redeploy.
+const MAX_FAILURES = 15;
 
 type WaitInput = {
-	read: () => Promise<Parsed<Snapshot>>;
+	read: (paid: DraftStatus | undefined) => Promise<Parsed<Snapshot>>;
 	seen: string | undefined;
 	signal: AbortSignal;
 	report: (message: string) => Promise<void>;
@@ -39,14 +42,25 @@ export const waitForChange = async ({
 }: WaitInput): Promise<WaitOutcome> => {
 	const started = deps.now();
 	let baseline = seen;
+	let paid: DraftStatus | undefined;
+	let failures = 0;
 	let reportedAt = started;
 
 	while (!signal.aborted) {
-		const current = await read();
+		const current = await read(paid);
 		if (!current.ok) {
-			return { kind: WaitKind.Error, message: current.error };
+			failures += 1;
+			if (failures >= MAX_FAILURES) {
+				return { kind: WaitKind.Error, message: current.error, seen: baseline };
+			}
+			await deps.sleep(POLL_MS, signal);
+			continue;
 		}
+		failures = 0;
 		const snapshot = current.value;
+		if (snapshot.order !== undefined) {
+			paid = snapshot.status;
+		}
 		const print = fingerprint(snapshot);
 		if (isSettled(snapshot.order)) {
 			return answer(WaitKind.Settled, snapshot);

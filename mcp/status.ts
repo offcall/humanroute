@@ -1,27 +1,41 @@
 // A draft's current state for get_task and wait_task, and its fingerprint for change detection.
-import type { GatewayClient, Order, Parsed, Snapshot } from "./types.js";
+import {
+	type DraftStatus,
+	type GatewayClient,
+	type Order,
+	type Parsed,
+	PublicState,
+	type Snapshot,
+} from "./types.js";
 
-// Final public states (src/tasks/types.ts PublicState); mcp/ cannot import src/ values.
-const SETTLED_STATES = ["paid_out", "refunded"];
+const SETTLED_STATES = new Set([PublicState.PaidOut, PublicState.Refunded]);
 
+const withOrder = async (
+	client: GatewayClient,
+	token: string,
+	status: DraftStatus,
+): Promise<Parsed<Snapshot>> => {
+	if (status.orderId === undefined) {
+		return { ok: true, value: { status, order: undefined } };
+	}
+	const order = await client.getOrder(token, status.orderId);
+
+	return order.ok ? { ok: true, value: { status, order: order.value } } : order;
+};
+
+// A paid draft never changes again, so a caller that has seen it paid passes it and skips getDraft.
 export const readStatus = async (
 	client: GatewayClient,
 	token: string,
 	draftId: string,
+	paid?: DraftStatus,
 ): Promise<Parsed<Snapshot>> => {
+	if (paid !== undefined) {
+		return withOrder(client, token, paid);
+	}
 	const status = await client.getDraft(draftId);
-	if (!status.ok) {
-		return status;
-	}
-	const { orderId } = status.value;
-	if (orderId === undefined) {
-		return { ok: true, value: { status: status.value, order: undefined } };
-	}
-	const order = await client.getOrder(token, orderId);
 
-	return order.ok
-		? { ok: true, value: { status: status.value, order: order.value } }
-		: order;
+	return status.ok ? withOrder(client, token, status.value) : status;
 };
 
 // "draft" before payment, then e.g. "paid;de=claimed;fr=open".
@@ -37,8 +51,7 @@ export const fingerprint = ({ status, order }: Snapshot): string => {
 };
 
 export const isSettled = (order: Order | undefined): boolean =>
-	order?.tasks.every((task) => SETTLED_STATES.includes(task.publicState)) ===
-	true;
+	order?.tasks.every((task) => SETTLED_STATES.has(task.publicState)) === true;
 
 export const progressLine = ({ order }: Snapshot): string =>
 	order === undefined

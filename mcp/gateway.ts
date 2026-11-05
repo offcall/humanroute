@@ -6,6 +6,9 @@ import {
 } from "./parse.js";
 import type { GatewayClient, Parsed } from "./types.js";
 
+// A hung gateway read must not stall wait_task past its progress notifications.
+const TIMEOUT_MS = 10_000;
+
 const call = async <T>(
 	url: string,
 	init: RequestInit,
@@ -14,7 +17,10 @@ const call = async <T>(
 ): Promise<Parsed<T>> => {
 	let response: Response;
 	try {
-		response = await fetch(url, init);
+		response = await fetch(url, {
+			...init,
+			signal: AbortSignal.timeout(TIMEOUT_MS),
+		});
 	} catch {
 		return { ok: false, error: "gateway is unreachable" };
 	}

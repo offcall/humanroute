@@ -1,7 +1,11 @@
 import { formatUsdc } from "./money.js";
-import type { Draft, DraftStatus, Order, OrderTask } from "./types.js";
-
-const PUBLIC_OPEN = "open";
+import {
+	type Draft,
+	type DraftStatus,
+	type Order,
+	type OrderTask,
+	PublicState,
+} from "./types.js";
 
 const TERMS = [
 	"Paid once through the pay link, with the firm's Phantom wallet on Solana devnet (test money).",
@@ -22,7 +26,7 @@ const renderTask = (task: OrderTask): string => {
 		`- ${task.targetLang}: ${task.publicState} (taskId: ${task.taskId})`,
 	];
 
-	if (task.publicState === PUBLIC_OPEN) {
+	if (task.publicState === PublicState.Open) {
 		lines.push(`  claim deadline: ${task.claimDeadline}`);
 	}
 	if (task.workDeadline !== null) {

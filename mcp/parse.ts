@@ -5,6 +5,7 @@ import {
 	type Order,
 	type OrderTask,
 	type Parsed,
+	PublicState,
 } from "./types.js";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -18,6 +19,9 @@ const isStringArray = (value: unknown): value is string[] =>
 
 const stateOf = (value: unknown): DraftState | undefined =>
 	Object.values(DraftState).find((state) => state === value);
+
+const publicStateOf = (value: unknown): PublicState | undefined =>
+	Object.values(PublicState).find((state) => state === value);
 
 const isUnits = (value: unknown): value is string =>
 	typeof value === "string" && /^\d+$/.test(value);
@@ -80,19 +84,13 @@ const parseOrderTask = (input: unknown): OrderTask | undefined => {
 	if (!isRecord(input)) {
 		return undefined;
 	}
-	const {
-		taskId,
-		targetLang,
-		publicState,
-		result,
-		reason,
-		claimDeadline,
-		workDeadline,
-	} = input;
+	const publicState = publicStateOf(input.publicState);
+	const { taskId, targetLang, result, reason, claimDeadline, workDeadline } =
+		input;
 	if (
 		typeof taskId !== "string" ||
 		typeof targetLang !== "string" ||
-		typeof publicState !== "string" ||
+		publicState === undefined ||
 		typeof claimDeadline !== "string" ||
 		!isNullableString(result) ||
 		!isNullableString(reason) ||

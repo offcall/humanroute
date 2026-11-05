@@ -31,10 +31,21 @@ export type DraftStatus = {
 	targetLangs: string[];
 };
 
+// Mirrors src/tasks/types.ts PublicState; mcp/ cannot import src/ values.
+export enum PublicState {
+	Open = "open",
+	Claimed = "claimed",
+	Submitted = "submitted",
+	PayingOut = "paying_out",
+	Refunding = "refunding",
+	PaidOut = "paid_out",
+	Refunded = "refunded",
+}
+
 export type OrderTask = {
 	taskId: string;
 	targetLang: string;
-	publicState: string;
+	publicState: PublicState;
 	result: string | null;
 	reason: string | null;
 	claimDeadline: string;
@@ -63,7 +74,7 @@ export type Snapshot = { status: DraftStatus; order: Order | undefined };
 
 export type WaitDeps = {
 	now: () => number;
-	sleep: (ms: number, signal: AbortSignal) => Promise<void>;
+	sleep: (millis: number, signal: AbortSignal) => Promise<void>;
 };
 
 export enum WaitKind {
@@ -80,5 +91,5 @@ export type WaitOutcome =
 			text: string;
 			seen: string;
 	  }
-	| { kind: WaitKind.Error; message: string }
+	| { kind: WaitKind.Error; message: string; seen: string | undefined }
 	| { kind: WaitKind.Aborted };

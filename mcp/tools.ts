@@ -4,8 +4,8 @@ import { registerDecisionTools } from "./decisionTools.js";
 import { GET_TASK_DESCRIPTION, POST_TASK_DESCRIPTION } from "./descriptions.js";
 import { renderDraft, renderStatus } from "./render.js";
 import { toolText } from "./result.js";
-import { readStatus } from "./status.js";
-import type { GatewayClient, WaitDeps } from "./types.js";
+import { fingerprint, readStatus } from "./status.js";
+import { DraftState, type GatewayClient, type WaitDeps } from "./types.js";
 import { registerWaitTool } from "./waitTool.js";
 
 const targetSchema = z.object({
@@ -41,7 +41,7 @@ export const registerTools = (
 			const created = await client.createDraft(token, input);
 
 			return created.ok
-				? toolText(renderDraft(created.value))
+				? toolText(`${renderDraft(created.value)}\nseen: ${DraftState.Draft}`)
 				: toolText(created.error, true);
 		},
 	);
@@ -56,7 +56,9 @@ export const registerTools = (
 			const current = await readStatus(client, token, draftId);
 
 			return current.ok
-				? toolText(renderStatus(current.value.status, current.value.order))
+				? toolText(
+						`${renderStatus(current.value.status, current.value.order)}\nseen: ${fingerprint(current.value)}`,
+					)
 				: toolText(current.error, true);
 		},
 	);
