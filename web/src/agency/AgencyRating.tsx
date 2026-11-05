@@ -1,13 +1,19 @@
+import "./income.css";
 import { useState } from "react";
 import {
-	formatUsdc,
+	Icon,
+	IconName,
 	parseAgencyRating,
 	type AgencyRating as Rating,
 	request,
 	usePoll,
 } from "../shared";
+import { IncomeNumbers } from "./IncomeNumbers";
+import { Loading } from "./Loading";
 
-export const AgencyRating = ({ agencyId }: { agencyId: string }) => {
+type Props = { agencyId: string; wallet: string };
+
+export const AgencyRating = ({ agencyId, wallet }: Props) => {
 	const [rating, setRating] = useState<Rating | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
@@ -27,24 +33,34 @@ export const AgencyRating = ({ agencyId }: { agencyId: string }) => {
 	});
 
 	return (
-		<section>
-			<h2>Income</h2>
-			{error === null ? null : <p className="error">{error}</p>}
+		<section
+			className="panel ag-income"
+			aria-labelledby="ag-income-h"
+			aria-busy={rating === null && error === null ? true : undefined}
+		>
+			<div className="ag-sec-head">
+				<h2 className="h2" id="ag-income-h">
+					Income
+				</h2>
+				<span className="ag-sec-head__aside">
+					Confirmed payouts only · updates every 3 s
+				</span>
+			</div>
+			{error === null ? null : (
+				<p className="alert alert--error" role="alert">
+					<Icon name={IconName.Alarm} size={20} />
+					<span>
+						<b>{error}</b> · could not refresh.
+						{rating === null ? "" : " Showing the last numbers."}
+					</span>
+				</p>
+			)}
 			{rating === null ? (
-				<p>Loading…</p>
+				error === null ? (
+					<Loading />
+				) : null
 			) : (
-				<ul>
-					<li>Earned: {formatUsdc(rating.paidUnits)}</li>
-					<li>
-						Rating:{" "}
-						{rating.ratingPct === null
-							? "no decisions yet"
-							: `${rating.ratingPct}%`}
-					</li>
-					<li>Approved: {rating.approved}</li>
-					<li>Rejected: {rating.rejected}</li>
-					<li>Late: {rating.late}</li>
-				</ul>
+				<IncomeNumbers rating={rating} wallet={wallet} />
 			)}
 		</section>
 	);

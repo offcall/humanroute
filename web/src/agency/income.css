@@ -1,0 +1,89 @@
+/* Agency income: one main number (rating) + earned */
+.ag-income {
+	padding: 22px 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+.ag-income__grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+	gap: 28px;
+	align-items: start;
+}
+.ag-income__rating,
+.ag-income__earned {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-height: 100%;
+}
+.ag-income__earned {
+	padding-left: 28px;
+	border-left: 1px solid var(--hr-line);
+}
+.ag-income .hero-caption {
+	font-size: 14px;
+}
+.ag-norating {
+	font: 850 clamp(26px, 4vw, 32px) / 1.05 var(--hr-sans);
+	letter-spacing: -0.03em;
+	color: var(--hr-void);
+}
+.ag-earned {
+	font: 850 clamp(32px, 5vw, 44px) / 1 var(--hr-sans);
+	letter-spacing: -0.035em;
+	color: var(--hr-ok);
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+}
+.ag-earned small {
+	font-size: 16px;
+	letter-spacing: 0;
+	color: var(--hr-muted);
+	font-weight: 750;
+}
+.ag-earned.is-zero {
+	color: var(--hr-ink);
+}
+.ag-income__foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 22px;
+	padding-top: 16px;
+	border-top: 1px solid var(--hr-line);
+	flex-wrap: wrap;
+}
+.ag-stats {
+	gap: 30px;
+	margin: 0;
+}
+.ag-stats dd {
+	margin: 0;
+}
+.ag-formula {
+	font-size: 13px;
+	color: var(--hr-muted);
+	max-width: 40ch;
+	line-height: 1.45;
+}
+/* proof link under Earned: text button, flush with the caption */
+.ag-earned-link {
+	align-self: flex-start;
+	padding: 0;
+	font-size: 14px;
+	gap: 6px;
+}
+@media (max-width: 760px) {
+	.ag-income__grid {
+		grid-template-columns: 1fr;
+	}
+	.ag-income__earned {
+		padding-left: 0;
+		border-left: 0;
+		padding-top: 16px;
+		border-top: 1px solid var(--hr-line);
+	}
+}

@@ -1,0 +1,58 @@
+/* Agency page-only rules (agency.html mock): column, sign-in hero, plate, section heads */
+.ag-main {
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 30px 24px 40px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+.ag-lead {
+	font-size: 17px;
+	line-height: 1.5;
+	color: var(--hr-muted);
+	max-width: 56ch;
+}
+.desk-hero .inline-error {
+	justify-content: center;
+	font-size: 15px;
+}
+.ag-plate {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.ag-plate__text {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+}
+.ag-plate__aside {
+	margin-left: auto;
+	text-align: right;
+	font-size: 13px;
+	color: var(--hr-muted);
+	line-height: 1.7;
+}
+.ag-sec-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+.ag-sec-head__aside {
+	font-size: 13px;
+	color: var(--hr-muted);
+	font-weight: 650;
+}
+/* header targets: 44 px (the cabinet also opens in the Phantom mobile browser) */
+.desk-top .wallet-line .btn {
+	min-height: 44px;
+}
+@media (max-width: 760px) {
+	.ag-plate__aside {
+		display: none;
+	}
+}

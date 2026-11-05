@@ -1,13 +1,23 @@
+import "./invite.css";
 import { useState } from "react";
-import { isRecord, request, str } from "../shared";
+import { Icon, IconName, isRecord, request, Spinner, str } from "../shared";
+import { CopyLink } from "./CopyLink";
 
 const parseInvite = (raw: unknown) =>
 	isRecord(raw) ? str(raw.url) : undefined;
 
-export const InviteLink = ({ initialUrl }: { initialUrl: string | null }) => {
+type Props = { initialUrl: string | null; agencyName: string };
+
+const InlineError = ({ text }: { text: string }) => (
+	<p className="inline-error" role="alert">
+		<Icon name={IconName.Alarm} size={16} />
+		{text}
+	</p>
+);
+
+export const InviteLink = ({ initialUrl, agencyName }: Props) => {
 	const [url, setUrl] = useState(initialUrl);
 	const [busy, setBusy] = useState(false);
-	const [copied, setCopied] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const create = async () => {
@@ -22,31 +32,45 @@ export const InviteLink = ({ initialUrl }: { initialUrl: string | null }) => {
 		setBusy(false);
 	};
 
-	const copy = async (link: string) => {
-		try {
-			await navigator.clipboard.writeText(link);
-			setCopied(true);
-		} catch {
-			setError("Copy failed, select the link manually");
-		}
-	};
-
 	return (
-		<section>
-			<h2>Invite link</h2>
+		<section className="panel ag-invite" aria-labelledby="ag-invite-h">
+			<div className="ag-sec-head">
+				<h2 className="h2" id="ag-invite-h">
+					Invite link
+				</h2>
+				<span className="ag-sec-head__aside">One link for all linguists</span>
+			</div>
 			{url === null ? (
-				<button type="button" onClick={create} disabled={busy}>
-					Add linguist
-				</button>
-			) : (
-				<>
-					<p style={{ fontSize: "1.2rem", wordBreak: "break-all" }}>{url}</p>
-					<button type="button" onClick={() => copy(url)}>
-						{copied ? "Copied" : "Copy"}
+				<div className="ag-invite__empty">
+					<div>
+						<b>No linguists yet</b>
+						<p>
+							Add linguist creates your permanent invite link. Send it to your
+							translators; they join from their phone.
+						</p>
+					</div>
+					<button
+						type="button"
+						className="btn btn--primary btn--lg"
+						aria-busy={busy || undefined}
+						aria-disabled={busy || undefined}
+						onClick={busy ? undefined : create}
+					>
+						{busy ? <Spinner /> : <Icon name={IconName.Plus} size={20} />}
+						Add linguist
 					</button>
-				</>
+				</div>
+			) : (
+				<CopyLink url={url} />
 			)}
-			{error === null ? null : <p className="error">{error}</p>}
+			{error === null ? null : <InlineError text={error} />}
+			{url === null ? null : (
+				<p className="desk-hint">
+					The link never changes. A linguist who opens it signs in with Phantom,
+					picks their language pairs and joins{" "}
+					<span dir="auto">{agencyName}</span>.
+				</p>
+			)}
 		</section>
 	);
 };

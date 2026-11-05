@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import {
 	type Agency as AgencyAccount,
+	Icon,
+	IconName,
 	isRecord,
 	orNull,
 	parseAgency,
-	RequireSession,
 	request,
 	str,
-	useSession,
 } from "../shared";
+import { AgencyPlate } from "./AgencyPlate";
 import { AgencyRating } from "./AgencyRating";
 import { InviteLink } from "./InviteLink";
+import { Loading } from "./Loading";
 import { RegisterAgency } from "./RegisterAgency";
 
 type AgencyView = { agency: AgencyAccount; inviteUrl: string | null };
@@ -34,8 +36,9 @@ const parseAgencyView = (raw: unknown): AgencyView | undefined => {
 	return { agency, inviteUrl };
 };
 
-const AgencyCabinet = () => {
-	const { me } = useSession();
+type Props = { wallet: string; agencyId: string | undefined };
+
+export const AgencyCabinet = ({ wallet, agencyId }: Props) => {
 	const [load, setLoad] = useState<Load>({ kind: "loading" });
 
 	const fetchAgency = useCallback(async () => {
@@ -54,28 +57,40 @@ const AgencyCabinet = () => {
 	}, [fetchAgency]);
 
 	if (load.kind === "loading") {
-		return <p>Loading…</p>;
-	}
-	if (load.kind === "error") {
-		return <p className="error">Could not load agency: {load.message}</p>;
+		return (
+			<main className="ag-main" aria-busy="true">
+				<Loading />
+			</main>
+		);
 	}
 	if (load.kind === "missing") {
-		return <RegisterAgency onDone={fetchAgency} />;
+		return <RegisterAgency wallet={wallet} onDone={fetchAgency} />;
 	}
 
-	const agencyId = me?.agency?.id;
-
 	return (
-		<section>
-			<h1>{load.view.agency.name}</h1>
-			<InviteLink initialUrl={load.view.inviteUrl} />
-			{agencyId === undefined ? null : <AgencyRating agencyId={agencyId} />}
-		</section>
+		<main className="ag-main">
+			{load.kind === "error" ? (
+				<div className="alert alert--error" role="alert">
+					<Icon name={IconName.Alarm} size={20} />
+					<div>
+						<b>Could not load agency: {load.message}</b>
+						<br />
+						Your wallet is signed in, but the agency did not load. Reload the
+						page to try again.
+					</div>
+				</div>
+			) : (
+				<>
+					<AgencyPlate name={load.view.agency.name} wallet={wallet} />
+					<InviteLink
+						initialUrl={load.view.inviteUrl}
+						agencyName={load.view.agency.name}
+					/>
+					{agencyId === undefined ? null : (
+						<AgencyRating agencyId={agencyId} wallet={wallet} />
+					)}
+				</>
+			)}
+		</main>
 	);
 };
-
-export const Agency = () => (
-	<RequireSession>
-		<AgencyCabinet />
-	</RequireSession>
-);

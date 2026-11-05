@@ -1,1 +1,1 @@
-export { Agency } from "./AgencyCabinet";
+export { Agency } from "./AgencyPage";
