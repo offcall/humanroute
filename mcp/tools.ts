@@ -42,7 +42,7 @@ export const registerTools = (
 
 			return created.ok
 				? toolText(
-						`${renderDraft(created.value)}\nseen: ${DraftState.Draft}\nNext: first write the pay link to the user in a message, then call wait_task with this seen.`,
+						`${renderDraft(created.value)}\nseen: ${DraftState.Draft}\nNext: first write the full Pay link URL above to the user verbatim, as a clickable link, then call wait_task with this seen.`,
 					)
 				: toolText(created.error, true);
 		},
