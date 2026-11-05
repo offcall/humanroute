@@ -41,3 +41,9 @@
 		margin-right: 0;
 	}
 }
+/* Transaction links: a 44 px tap target; negative margins keep the line height */
+.fb-main .proof {
+	min-block-size: 44px;
+	padding-block: 14px;
+	margin-block: -14px;
+}
