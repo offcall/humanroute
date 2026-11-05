@@ -1,6 +1,8 @@
 import { type Context, Hono } from "hono";
-import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import { deleteCookie, getCookie } from "hono/cookie";
 import { parseNonceBody, parseVerifyBody, readJson } from "./body.js";
+import { setSessionCookie } from "./cookies.js";
+import { loginRoutes } from "./loginRoutes.js";
 import { consumeNonce, createNonce } from "./nonce.js";
 import { createSession, endSession } from "./session.js";
 import { type AuthDeps, SESSION_COOKIE } from "./types.js";
@@ -46,13 +48,7 @@ export const authRoutes = (deps: AuthDeps): Hono => {
 		}
 
 		const token = createSession(deps, input.wallet);
-		setCookie(ctx, SESSION_COOKIE, token, {
-			httpOnly: true,
-			sameSite: "Lax",
-			path: "/",
-			secure: deps.publicBaseUrl.startsWith("https:"),
-			maxAge: deps.sessionTtlSeconds,
-		});
+		setSessionCookie(ctx, deps, token);
 
 		return ctx.json({ wallet: input.wallet });
 	});
@@ -69,6 +65,8 @@ export const authRoutes = (deps: AuthDeps): Hono => {
 
 		return ctx.body(null, 204);
 	});
+
+	app.route("/", loginRoutes(deps));
 
 	return app;
 };

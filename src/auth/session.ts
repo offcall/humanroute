@@ -3,7 +3,7 @@ import type { Database } from "../store/index.js";
 import { SESSIONS_SQL } from "./sql.js";
 import type { AuthDeps, SessionLookup } from "./types.js";
 
-const hashToken = (token: string): string =>
+export const hashToken = (token: string): string =>
 	createHash("sha256").update(token).digest("hex");
 
 export const createSession = (deps: AuthDeps, wallet: string): string => {
