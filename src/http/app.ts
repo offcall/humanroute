@@ -2,6 +2,7 @@
 import { Hono } from "hono";
 import { accountsRoutes } from "../accounts/index.js";
 import { authRoutes } from "../auth/index.js";
+import { notifyRoutes } from "../notify/index.js";
 import { ordersRoutes } from "../orders/index.js";
 import { ratingRoutes } from "../rating/index.js";
 import { tasksRoutes } from "../tasks/index.js";
@@ -18,6 +19,7 @@ export const createApp = (deps: AppDeps): Hono => {
 	app.route("/", ordersRoutes(deps.orders));
 	app.route("/", tasksRoutes(deps.tasks));
 	app.route("/", ratingRoutes(deps.rating));
+	app.route("/", notifyRoutes(deps.notify));
 	// Last: every path that no route above answered.
 	app.route("/", webRoutes(deps.webDistDir));
 	return app;

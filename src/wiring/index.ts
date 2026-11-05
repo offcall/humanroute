@@ -3,10 +3,12 @@
 import { accountsSlice } from "../accounts/index.js";
 import { authSlice } from "../auth/index.js";
 import type { AppDeps } from "../http/index.js";
+import { notifyNewTasks, notifySlice } from "../notify/index.js";
 import { ordersSlice } from "../orders/index.js";
 import { payoutsSlice, type TaskPayoutDeps } from "../payouts/index.js";
 import type { SliceDefinition } from "../store/index.js";
 import { tasksSlice } from "../tasks/index.js";
+import { notifyDeps } from "./notify.js";
 import { ordersDeps } from "./orders.js";
 import { payoutDeps } from "./payouts.js";
 import { peopleDeps } from "./people.js";
@@ -22,6 +24,7 @@ export const SLICES: SliceDefinition[] = [
 	tasksSlice,
 	payoutsSlice,
 	ordersSlice,
+	notifySlice,
 ];
 
 export type Wired = { app: AppDeps; payouts: TaskPayoutDeps };
@@ -30,6 +33,7 @@ export const wire = (input: WiringInput): Wired => {
 	const { config, database, now } = input;
 	const people = peopleDeps(database, now);
 	const payouts = payoutDeps(input);
+	const notify = notifyDeps(input, people);
 	const app: AppDeps = {
 		auth: {
 			database,
@@ -45,9 +49,13 @@ export const wire = (input: WiringInput): Wired => {
 			publicBaseUrl: config.publicBaseUrl,
 			mcpPublicUrl: config.mcpPublicUrl,
 		},
-		orders: ordersDeps(input, people),
+		orders: {
+			...ordersDeps(input, people),
+			onTasksCreated: notifyNewTasks(notify),
+		},
 		tasks: tasksDeps(input, payouts, people),
 		rating: ratingDeps(database),
+		notify,
 		preflightProblems: input.preflightProblems,
 		webDistDir: config.webDistDir,
 	};
