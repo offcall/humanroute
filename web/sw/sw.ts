@@ -61,19 +61,25 @@ const show = (notice: Notice | null): Promise<void> => {
 	});
 };
 
-const focusOrOpen = async (): Promise<void> => {
+const inCabinet = (url: string): boolean => {
+	const { pathname } = new URL(url);
+	return pathname === CABINET || pathname.startsWith(`${CABINET}/`);
+};
+
+// An open cabinet window moves to the board, where the new job is; navigate fails on a
+// window this worker does not control yet, which then only gets focus.
+const openBoard = async (): Promise<void> => {
 	const windows = await self.clients.matchAll({
 		type: "window",
 		includeUncontrolled: true,
 	});
-	const open = windows.find((client) =>
-		new URL(client.url).pathname.startsWith(CABINET),
-	);
-	if (open !== undefined) {
-		await open.focus();
+	const open = windows.find((client) => inCabinet(client.url));
+	if (open === undefined) {
+		await self.clients.openWindow(CABINET);
 		return;
 	}
-	await self.clients.openWindow(CABINET);
+	const moved = await open.navigate(CABINET).catch(() => null);
+	await (moved ?? open).focus();
 };
 
 self.addEventListener("push", (event) => {
@@ -82,7 +88,7 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
 	event.notification.close();
-	event.waitUntil(focusOrOpen());
+	event.waitUntil(openBoard());
 });
 
 export {};
