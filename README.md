@@ -9,7 +9,7 @@ Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. Tests are d
 | Part | What | Where |
 | --- | --- | --- |
 | Gateway | Node process: Hono HTTP API, SQLite, x402 payment route, payout worker | `src/` |
-| Web app | React + Vite, PWA manifest: landing, firm, agency, linguist, join and pay pages | `web/` |
+| Web app | React + Vite, PWA manifest, Indigo UI (ADR 0032): landing, firm (jobs, review, task detail), agency, linguist (board, my tasks, wallet), join and pay pages | `web/` |
 | MCP server | Remote MCP over Streamable HTTP, tools `post_task`, `get_task`, `wait_task` (waits for the next change) and `approve_task` and `reject_task` (Claude asks the user before deciding); talks to the gateway over HTTP only | `mcp/` |
 | Scripts | Devnet wallet setup and an opt-in e2e flow | `scripts/` |
 
