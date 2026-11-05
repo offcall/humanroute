@@ -61,7 +61,7 @@ Memos: `hr:<taskId>` (approved), `hr:<taskId>:rejected`, `:unclaimed`, `:late` (
 | Auto-pay: signature from another key than the delegate | `pay_task` refuses before sending; the firm enables auto-pay for its agent key | mcp |
 | Auto-pay: message is not a HumanRoute payment to the firm's account and HumanRoute | `sign.mjs` refuses to sign | agent machine |
 | Auto-pay: blockhash expired or funds moved before `pay_task` | `402` simulation failure; Claude calls `prepare_payment` again | orders, mcp |
-| Auto-pay: `pay_task` gets no answer in 45 s | MCP says the payment may have settled: Claude calls `get_task`; with no order it tells the user the outcome is unknown and asks before paying again | mcp |
+| Auto-pay: `pay_task` gets no answer in 45 s, a broken connection or a 5xx other than `orphan_payment` | MCP says the payment may have settled: Claude calls `get_task`; with no order it tells the user the outcome is unknown and asks before paying again | mcp |
 | Auto-pay: `409 payment_in_progress` | MCP says the payment is still settling: `get_task` in a few seconds, no new `prepare_payment` | orders, mcp |
 | Auto-pay: `502 orphan_payment` | MCP tells Claude the money was taken (`payTx`) without an order and not to pay again; the operator refunds by hand | orders, mcp |
 | Second linguist claims the task | `409 claim_taken`; after the claim window `409 claim_closed` | tasks |

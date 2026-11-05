@@ -6,8 +6,10 @@ import type { Parsed } from "./types.js";
 
 // Verify plus settle through the facilitator can take longer than a plain read.
 export const PAY_TIMEOUT_MS = 45_000;
-// No automatic second payment: a timed-out one may have settled, even as an orphan.
-export const PAY_TIMED_OUT = `the gateway did not answer in ${PAY_TIMEOUT_MS / 1000} s; the payment may have settled. Call get_task. If it shows no order, tell the user the outcome is unknown and ask before calling prepare_payment or pay_task again`;
+// No answer, a broken connection or a 5xx after sending: the payment may have settled, even as an
+// orphan. No automatic second payment; the user decides.
+export const payUnknown = (reason: string) =>
+	`${reason}; the payment may have settled. Call get_task. If it shows no order, tell the user the outcome is unknown and ask before calling prepare_payment or pay_task again`;
 
 export const STILL_SETTLING =
 	"the payment is still settling: call get_task in a few seconds; do not call prepare_payment";

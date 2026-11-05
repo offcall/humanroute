@@ -3,16 +3,17 @@
 import { failureReason, fieldOf, readOffer } from "./payHeaders.js";
 import {
 	orphanText,
-	PAY_TIMED_OUT,
 	PAY_TIMEOUT_MS,
 	parsePaid,
 	parseUnsigned,
+	payUnknown,
 	STILL_SETTLING,
 } from "./payParse.js";
 import { type PayClient, PayOutcome } from "./payTypes.js";
 import type { Parsed } from "./types.js";
 
 const TIMEOUT_MS = 15_000;
+
 const send = async (
 	url: string,
 	init: RequestInit,
@@ -79,8 +80,7 @@ export const createPayClient = (baseUrl: string): PayClient => {
 				PAY_TIMEOUT_MS,
 			);
 			if (!sent.ok) {
-				const timedOut = sent.error.includes("in time");
-				return { ok: false, error: timedOut ? PAY_TIMED_OUT : sent.error };
+				return { ok: false, error: payUnknown(sent.error) };
 			}
 			const response = sent.value;
 			if (response.status === 402) {
@@ -98,11 +98,14 @@ export const createPayClient = (baseUrl: string): PayClient => {
 					? { ok: false, error: STILL_SETTLING }
 					: { ok: false, error: `payment refused: ${code}` };
 			}
-			if (response.status === 502) {
+			if (response.status >= 500) {
 				const body: unknown = await response.json().catch(() => undefined);
-				if (fieldOf(body, "error") === "orphan_payment") {
-					return { ok: false, error: orphanText(fieldOf(body, "payTx")) };
-				}
+				return fieldOf(body, "error") === "orphan_payment"
+					? { ok: false, error: orphanText(fieldOf(body, "payTx")) }
+					: {
+							ok: false,
+							error: payUnknown(`gateway answered HTTP ${response.status}`),
+						};
 			}
 			if (response.status !== 201) {
 				return {
