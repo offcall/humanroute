@@ -1,36 +1,46 @@
-import { useCallback, useState } from "react";
-import {
-	formatUsdc,
-	type LanguagePair,
-	LanguagePairs,
-	RequireSession,
-	request,
-	usePoll,
-	useSession,
-} from "../shared";
+import { useEffect, useState } from "react";
+import { navigate, RequireSession, useRoute, useSession } from "../shared";
 import { Board } from "./Board";
 import { MyTasks } from "./MyTasks";
-import { type Cabinet, parseCabinet, parsePairs } from "./parseCabinet";
+import type { Cabinet } from "./parseCabinet";
+import { SubmitTask } from "./SubmitTask";
+import { Tabbar } from "./Tabbar";
+import { type Screen, screenOf, TAB_PATH, TAB_TITLE, Tab } from "./tabs";
+import { useCabinet } from "./useCabinet";
+import { WalletTab } from "./WalletTab";
 
-const LinguistHome = () => {
+type BodyProps = {
+	screen: Screen;
+	cabinet: Cabinet;
+	reload: () => Promise<void>;
+	onBoardCount: (count: number) => void;
+};
+
+const Body = ({ screen, cabinet, reload, onBoardCount }: BodyProps) => {
+	if (screen.taskId !== undefined) {
+		return (
+			<SubmitTask
+				key={screen.taskId}
+				taskId={screen.taskId}
+				onSubmitted={reload}
+				onClose={() => navigate(TAB_PATH[Tab.Tasks])}
+			/>
+		);
+	}
+	if (screen.tab === Tab.Tasks) {
+		return <MyTasks tasks={cabinet.tasks} />;
+	}
+	if (screen.tab === Tab.Wallet) {
+		return <WalletTab cabinet={cabinet} reload={reload} />;
+	}
+
+	return <Board onClaimed={reload} onCount={onBoardCount} />;
+};
+
+const LinguistShell = ({ screen }: { screen: Screen }) => {
 	const { me } = useSession();
-	const [cabinet, setCabinet] = useState<Cabinet>();
-	const [failed, setFailed] = useState<string>();
-	const [edited, setEdited] = useState<LanguagePair[]>();
-	const [saveError, setSaveError] = useState<string>();
-	const [saved, setSaved] = useState(0);
-
-	const load = useCallback(async () => {
-		const res = await request("GET", "/api/linguist", undefined, parseCabinet);
-		if (res.ok) {
-			setCabinet(res.value);
-			setFailed(undefined);
-		} else {
-			setFailed(res.error.message ?? res.error.error);
-		}
-	}, []);
-
-	usePoll(load);
+	const { cabinet, failed, reload } = useCabinet();
+	const [boardCount, setBoardCount] = useState(0);
 
 	if (cabinet === undefined) {
 		if (failed === undefined) {
@@ -45,47 +55,46 @@ const LinguistHome = () => {
 		);
 	}
 
-	const pairs = edited ?? cabinet.pairs;
-	// Every Add / Remove is saved at once; the API needs at least one pair.
-	const save = async (next: LanguagePair[]) => {
-		if (next.length === 0) {
-			setSaveError("keep at least one language pair");
-			return;
-		}
-		setEdited(next);
-		const res = await request(
-			"PUT",
-			"/api/linguist/languages",
-			{ pairs: next },
-			parsePairs,
-		);
-		if (!res.ok) {
-			setEdited(undefined);
-			setSaveError(res.error.message ?? res.error.error);
-			return;
-		}
-		setSaveError(undefined);
-		await load();
-		setEdited(undefined);
-		setSaved((count) => count + 1);
-	};
-
 	return (
-		<div>
-			<h1>Linguist cabinet</h1>
-			<p>Earned: {formatUsdc(cabinet.earnedUnits)}</p>
-			<h2>Language pairs</h2>
-			<LanguagePairs value={pairs} onChange={(next) => void save(next)} />
-			{saveError === undefined ? null : <p className="error">{saveError}</p>}
-			{/* Remounting reloads the board for the saved pairs. */}
-			<Board key={saved} onClaimed={load} />
-			<MyTasks tasks={cabinet.tasks} onChanged={load} />
+		<div className="app theme-big">
+			<main className="app__main">
+				<div className="app__pad">
+					<header className="big-head">
+						<h1 className="h-title">{TAB_TITLE[screen.tab]}</h1>
+						<span>
+							{cabinet.agency.name} · translator #{cabinet.translatorNo}
+						</span>
+					</header>
+					<Body
+						screen={screen}
+						cabinet={cabinet}
+						reload={reload}
+						onBoardCount={setBoardCount}
+					/>
+				</div>
+			</main>
+			<Tabbar current={screen.tab} boardCount={boardCount} />
 		</div>
 	);
 };
 
-export const Linguist = () => (
-	<RequireSession>
-		<LinguistHome />
-	</RequireSession>
-);
+// Unknown /linguist/... paths go to the board.
+const BoardRedirect = () => {
+	useEffect(() => navigate(TAB_PATH[Tab.Board], true), []);
+
+	return null;
+};
+
+export const Linguist = () => {
+	const screen = screenOf(useRoute());
+
+	return (
+		<RequireSession>
+			{screen === undefined ? (
+				<BoardRedirect />
+			) : (
+				<LinguistShell screen={screen} />
+			)}
+		</RequireSession>
+	);
+};

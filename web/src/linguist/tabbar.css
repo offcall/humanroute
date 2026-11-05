@@ -1,0 +1,43 @@
+/* Bottom tab bar (indigo.css §11) */
+.tabbar {
+	flex: none;
+	display: flex;
+	justify-content: space-around;
+	border-top: 1px solid var(--hr-line);
+	background: var(--hr-card);
+	padding: 6px 6px 12px;
+}
+.tabbar__tab {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 3px;
+	min-height: 48px;
+	min-width: 76px;
+	font: 700 11.5px / 1.2 var(--hr-sans);
+	color: var(--hr-muted);
+	text-decoration: none;
+	position: relative;
+	background: none;
+	border: 0;
+}
+.tabbar__tab[aria-current="page"] {
+	color: var(--hr-accent-strong);
+}
+.tabbar__count {
+	position: absolute;
+	top: 0;
+	right: 16px;
+	background: var(--hr-bad);
+	color: var(--hr-on-accent);
+	border-radius: var(--hr-radius-pill);
+	font: 800 10px / 1 var(--hr-sans);
+	padding: 3px 5px;
+}
+
+/* Big phone header title (linguist-big page rules) */
+.big-head .h-title {
+	font: 850 19px / 1.1 var(--hr-sans);
+	margin: 0;
+}

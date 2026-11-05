@@ -1,0 +1,19 @@
+/* Wallet tab (linguist-big page rules) */
+.money .num-money {
+	margin: 0;
+}
+.plate__who {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.plate__who b {
+	font-size: 16px;
+}
+.pairs {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding-top: 12px;
+	border-top: 1px solid var(--hr-line);
+}

@@ -3,18 +3,19 @@ import {
 	type BoardTask,
 	Countdown,
 	formatUsdc,
+	navigate,
 	parseBoard,
 	parseTask,
 	request,
 	usePoll,
 } from "../shared";
 
-type Props = { onClaimed: () => void };
+type Props = { onClaimed: () => void; onCount: (count: number) => void };
 type BoardView = { serverTime: string; tasks: BoardTask[] };
 
 const preview = (text: string): string[] => text.split("\n").slice(0, 2);
 
-export const Board = ({ onClaimed }: Props) => {
+export const Board = ({ onClaimed, onCount }: Props) => {
 	const [board, setBoard] = useState<BoardView>();
 	const [taken, setTaken] = useState<string[]>([]);
 	const [error, setError] = useState<string>();
@@ -24,11 +25,12 @@ export const Board = ({ onClaimed }: Props) => {
 		const res = await request("GET", "/api/board", undefined, parseBoard);
 		if (res.ok) {
 			setBoard(res.value);
+			onCount(res.value.tasks.length);
 			setLoadError(undefined);
 		} else {
 			setLoadError(res.error.message ?? res.error.error);
 		}
-	}, []);
+	}, [onCount]);
 
 	usePoll(load);
 
@@ -38,6 +40,8 @@ export const Board = ({ onClaimed }: Props) => {
 		if (res.ok) {
 			setError(undefined);
 			onClaimed();
+			navigate(`/linguist/tasks/${encodeURIComponent(taskId)}`);
+			return;
 		} else if (res.status === 409) {
 			setTaken((ids) => [...ids, taskId]);
 		} else {
@@ -48,7 +52,6 @@ export const Board = ({ onClaimed }: Props) => {
 
 	return (
 		<section>
-			<h2>Board</h2>
 			{error === undefined ? null : <p className="error">{error}</p>}
 			{loadError === undefined ? null : (
 				<p className="error">Board not loaded: {loadError}</p>
