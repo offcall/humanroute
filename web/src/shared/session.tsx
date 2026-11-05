@@ -9,6 +9,7 @@ import {
 } from "react";
 import { request } from "./api";
 import { parseMe } from "./parsers";
+import { unsubscribePush } from "./push";
 import { navigate } from "./router";
 import { signIn as signInSiws } from "./siws";
 import type { Me } from "./types";
@@ -56,6 +57,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 	}, [refresh]);
 
 	const signOut = useCallback(async () => {
+		// Not awaited: the unsubscribe route needs no session, so it never blocks logout.
+		void unsubscribePush();
 		const res = await request("POST", "/api/auth/logout", {}, parseDone);
 		if (!res.ok) {
 			return;

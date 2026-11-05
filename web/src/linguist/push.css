@@ -1,0 +1,9 @@
+/* Push card in the wallet tab (ADR 0029) */
+.push {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+	padding-top: 12px;
+	border-top: 1px solid var(--hr-line);
+}

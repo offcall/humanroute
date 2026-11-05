@@ -1,5 +1,6 @@
 import { Avatar, LanguagePairs, useSession, WalletLine } from "../shared";
 import { amountOnly } from "./jobLabel";
+import { PushCard } from "./PushCard";
 import type { Cabinet } from "./parseCabinet";
 import { usePairSave } from "./usePairSave";
 import "./wallet.css";
@@ -38,6 +39,7 @@ export const WalletTab = ({ cabinet, reload }: Props) => {
 				<LanguagePairs value={pairs} onChange={(next) => void save(next)} />
 				{saveError === undefined ? null : <p className="error">{saveError}</p>}
 			</section>
+			<PushCard />
 		</>
 	);
 };
