@@ -1,5 +1,5 @@
 import type { MouseEvent } from "react";
-import { Icon, IconName, navigate, phantomDeepLink, Spinner } from "../shared";
+import { Icon, IconName, LoginLink, navigate, Spinner } from "../shared";
 import { JoinButton } from "./JoinButton";
 import { JoinBusy, type JoinError, JoinFailure } from "./useJoin";
 
@@ -16,6 +16,7 @@ type Props = {
 	busy: JoinBusy;
 	error: JoinError | undefined;
 	onJoin: () => void;
+	onSignedIn: () => void;
 };
 
 const goTo = (path: string) => (event: MouseEvent) => {
@@ -29,7 +30,14 @@ const Note = ({ text, live }: { text: string; live?: boolean }) => (
 	</p>
 );
 
-export const JoinStub = ({ kind, signedIn, busy, error, onJoin }: Props) => {
+export const JoinStub = ({
+	kind,
+	signedIn,
+	busy,
+	error,
+	onJoin,
+	onSignedIn,
+}: Props) => {
 	if (kind === StubKind.Loading) {
 		return (
 			<p className="stub-loading" role="status">
@@ -53,14 +61,11 @@ export const JoinStub = ({ kind, signedIn, busy, error, onJoin }: Props) => {
 	if (kind === StubKind.NoPhantom) {
 		return (
 			<>
-				<a
+				<LoginLink
 					className="btn btn--white btn--block"
-					href={phantomDeepLink(window.location.href)}
-				>
-					Open in Phantom
-					<Icon name={IconName.Ext} size={16} />
-				</a>
-				<Note text="No Phantom wallet in this browser. This invite opens in the Phantom app, then you sign in there." />
+					onSignedIn={onSignedIn}
+				/>
+				<Note text="Phantom opens. Tap Approve there, come back here, and you join right away." />
 			</>
 		);
 	}

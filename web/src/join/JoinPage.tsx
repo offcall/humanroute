@@ -15,7 +15,11 @@ import { JoinStub, StubKind } from "./JoinStub";
 import { InviteState, useInvite } from "./useInvite";
 import { JoinBusy, useJoin } from "./useJoin";
 
-const stubKind = (state: InviteState, sessionLoading: boolean): StubKind => {
+const stubKind = (
+	state: InviteState,
+	sessionLoading: boolean,
+	signedIn: boolean,
+): StubKind => {
 	if (state === InviteState.Loading || sessionLoading) {
 		return StubKind.Loading;
 	}
@@ -23,15 +27,17 @@ const stubKind = (state: InviteState, sessionLoading: boolean): StubKind => {
 		return StubKind.NotFound;
 	}
 
-	return getPhantom() === undefined ? StubKind.NoPhantom : StubKind.Ready;
+	return getPhantom() === undefined && !signedIn
+		? StubKind.NoPhantom
+		: StubKind.Ready;
 };
 
 const JoinInvite = ({ inviteCode }: { inviteCode: string }) => {
 	const invite = useInvite(inviteCode);
 	const { me, loading, signOut } = useSession();
-	const { busy, error, join } = useJoin(inviteCode);
-	const kind = stubKind(invite.state, loading);
+	const { busy, error, join, joinSignedIn } = useJoin(inviteCode);
 	const signedIn = me !== null;
+	const kind = stubKind(invite.state, loading, signedIn);
 	const open = kind !== StubKind.Loading && kind !== StubKind.NotFound;
 	const calm = open && error === undefined;
 
@@ -55,6 +61,7 @@ const JoinInvite = ({ inviteCode }: { inviteCode: string }) => {
 					busy={busy}
 					error={error}
 					onJoin={join}
+					onSignedIn={joinSignedIn}
 				/>
 			</InviteTicket>
 			{kind === StubKind.NotFound ? <JoinAlert error={undefined} /> : null}

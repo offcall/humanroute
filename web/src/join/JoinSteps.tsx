@@ -18,13 +18,8 @@ export const JoinSteps = ({ agencyName, signedIn, noPhantom }: Props) => (
 				{signedIn ? <Icon name={IconName.Check} size={15} /> : "1"}
 			</span>
 			<span>
-				{noPhantom ? (
-					<>
-						<b>Open this invite in Phantom</b> and sign in
-					</>
-				) : (
-					<b>Sign in with Phantom</b>
-				)}
+				<b>Sign in with Phantom</b>
+				{noPhantom ? ", approve there, then come back here" : null}
 				{signedIn ? <span className="visually-hidden"> (done)</span> : null}
 			</span>
 		</li>

@@ -32,18 +32,9 @@ export const useJoin = (inviteCode: string) => {
 	const [busy, setBusy] = useState(JoinBusy.Idle);
 	const [error, setError] = useState<JoinError | undefined>(undefined);
 
-	const join = async () => {
+	// Also called right after a login request signs the tab in (ADR 0034).
+	const joinSignedIn = async () => {
 		setError(undefined);
-		if (me === null) {
-			setBusy(JoinBusy.SignIn);
-			const failed = await signIn();
-			if (failed !== undefined) {
-				setError({ kind: JoinFailure.SignIn, code: failed });
-				setBusy(JoinBusy.Idle);
-				return;
-			}
-		}
-
 		setBusy(JoinBusy.Join);
 		const url = `/api/linguist/join/${encodeURIComponent(inviteCode)}`;
 		const res = await request("POST", url, {}, parseJoined);
@@ -57,5 +48,19 @@ export const useJoin = (inviteCode: string) => {
 		setBusy(JoinBusy.Idle);
 	};
 
-	return { busy, error, join };
+	const join = async () => {
+		setError(undefined);
+		if (me === null) {
+			setBusy(JoinBusy.SignIn);
+			const failed = await signIn();
+			if (failed !== undefined) {
+				setError({ kind: JoinFailure.SignIn, code: failed });
+				setBusy(JoinBusy.Idle);
+				return;
+			}
+		}
+		await joinSignedIn();
+	};
+
+	return { busy, error, join, joinSignedIn };
 };
