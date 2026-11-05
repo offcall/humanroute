@@ -8,9 +8,9 @@
 	"scripts": {
 		"dev": "tsx watch --env-file=.env src/index.ts",
 		"start": "tsx --env-file=.env src/index.ts",
-		"check": "biome check . && tsc --noEmit && tsc -p web/tsconfig.json --noEmit",
+		"check": "biome check . && tsc --noEmit && tsc -p web/tsconfig.json --noEmit && tsc -p web/sw/tsconfig.json --noEmit",
 		"fix": "biome check --write .",
-		"typecheck": "tsc --noEmit && tsc -p web/tsconfig.json --noEmit",
+		"typecheck": "tsc --noEmit && tsc -p web/tsconfig.json --noEmit && tsc -p web/sw/tsconfig.json --noEmit",
 		"setup:wallets": "tsx --env-file-if-exists=.env scripts/setup-wallets.ts",
 		"e2e:devnet": "bash scripts/e2e-devnet.sh",
 		"requeue": "tsx --env-file=.env src/requeue.ts",
