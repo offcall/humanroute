@@ -7,7 +7,12 @@ import {
 import { type Connection, PublicKey } from "@solana/web3.js";
 import type { Commitment } from "../config/index.js";
 import { classify } from "./errors.js";
-import { type ChainResult, Phase, type TokenAccount } from "./types.js";
+import {
+	type ChainResult,
+	Phase,
+	type RecentBlockhash,
+	type TokenAccount,
+} from "./types.js";
 
 export const tokenAccount = async (
 	conn: Connection,
@@ -43,10 +48,11 @@ export const tokenAccount = async (
 export const latestBlockhash = async (
 	conn: Connection,
 	commitment: Commitment,
-): Promise<ChainResult<string>> => {
+): Promise<ChainResult<RecentBlockhash>> => {
 	try {
 		const latest = await conn.getLatestBlockhash(commitment);
-		return { ok: true, value: latest.blockhash };
+		const { blockhash, lastValidBlockHeight } = latest;
+		return { ok: true, value: { blockhash, lastValidBlockHeight } };
 	} catch (err) {
 		return { ok: false, error: classify(err, Phase.Prepare) };
 	}

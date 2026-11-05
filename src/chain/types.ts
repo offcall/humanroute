@@ -73,6 +73,11 @@ export type TokenAccount =
 			delegatedAmount: bigint;
 	  };
 
+export type RecentBlockhash = {
+	blockhash: string;
+	lastValidBlockHeight: number;
+};
+
 export type SolanaClient = {
 	holdAddress: string;
 	signPayout(req: PayoutRequest): Promise<ChainResult<SignedTransfer>>;
@@ -82,7 +87,7 @@ export type SolanaClient = {
 	// Signature of a successful hold transaction whose memo contains `memo`, or null.
 	findMemo(memo: string): Promise<ChainResult<string | null>>;
 	tokenAccount(owner: string): Promise<ChainResult<TokenAccount>>;
-	latestBlockhash(): Promise<ChainResult<string>>;
+	latestBlockhash(): Promise<ChainResult<RecentBlockhash>>;
 	// Problems that should stop the gateway from taking payments; empty when ready.
 	preflight(): Promise<PreflightProblem[]>;
 };

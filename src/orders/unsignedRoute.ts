@@ -68,7 +68,7 @@ export const unsignedRoute = (deps: OrdersDeps): Hono => {
 			mint: deps.usdcMint,
 			payTo: deps.payTo,
 			amountUnits: draft.totalUnits,
-			blockhash: blockhash.value,
+			blockhash: blockhash.value.blockhash,
 		});
 		const amountUnits = draft.totalUnits.toString();
 		return ctx.json({

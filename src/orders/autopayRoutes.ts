@@ -31,7 +31,8 @@ export const autopayRoutes = (deps: OrdersDeps): Hono => {
 					allowanceUnits: usdc.delegatedAmount.toString(),
 				}
 			: {};
-		const base = { wallet, mint: deps.usdcMint, blockhash: blockhash.value };
+		const { payTo, usdcMint: mint } = deps;
+		const base = { wallet, mint, payTo, ...blockhash.value };
 		return ctx.json({
 			...base,
 			account: usdc.address,
