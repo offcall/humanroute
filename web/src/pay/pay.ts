@@ -3,6 +3,7 @@ import type { ClientSvmSigner } from "@x402/svm";
 import { SOLANA_DEVNET_CAIP2 } from "@x402/svm";
 import { ExactSvmScheme } from "@x402/svm/exact/client";
 import { parsePayResult } from "./parse";
+import { paymentFailureReason } from "./reason";
 import type { Parsed, PayResult } from "./types";
 
 const errorByCode: Record<string, string> = {
@@ -28,6 +29,10 @@ const readError = async (response: Response): Promise<string> => {
 	}
 	if (response.status === 503) {
 		return "the gateway is not ready, try again later";
+	}
+	const reason = paymentFailureReason(response.headers);
+	if (reason !== undefined) {
+		return `payment failed (HTTP ${response.status}): ${reason}`;
 	}
 
 	return `payment failed (HTTP ${response.status})`;

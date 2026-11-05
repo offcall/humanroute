@@ -1,5 +1,6 @@
 import { VersionedTransaction } from "@solana/web3.js";
 import { isRecord } from "../shared";
+import { phantomError } from "./phantomError";
 import { createPhantomSigner } from "./signer";
 import type { Parsed, PhantomProvider } from "./types";
 
@@ -28,9 +29,12 @@ export const getPhantom = (): PhantomProvider | undefined => {
 			return { publicKey: { toString: () => key } };
 		},
 		signTransaction: async (tx) => {
-			const signed: unknown = await Reflect.apply(signTransaction, provider, [
-				tx,
-			]);
+			let signed: unknown;
+			try {
+				signed = await Reflect.apply(signTransaction, provider, [tx]);
+			} catch (error) {
+				throw phantomError(error);
+			}
 			// Phantom builds the result with its own web3.js copy, so `instanceof` fails;
 			// re-read its wire bytes with ours instead.
 			if (signed instanceof VersionedTransaction) {

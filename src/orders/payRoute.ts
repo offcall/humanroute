@@ -6,16 +6,16 @@ import { ExactSvmScheme } from "@x402/svm/exact/server";
 import { Hono } from "hono";
 import { capturePayment } from "./capture.js";
 import { draftById } from "./drafts.js";
+import { loggedFacilitator } from "./facilitatorLog.js";
 import { draftGate, readinessGate } from "./guards.js";
 import type { OrdersDeps, OrdersEnv } from "./types.js";
 
 const PAY_PATH = "/x/orders/:draftId";
 
 export const payRoute = (deps: OrdersDeps): Hono<OrdersEnv> => {
-	const server = new x402ResourceServer(deps.facilitator).register(
-		deps.network,
-		new ExactSvmScheme(),
-	);
+	const server = new x402ResourceServer(
+		loggedFacilitator(deps.facilitator, deps.log),
+	).register(deps.network, new ExactSvmScheme());
 	// Explicit asset + base units, so any 6-decimal mint (devnet USDC or a test mint) works.
 	const price: DynamicPrice = (context) => {
 		const draftId = context.path.split("/").pop() ?? "";

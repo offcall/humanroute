@@ -8,6 +8,9 @@ import { VersionedTransaction } from "@solana/web3.js";
 import type { ClientSvmSigner } from "@x402/svm";
 import type { PhantomProvider } from "./types";
 
+const sameBytes = (left: Uint8Array, right: Uint8Array): boolean =>
+	left.length === right.length && left.every((byte, at) => byte === right[at]);
+
 export const createPhantomSigner = (
 	phantom: PhantomProvider,
 	walletAddress: string,
@@ -24,6 +27,14 @@ export const createPhantomSigner = (
 					Uint8Array.from(encoder.encode(transaction)),
 				);
 				const signed = await phantom.signTransaction(unsigned);
+				// x402 sends its own message with this signature, so a changed message cannot verify.
+				if (
+					!sameBytes(signed.message.serialize(), unsigned.message.serialize())
+				) {
+					throw new Error(
+						"Phantom changed the transaction before signing; its signature would not verify",
+					);
+				}
 				const index = signed.message.staticAccountKeys.findIndex(
 					(key) => key.toBase58() === walletAddress,
 				);
