@@ -52,7 +52,7 @@ export const sendWithPhantom = async (
 	} catch (error) {
 		return {
 			ok: false,
-			error: `Phantom: ${reason(error)}. Is Phantom on Solana devnet (Settings, Developer settings, Testnet mode)?`,
+			error: `Phantom did not send it: ${reason(error)}. Check the reason in the Phantom window; Phantom must be in Testnet mode (devnet).`,
 		};
 	}
 };

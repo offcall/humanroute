@@ -1,0 +1,28 @@
+/* Quiet tabs in the Connect Claude dialog; auto-pay is optional and stays out of the way. */
+.fb-tabs {
+	display: flex;
+	gap: 18px;
+	border-bottom: 1px solid var(--hr-line, rgba(31, 27, 22, 0.15));
+}
+.fb-tab {
+	padding: 6px 0;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	background: none;
+	font: 600 14px / 1.3 var(--hr-sans);
+	color: var(--hr-muted);
+	cursor: pointer;
+}
+.fb-tab[aria-selected="true"] {
+	border-bottom-color: var(--hr-ink);
+	color: var(--hr-ink);
+}
+.fb-autopay-toggle {
+	grid-column: 1 / -1;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+.fb-autopay-toggle > .fb-tab {
+	align-self: flex-start;
+}

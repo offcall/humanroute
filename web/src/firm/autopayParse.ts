@@ -6,6 +6,7 @@ export type Autopay = {
 	mint: string;
 	payTo: string;
 	payToAccount: string;
+	solLamports: number;
 	blockhash: string;
 	lastValidBlockHeight: number;
 	account: string;
@@ -23,6 +24,7 @@ export const parseAutopay = (raw: unknown): Autopay | undefined => {
 	const mint = str(raw.mint);
 	const payTo = str(raw.payTo);
 	const payToAccount = str(raw.payToAccount);
+	const solLamports = num(raw.solLamports);
 	const recent = str(raw.blockhash);
 	const height = num(raw.lastValidBlockHeight);
 	const account = str(raw.account);
@@ -31,6 +33,7 @@ export const parseAutopay = (raw: unknown): Autopay | undefined => {
 		!mint ||
 		!payTo ||
 		!payToAccount ||
+		solLamports === undefined ||
 		!recent ||
 		height === undefined ||
 		!account
@@ -43,6 +46,7 @@ export const parseAutopay = (raw: unknown): Autopay | undefined => {
 		mint,
 		payTo,
 		payToAccount,
+		solLamports,
 		blockhash: recent,
 		lastValidBlockHeight: height,
 		account,

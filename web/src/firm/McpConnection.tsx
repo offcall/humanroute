@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Icon, IconName } from "../shared";
 import { AutoPay } from "./AutoPay";
+import { AutoPayToggle, ConnectTabs } from "./ConnectTabs";
 import { McpBlock } from "./McpBlock";
 import type { Mcp } from "./types";
 import "./connect.css";
@@ -42,7 +43,9 @@ export const ConnectHero = ({ mcp }: { mcp: Mcp }) => (
 				</span>
 			</li>
 		</ol>
-		<AutoPay />
+		<AutoPayToggle>
+			<AutoPay />
+		</AutoPayToggle>
 	</div>
 );
 
@@ -76,12 +79,18 @@ export const ConnectDialog = ({ mcp, onClose }: DialogProps) => {
 					<Icon name={IconName.Cross} size={20} />
 				</button>
 			</div>
-			<p className="desk-hint">
-				Add HumanRoute to Claude Code once. Then ask Claude to translate; it
-				sends you a pay link.
-			</p>
-			<McpBlock mcp={mcp} />
-			<AutoPay />
+			<ConnectTabs
+				connect={
+					<>
+						<p className="desk-hint">
+							Add HumanRoute to Claude Code once. Then ask Claude to translate;
+							it sends you a pay link.
+						</p>
+						<McpBlock mcp={mcp} />
+					</>
+				}
+				autopay={<AutoPay />}
+			/>
 		</dialog>
 	);
 };

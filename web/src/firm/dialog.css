@@ -12,6 +12,9 @@
 	gap: 14px;
 	padding: 22px 24px 24px;
 	border-radius: 20px;
+	/* Tall content (auto-pay) scrolls inside the dialog instead of running off the screen. */
+	max-height: calc(100dvh - 140px);
+	overflow-y: auto;
 }
 .fb-dialog[open] {
 	display: flex;
@@ -28,5 +31,6 @@
 @media (max-width: 760px) {
 	.fb-dialog {
 		top: 24px;
+		max-height: calc(100dvh - 48px);
 	}
 }

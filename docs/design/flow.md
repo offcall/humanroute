@@ -54,6 +54,7 @@ Memos: `hr:<taskId>` (approved), `hr:<taskId>:rejected`, `:unclaimed`, `:late` (
 | Different payment for a paid draft | `409 draft_paid` | orders |
 | Payment already used for another draft | `409 payment_reused` | orders |
 | Paid on-chain but not recorded | `502 orphan_payment`, orphan row; operator refunds by hand to the owner of the paying token account (ADR 0036) | orders |
+| Auto-pay: firm wallet has no SOL for the approve or revoke fee | cabinet disables the buttons and links the devnet faucet | web |
 | Auto-pay: no allowance, or revoked | `409 autopay_off`; Claude gives the pay link | orders, mcp |
 | Auto-pay: allowance below the order total | `409 autopay_limit {leftUnits}`; the firm raises the limit in the cabinet or pays by link | orders, mcp |
 | Auto-pay: firm USDC below the order total, or no USDC account | `409 insufficient_usdc {balanceUnits}` or `409 no_usdc_account`; pay link | orders, mcp |
