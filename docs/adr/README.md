@@ -34,5 +34,5 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0028](0028-demo-vs-public-timers.md) | Demo vs public timers in config | Proposed |
 | [0030](0030-approve-reject-from-mcp.md) | Approve and reject from MCP after asking the user | Proposed |
 | [0031](0031-wait-task.md) | wait_task with progress notifications | Proposed |
-| [0032](0032-indigo-web-ui.md) | Indigo web UI: theme, CSS layout, client routes | Proposed |
-| [0033](0033-indigo-read-fields.md) | Indigo read fields | Proposed |
+| [0032](0032-indigo-web-ui.md) | Indigo web UI: theme, CSS layout, client routes | Accepted |
+| [0033](0033-indigo-read-fields.md) | Indigo read fields | Accepted |
