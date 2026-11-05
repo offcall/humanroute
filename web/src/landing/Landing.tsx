@@ -2,11 +2,17 @@ import "./landing.css";
 import { useSession, WalletLine } from "../shared";
 import { HowItWorks } from "./HowItWorks";
 import { RegisterForm } from "./RegisterForm";
+import { useHomeRedirect } from "./useHomeRedirect";
 import { Busy, useRegister } from "./useRegister";
 
 export const Landing = () => {
 	const { me, signOut } = useSession();
 	const { busy, error, registerFirm, registerAgency } = useRegister();
+	const redirecting = useHomeRedirect();
+
+	if (redirecting) {
+		return null;
+	}
 
 	return (
 		<div className="land">
