@@ -1,0 +1,63 @@
+/* ---------- 18. Alerts, inline error, loading, empty ---------- */
+.alert {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+	padding: 12px 14px;
+	border-radius: 14px;
+	font-size: 15px;
+	line-height: 1.4;
+	border: 1.5px solid;
+}
+.alert svg {
+	width: 20px;
+	height: 20px;
+	margin-top: 1px;
+}
+.alert b {
+	font-weight: 850;
+}
+.alert--error {
+	background: var(--hr-bad-tint);
+	border-color: var(--hr-bad);
+	color: var(--hr-ink);
+}
+.alert--error > svg {
+	color: var(--hr-bad);
+}
+.alert--info {
+	background: var(--hr-accent-soft);
+	border-color: var(--hr-accent);
+	color: var(--hr-ink);
+}
+.alert--info > svg {
+	color: var(--hr-accent-strong);
+}
+.alert--success {
+	background: var(--hr-ok-tint);
+	border-color: var(--hr-ok);
+	color: var(--hr-ink);
+}
+.alert--success > svg {
+	color: var(--hr-ok);
+}
+/* finished event, no action needed: neutral (indigo is kept for "your turn") */
+.alert--notice {
+	background: var(--hr-card);
+	border-color: var(--hr-line);
+	color: var(--hr-ink);
+}
+.alert--notice > svg {
+	color: var(--hr-void);
+}
+.alert .proof svg {
+	width: 13px;
+	height: 13px;
+	margin-top: 0;
+}
+.alert__actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+	flex-wrap: wrap;
+}

@@ -1,0 +1,102 @@
+/* ---------- 6. Inputs (16px: no iOS zoom) ---------- */
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+}
+.field__label {
+	font: 750 12px / 1.2 var(--hr-sans);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--hr-muted);
+}
+.field__hint {
+	font-size: 13px;
+	color: var(--hr-muted);
+}
+.input,
+.select,
+.textarea {
+	font: 400 16px / 1.45 var(--hr-sans);
+	width: 100%;
+	min-height: 48px;
+	padding: 10px 12px;
+	border: 2px solid var(--hr-muted);
+	border-radius: 12px;
+	background: var(--hr-card);
+	color: var(--hr-ink);
+}
+.textarea {
+	resize: vertical;
+	min-height: 120px;
+}
+.select {
+	appearance: none;
+	padding-right: 40px;
+	background: var(--hr-card)
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%231F1B16' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+		no-repeat right 12px center;
+}
+.input::placeholder,
+.textarea::placeholder {
+	color: var(--hr-muted);
+}
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible {
+	border-color: var(--hr-accent);
+	outline-offset: 1px;
+}
+.input:disabled,
+.select:disabled,
+.textarea:disabled {
+	background: var(--hr-bg);
+	border-color: var(--hr-dash);
+	color: var(--hr-muted);
+}
+.field--error .input,
+.field--error .select,
+.field--error .textarea,
+[aria-invalid="true"] {
+	border-color: var(--hr-bad);
+}
+.input-row {
+	display: flex;
+	gap: 8px;
+	align-items: flex-end;
+	flex-wrap: wrap;
+}
+.input-row > .field {
+	flex: 1 1 120px;
+}
+
+/* Reason chips (reject): toggle buttons, selected = indigo fill + check */
+.chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+.chip {
+	min-height: 44px;
+	padding: 0 16px;
+	border-radius: var(--hr-radius-pill);
+	border: 2px solid var(--hr-muted);
+	background: var(--hr-card);
+	color: var(--hr-ink);
+	font: 700 15px / 1 var(--hr-sans);
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+.chip svg {
+	display: none;
+}
+.chip[aria-pressed="true"] {
+	background: var(--hr-accent);
+	border-color: var(--hr-accent);
+	color: var(--hr-on-accent);
+}
+.chip[aria-pressed="true"] svg {
+	display: block;
+}

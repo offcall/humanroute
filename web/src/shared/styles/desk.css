@@ -1,0 +1,74 @@
+/* Desktop page */
+.desk {
+	padding: 22px 24px 26px;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+.desk--narrow {
+	max-width: 720px;
+	margin: 0 auto;
+	width: 100%;
+}
+/* Desktop top bar: brand left, role label, signed-in wallet line right */
+.desk-top {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 24px;
+	border-bottom: 1px solid var(--hr-line);
+	min-height: 64px;
+	flex-wrap: wrap;
+}
+.desk-top__name {
+	font: 850 17px / 1 var(--hr-sans);
+	letter-spacing: -0.01em;
+}
+.desk-top__role {
+	font: 750 12px / 1.2 var(--hr-sans);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--hr-muted);
+	padding-left: 10px;
+	border-left: 1px solid var(--hr-line);
+}
+.desk-top .wallet-line {
+	margin-left: auto;
+	padding: 0;
+}
+.desk-title {
+	font: 850 clamp(32px, 6vw, 44px) / 1 var(--hr-sans);
+	letter-spacing: -0.035em;
+}
+.desk-hint {
+	font-size: 14px;
+	color: var(--hr-muted);
+	line-height: 1.45;
+}
+/* Desktop sign-in hero (RequireSession states): centred column, one action */
+.desk-hero {
+	max-width: 680px;
+	margin: 0 auto;
+	padding: 72px 24px 60px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 14px;
+}
+.desk-hero__action {
+	margin-top: 10px;
+}
+.desk-hero__action .btn {
+	min-width: 280px;
+}
+
+@media (max-width: 760px) {
+	.desk-top {
+		padding: 10px 16px;
+	}
+	.desk-top .wallet-line {
+		margin-left: 0;
+		flex-wrap: wrap;
+	}
+}

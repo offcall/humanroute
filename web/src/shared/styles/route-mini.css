@@ -1,0 +1,61 @@
+/* ---------- 8. Progress: 4-dot mini route and 4-segment bar ---------- */
+/* <div class="route-mini" style="--c:1"><i class="is-done"></i><i class="is-now"></i><i></i><i></i></div>
+   --c = number of completed links (0..3) */
+.route-mini {
+	display: flex;
+	justify-content: space-between;
+	position: relative;
+	width: 170px;
+	max-width: 100%;
+}
+.route-mini::before,
+.route-mini::after {
+	content: "";
+	position: absolute;
+	left: 6px;
+	top: 5px;
+	height: 3px;
+}
+.route-mini::before {
+	right: 6px;
+	background: var(--hr-line);
+}
+.route-mini::after {
+	width: calc((100% - 12px) * var(--c, 0) / 3);
+	background: var(--hr-ink);
+}
+.route-mini i {
+	width: 13px;
+	height: 13px;
+	border-radius: 50%;
+	background: var(--hr-card);
+	box-shadow: inset 0 0 0 2.5px var(--hr-mini-off);
+	position: relative;
+	z-index: 1;
+}
+.route-mini i.is-done {
+	background: var(--hr-ink);
+	box-shadow: none;
+}
+.route-mini i.is-now {
+	background: var(--hr-accent);
+	box-shadow: inset 0 0 0 2.5px var(--hr-ink);
+}
+.route-mini i.is-skipped {
+	background: var(--hr-card);
+	box-shadow: inset 0 0 0 2px var(--hr-mini-off);
+}
+.route-mini i.is-skipped::after {
+	content: "";
+	position: absolute;
+	left: -2px;
+	right: -2px;
+	top: 5px;
+	height: 2.5px;
+	background: var(--hr-void);
+	transform: rotate(-45deg);
+}
+.route-mini i.is-end-void {
+	background: var(--hr-void);
+	box-shadow: none;
+}

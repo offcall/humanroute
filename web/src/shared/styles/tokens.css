@@ -1,0 +1,71 @@
+/* ---------- 1. Tokens (brief §3, exact values) ---------- */
+:root {
+	/* surfaces */
+	--hr-bg: #f3efe9;
+	--hr-bg-plain: #faf8f5;
+	--hr-card: #ffffff;
+	--hr-hair: #efe9e1;
+	--hr-line: #e4ddd3;
+	--hr-dash: #cfc6b8;
+
+	/* text */
+	--hr-ink: #1f1b16;
+	--hr-src: #3a342c;
+	--hr-muted: #6b6250;
+
+	/* action and "your turn" */
+	--hr-accent: #4930c9;
+	--hr-accent-strong: #3a2aa8;
+	--hr-on-accent: #ffffff;
+	--hr-accent-soft: #eeeafb;
+	--hr-on-accent-label: #d9d3ff;
+	--hr-on-accent-urgent: #ffc2ba;
+
+	/* statuses */
+	--hr-ok: #13753f;
+	--hr-bad: #b42318;
+	--hr-info: #2563c9;
+	--hr-info-ink: #1d4fa3;
+	--hr-amber-ink: #6e4300;
+	--hr-void: #4a443a;
+	--hr-mini-off: #8c8276;
+	--hr-drain-track: #ece6dd;
+
+	/* shape */
+	--hr-radius-ticket: 24px;
+	--hr-radius-row: 20px;
+	--hr-radius-card: 16px;
+	--hr-radius-pill: 999px;
+	--hr-shadow-card:
+		0 1px 0 rgba(31, 27, 22, 0.05), 0 16px 30px -20px rgba(31, 27, 22, 0.35);
+	--hr-perforation: 2px dashed rgba(31, 27, 22, 0.25);
+
+	/* fonts */
+	--hr-sans:
+		ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+		"Helvetica Neue", Arial, sans-serif;
+	--hr-mono:
+		ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas,
+		monospace;
+
+	/* derived (not in brief §3; computed from it, see sheet contrast table) */
+	--hr-info-tint: #dce6f6; /* --hr-info 16% on white */
+	--hr-amber: #b47a00;
+	--hr-amber-tint: #f3ead6; /* --hr-amber 16% on white */
+	--hr-ok-tint: #e3eee8; /* --hr-ok 12% on white, success alert */
+	--hr-bad-tint: #f8e9e8; /* --hr-bad 10% on white, error alert */
+	--hr-on-accent-track: rgba(255, 255, 255, 0.28);
+	--hr-shadow-row:
+		0 1px 0 rgba(31, 27, 22, 0.05), 0 10px 22px -18px rgba(31, 27, 22, 0.35);
+	--hr-focus: 3px solid var(--hr-accent);
+
+	/* the surface a component sits on; ticket notches cut out this colour */
+	--hr-surface: var(--hr-bg);
+}
+
+/* Layout themes: Ticket uses warm paper, Big uses plain paper. */
+.theme-big {
+	--hr-surface: var(--hr-bg-plain);
+	background: var(--hr-bg-plain);
+	color: var(--hr-ink);
+}

@@ -1,0 +1,81 @@
+/* ---------- 9. Avatars (decorative: always aria-hidden, the name is text) ---------- */
+.avatar {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	flex: none;
+	font: 800 12px / 1 var(--hr-sans);
+	letter-spacing: 0.02em;
+	color: var(--hr-on-accent);
+	background: var(--hr-ink);
+}
+.avatar--sm {
+	width: 28px;
+	height: 28px;
+	font-size: 10.5px;
+}
+.avatar--lg {
+	width: 60px;
+	height: 60px;
+	font-size: 19px;
+}
+.avatar--indigo {
+	background: var(--hr-accent);
+}
+.avatar--green {
+	background: var(--hr-ok);
+}
+.avatar--red {
+	background: var(--hr-bad);
+}
+.avatar--none {
+	background: transparent;
+	box-shadow: inset 0 0 0 2px var(--hr-dash);
+	color: var(--hr-muted);
+	border: 0;
+}
+.avatar--none.avatar--dashed {
+	box-shadow: none;
+	border: 2px dashed var(--hr-dash);
+}
+
+/* Who: avatar + name + "translator #N" */
+.who {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+.who__name {
+	display: block;
+	font-size: 15px;
+	font-weight: 750;
+	line-height: 1.2;
+}
+.who__sub {
+	display: block;
+	font-size: 12.5px;
+	color: var(--hr-muted);
+}
+.theme-big .who__name {
+	font-size: 16px;
+}
+
+/* Agency plate */
+.plate {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	background: var(--hr-card);
+	border-radius: 12px;
+	padding: 8px 10px;
+	font-size: 13.5px;
+}
+.plate__aside {
+	margin-left: auto;
+	font: 12px var(--hr-mono);
+	color: var(--hr-muted);
+	white-space: nowrap;
+}

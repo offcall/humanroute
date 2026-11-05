@@ -1,0 +1,56 @@
+/* Round PAID / LATE stamps (animation in motion.css) */
+.stamp {
+	margin-left: auto;
+	transform: rotate(-9deg);
+	border: 2.5px solid var(--hr-ok);
+	color: var(--hr-ok);
+	border-radius: var(--hr-radius-pill);
+	padding: 5px 12px 4px;
+	text-align: center;
+	flex: none;
+	box-shadow:
+		inset 0 0 0 1.5px var(--hr-card),
+		inset 0 0 0 3px currentColor;
+	background: var(--hr-card);
+	animation: hr-stamp 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.stamp b {
+	display: block;
+	font: 900 14px / 1 var(--hr-sans);
+	letter-spacing: 0.1em;
+}
+.stamp small {
+	display: block;
+	font: 700 9.5px / 1.3 var(--hr-mono);
+}
+.stamp--late {
+	border-color: var(--hr-bad);
+	color: var(--hr-bad);
+}
+.stamp--paid {
+	border-color: var(--hr-ok);
+	color: var(--hr-ok);
+}
+.stamp--still {
+	animation: none;
+}
+.stamp--lg b {
+	font-size: 19px;
+}
+.stamp--lg small {
+	font-size: 10.5px;
+}
+.stamp--xl {
+	padding: 8px 20px 7px;
+} /* final money screen */
+.stamp--xl b {
+	font-size: clamp(24px, 8cqi, 30px);
+}
+.stamp--xl small {
+	font-size: clamp(12.5px, 4cqi, 14px);
+}
+/* money held in escrow: neutral accent; the green PAID stamp is kept for the final Paid out (brief §5) */
+.stamp--escrow {
+	border-color: var(--hr-accent);
+	color: var(--hr-accent-strong);
+}

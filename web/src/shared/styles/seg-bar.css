@@ -1,0 +1,68 @@
+/* ---------- 8. Progress: 4-segment bar ---------- */
+/* 4-segment bar. Compact (table): <div class="seg-bar seg-bar--mini"><i class="is-done"></i>…</div>
+   Labelled (detail): <ol class="seg-bar"><li class="is-done">Open</li>…</ol> */
+.seg-bar {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 6px;
+}
+.seg-bar > li {
+	font-size: 13px;
+	font-weight: 650;
+	color: var(--hr-muted);
+}
+.seg-bar > li::before {
+	content: "";
+	display: block;
+	height: 8px;
+	border-radius: 4px;
+	background: var(--hr-line);
+	margin-bottom: 7px;
+}
+.seg-bar > li.is-done {
+	color: var(--hr-ink);
+}
+.seg-bar > li.is-done::before {
+	background: var(--hr-ink);
+}
+.seg-bar > li.is-now {
+	color: var(--hr-ink);
+	font-weight: 850;
+}
+.seg-bar > li.is-now::before {
+	background: var(--hr-accent);
+}
+.seg-bar > li.is-skipped {
+	text-decoration: line-through;
+}
+.seg-bar > li.is-skipped::before,
+.seg-bar--mini > i.is-skipped {
+	background: repeating-linear-gradient(
+		135deg,
+		var(--hr-mini-off) 0 2px,
+		transparent 2px 6px
+	);
+	box-shadow: inset 0 0 0 1px var(--hr-mini-off);
+}
+.seg-bar > li.is-void::before {
+	background: var(--hr-void);
+}
+.seg-bar--mini {
+	gap: 4px;
+	width: 150px;
+	margin-top: 10px;
+}
+.seg-bar--mini > i {
+	height: 6px;
+	border-radius: 3px;
+	background: var(--hr-line);
+}
+.seg-bar--mini > i.is-done {
+	background: var(--hr-ink);
+}
+.seg-bar--mini > i.is-now {
+	background: var(--hr-accent);
+}
+.seg-bar--mini > i.is-void {
+	background: var(--hr-void);
+}

@@ -1,0 +1,84 @@
+/* ---------- 4. Layout primitives ---------- */
+.stack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap, 12px);
+}
+.stack--sm {
+	--gap: 8px;
+}
+.stack--lg {
+	--gap: 18px;
+}
+.row {
+	display: flex;
+	align-items: center;
+	gap: var(--gap, 10px);
+	min-width: 0;
+}
+.row--between {
+	justify-content: space-between;
+}
+.row--wrap {
+	flex-wrap: wrap;
+}
+.row--base {
+	align-items: baseline;
+}
+.push {
+	margin-left: auto;
+}
+.nowrap {
+	white-space: nowrap;
+	font-style: normal;
+} /* keeps a name + amount pair on one line */
+.grid-2 {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--gap, 26px);
+}
+.divider {
+	border: 0;
+	border-top: 1px solid var(--hr-line);
+	margin: 0;
+}
+.panel {
+	background: var(--hr-card);
+	border-radius: var(--hr-radius-card);
+	box-shadow: var(--hr-shadow-card);
+	padding: 18px 20px;
+}
+.panel--flat {
+	box-shadow: none;
+	border: 1px solid var(--hr-line);
+}
+
+/* Phone app shell: scrolling main + bottom tabs */
+.app {
+	display: flex;
+	flex-direction: column;
+	min-height: 100dvh;
+}
+.app__main {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.app__pad {
+	padding: 4px 14px 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 11px;
+}
+.theme-big .app__pad {
+	padding: 0 20px 16px;
+	gap: 12px;
+	position: relative;
+}
+
+@media (max-width: 760px) {
+	.grid-2 {
+		grid-template-columns: 1fr;
+	}
+}

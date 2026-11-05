@@ -1,0 +1,68 @@
+/* ---------- 17. Money links, wallet line, MCP ---------- */
+.proof {
+	color: var(--hr-accent-strong);
+	font: 600 13px var(--hr-mono);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	white-space: nowrap;
+}
+.proof:hover {
+	color: var(--hr-ink);
+}
+.proof svg {
+	width: 13px;
+	height: 13px;
+}
+.proof--lg {
+	font-size: 15px;
+}
+.proof--lg svg {
+	width: 15px;
+	height: 15px;
+}
+
+.wallet-line {
+	display: flex;
+	align-items: center;
+	gap: 6px 10px;
+	flex-wrap: wrap;
+	font-size: 14px;
+	color: var(--hr-muted);
+	padding: 8px 0;
+}
+.wallet-line__addr {
+	font: 650 14px var(--hr-mono);
+	color: var(--hr-ink);
+	background: var(--hr-card);
+	border: 1px solid var(--hr-line);
+	border-radius: 8px;
+	padding: 3px 8px;
+}
+.wallet-line .btn {
+	min-height: 36px;
+	font-size: 14px;
+	padding: 0 12px;
+	border-width: 1.5px;
+}
+.app .wallet-line .btn {
+	min-height: 44px;
+}
+.copy-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font: 750 13px / 1.2 var(--hr-sans);
+}
+.copy-status--ok {
+	color: var(--hr-ok);
+}
+.copy-status--fail {
+	color: var(--hr-bad);
+}
+.copy-status svg {
+	width: 15px;
+	height: 15px;
+}

@@ -1,0 +1,55 @@
+/* ---------- Motion: spinner, keyframes, reduced motion ---------- */
+.spinner {
+	width: 18px;
+	height: 18px;
+	animation: hr-spin 0.8s linear infinite;
+}
+@keyframes hr-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+@keyframes hr-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 currentColor;
+	}
+	50% {
+		box-shadow: 0 0 0 4px transparent;
+		opacity: 0.55;
+	}
+}
+/* shrink stamps by size, never by transform: the hr-stamp animation owns transform */
+@keyframes hr-stamp {
+	from {
+		transform: rotate(-9deg) scale(1.6);
+		opacity: 0;
+	}
+	to {
+		transform: rotate(-9deg) scale(1);
+		opacity: 1;
+	}
+}
+@keyframes hr-shimmer {
+	to {
+		transform: translateX(100%);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dot--pulse,
+	.stamp,
+	.skeleton::after,
+	.spinner {
+		animation: none;
+	}
+	.spinner {
+		opacity: 0.8;
+	}
+	* {
+		/* biome-ignore lint/complexity/noImportantStyles: reduced motion must override every component */
+		scroll-behavior: auto !important;
+		/* biome-ignore lint/complexity/noImportantStyles: reduced motion must override every component */
+		transition: none !important;
+	}
+}

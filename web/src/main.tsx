@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Routes } from "./routes";
 import { SessionProvider } from "./shared";
-import "./shared/styles.css";
+import "./shared/styles/index.css";
 
 const container = document.getElementById("root");
 

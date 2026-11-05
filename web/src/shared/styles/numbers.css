@@ -1,0 +1,30 @@
+/* ---------- 3. Typography: big numbers (brief §4) ---------- */
+.num-hero {
+	font: 850 clamp(64px, 26vw, 100px) / 0.88 var(--hr-sans);
+	letter-spacing: -0.055em;
+}
+.num-money {
+	font: 850 clamp(48px, 13vw, 76px) / 0.9 var(--hr-sans);
+	letter-spacing: -0.05em;
+}
+.num-status {
+	font: 850 clamp(40px, 11vw, 64px) / 0.95 var(--hr-sans);
+	letter-spacing: -0.045em;
+}
+.num-pair {
+	font: 850 clamp(28px, 9vw, 36px) / 0.95 var(--hr-sans);
+}
+.num-pair--compact {
+	font-size: 27px;
+}
+.num-fare {
+	font: 850 25px / 30px var(--hr-sans);
+}
+.num-row {
+	font: 850 clamp(25px, 7vw, 32px) / 1 var(--hr-sans);
+	letter-spacing: -0.035em;
+}
+.is-urgent.num-hero,
+.is-urgent.num-row {
+	color: var(--hr-bad);
+}

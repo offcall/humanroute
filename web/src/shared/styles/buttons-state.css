@@ -1,0 +1,44 @@
+/* Button states: unavailable, busy; pill on indigo surfaces */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+	background: var(--hr-hair);
+	color: var(--hr-muted);
+	border: 2px dashed var(--hr-dash);
+	cursor: not-allowed;
+}
+.btn[aria-busy="true"] {
+	cursor: progress;
+}
+.btn[aria-busy="true"] > .spinner {
+	width: 18px;
+	height: 18px;
+}
+/* busy is not "unavailable": a busy pill keeps its fill; clicks are ignored via disabled / aria-disabled */
+.btn--primary[aria-busy="true"],
+.btn--primary[aria-busy="true"]:hover {
+	background: var(--hr-accent);
+	color: var(--hr-on-accent);
+	border: 2px solid transparent;
+}
+.btn--ghost[aria-busy="true"],
+.btn--ghost[aria-busy="true"]:hover {
+	background: transparent;
+	color: var(--hr-ink);
+	border: 2px solid var(--hr-muted);
+}
+.btn--white[aria-busy="true"],
+.btn--white[aria-busy="true"]:hover {
+	background: var(--hr-on-accent);
+	color: var(--hr-accent-strong);
+	border: 2px solid transparent;
+}
+/* secondary pill on indigo surfaces: white outline, white text */
+.btn--outline-white {
+	border-color: var(--hr-on-accent);
+	color: var(--hr-on-accent);
+	background: transparent;
+}
+.btn--outline-white:hover {
+	background: var(--hr-on-accent-track);
+	color: var(--hr-on-accent);
+}

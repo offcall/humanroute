@@ -1,0 +1,69 @@
+/* ---------- 7. Status tags (brief §5: shape + word) ---------- */
+.tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font: 700 13px / 1.25 var(--hr-sans);
+	padding: 4px 10px;
+	border-radius: var(--hr-radius-pill);
+	white-space: nowrap;
+}
+.tag svg {
+	width: 14px;
+	height: 14px;
+}
+.dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentColor;
+	display: inline-block;
+	flex: none;
+}
+.dot--pulse {
+	animation: hr-pulse 1.4s ease-in-out infinite;
+}
+/* waiting: outline */
+.tag--open,
+.tag--taken,
+.tag--pending {
+	box-shadow: inset 0 0 0 1.5px var(--hr-muted);
+	color: var(--hr-ink);
+}
+.tag--taken {
+	box-shadow: none;
+	border: 1.5px dashed var(--hr-mini-off);
+	color: var(--hr-muted);
+}
+/* in work: tint + dot */
+.tag--claimed,
+.tag--submitted {
+	background: var(--hr-info-tint);
+	color: var(--hr-info-ink);
+}
+/* money in flight: amber tint + pulsing dot */
+.tag--paying,
+.tag--refunding,
+.tag--sent {
+	background: var(--hr-amber-tint);
+	color: var(--hr-amber-ink);
+}
+/* final: fill + icon */
+.tag--paid,
+.tag--confirmed {
+	background: var(--hr-ok);
+	color: var(--hr-on-accent);
+}
+.tag--refunded,
+.tag--late {
+	background: var(--hr-void);
+	color: var(--hr-on-accent);
+}
+.tag--failed {
+	background: var(--hr-bad);
+	color: var(--hr-on-accent);
+}
+.tag--lg {
+	font-size: 15px;
+	padding: 6px 14px;
+}

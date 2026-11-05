@@ -1,0 +1,78 @@
+/* ---------- 5. Buttons (pills) ---------- */
+.btn {
+	font: 750 16px / 1.15 var(--hr-sans);
+	min-height: 48px;
+	padding: 0 20px;
+	border-radius: var(--hr-radius-pill);
+	border: 2px solid transparent;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	white-space: nowrap;
+	text-decoration: none;
+	background: transparent;
+	color: var(--hr-ink);
+	position: relative;
+}
+.btn--primary {
+	background: var(--hr-accent);
+	color: var(--hr-on-accent);
+}
+.btn--primary:hover {
+	background: var(--hr-accent-strong);
+	color: var(--hr-on-accent);
+}
+.btn--ghost {
+	border-color: var(--hr-muted);
+	color: var(--hr-ink);
+}
+.btn--ghost:hover {
+	background: var(--hr-card);
+	color: var(--hr-ink);
+}
+.btn--white {
+	background: var(--hr-on-accent);
+	color: var(--hr-accent-strong);
+}
+.btn--white:hover {
+	background: var(--hr-accent-soft);
+	color: var(--hr-accent-strong);
+}
+.btn--danger {
+	border-color: var(--hr-bad);
+	color: var(--hr-bad);
+	background: var(--hr-card);
+}
+.btn--danger:hover {
+	background: var(--hr-bad-tint);
+	color: var(--hr-bad);
+}
+.btn--text {
+	min-height: 44px;
+	padding: 0 10px;
+	color: var(--hr-accent-strong);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+.btn--block {
+	width: 100%;
+}
+.btn--lg {
+	min-height: 58px;
+	font-size: 18px;
+}
+.btn--xl {
+	min-height: 62px;
+	font-size: 18px;
+}
+.btn--sm {
+	min-height: 44px;
+	font-size: 15px;
+	padding: 0 16px;
+}
+.btn--xs {
+	min-height: 36px;
+	font-size: 14px;
+	padding: 0 12px;
+} /* desktop only; phones keep 44 */

@@ -1,0 +1,48 @@
+/* MCP connection block */
+.mcp {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+.mcp__row {
+	display: grid;
+	grid-template-columns: 70px minmax(0, 1fr);
+	gap: 10px;
+	align-items: baseline;
+	font-size: 14px;
+}
+.mcp__row code {
+	font-size: 14px;
+	overflow-wrap: anywhere;
+}
+.codeblock {
+	position: relative;
+	background: var(--hr-ink);
+	color: var(--hr-bg);
+	border-radius: 14px;
+	padding: 14px 16px;
+}
+.codeblock pre {
+	font: 500 13.5px / 1.55 var(--hr-mono);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	margin: 0;
+}
+.codeblock__bar {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 10px;
+}
+.codeblock .btn--white {
+	min-height: 40px;
+	font-size: 14px;
+	padding: 0 14px;
+}
+.codeblock .copy-status--ok {
+	color: #8fd9ae;
+}
+.codeblock .copy-status--fail {
+	color: var(--hr-on-accent-urgent);
+}
