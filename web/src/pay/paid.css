@@ -1,0 +1,62 @@
+/* Paid view: Paid word, escrow stamp, order facts */
+.pay-done {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px 16px;
+	flex-wrap: wrap;
+}
+.pay-done .stamp {
+	margin-left: 0;
+	margin-right: 8px;
+}
+.pay-done__word {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	color: var(--hr-ink);
+}
+.pay-done__word svg {
+	width: clamp(30px, 8vw, 44px);
+	height: clamp(30px, 8vw, 44px);
+}
+.pay-facts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 32px;
+	padding: 12px 0;
+	margin: 0;
+	border-top: 1px solid var(--hr-line);
+	border-bottom: 1px solid var(--hr-line);
+}
+.pay-facts dt {
+	font-size: 12px;
+	font-weight: 650;
+	color: var(--hr-muted);
+}
+.pay-facts dd {
+	margin: 4px 0 0;
+}
+.pay-facts .code-chip {
+	font-size: 15px;
+}
+.pay .pay-explorer {
+	display: block;
+	white-space: normal;
+	padding-block: 10px;
+}
+.pay-explorer svg {
+	display: inline;
+	vertical-align: -2px;
+	margin-left: 4px;
+}
+@container (max-width: 520px) {
+	/* the stamp animation keeps its own transform, so shrink by size, not scale */
+	.pay-done .stamp {
+		padding: 4px 10px 3px;
+		margin-right: 8px;
+	}
+	.pay-done .stamp--lg b {
+		font-size: 16px;
+	}
+}

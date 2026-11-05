@@ -1,0 +1,59 @@
+/* Pay page: paid view, alerts, loading and expired states */
+.pay .alert__actions .btn {
+	max-width: 100%;
+	white-space: normal;
+}
+.pay-raw {
+	display: block;
+	margin-top: 6px;
+	font: 500 13px / 1.45 var(--hr-mono);
+	color: var(--hr-src);
+	overflow-wrap: anywhere;
+}
+/* 44 px tap targets */
+.pay .proof {
+	min-height: 44px;
+	padding-block: 4px;
+}
+.pay-orphan-proof {
+	font-size: 14.5px;
+	line-height: 1.5;
+	color: var(--hr-src);
+}
+.pay-orphan-proof .code-chip {
+	font-size: 13px;
+}
+.pay-skel-num {
+	height: 68px;
+	width: 46%;
+	border-radius: 12px;
+}
+.pay-w82 {
+	width: 82%;
+}
+.pay-w64 {
+	width: 64%;
+}
+.pay-gone {
+	padding: 34px 20px;
+}
+.pay .only-phone {
+	display: none;
+}
+@container (max-width: 520px) {
+	.pay .only-phone {
+		display: inline-flex;
+	}
+	.pay span.only-phone {
+		display: inline;
+	}
+	.pay .only-desktop {
+		display: none;
+	}
+	.pay .cta-banner {
+		padding: 14px 16px;
+	}
+	.pay .cta-banner .btn {
+		width: 100%;
+	}
+}

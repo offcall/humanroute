@@ -1,52 +1,25 @@
+import "./pay.css";
+import "./pay-states.css";
 import { useEffect, useState } from "react";
-import { useSession, WalletLine } from "../shared";
-import { PaidView, ReadyView } from "./PayView";
-import { parseDraftView } from "./parse";
+import { useSession } from "../shared";
+import { loadDraft } from "./loadDraft";
+import { PayBody } from "./PayBody";
+import { PayHead } from "./PayHead";
+import { PayTop } from "./PayTop";
 import { payOrder } from "./pay";
-import { DraftState, type DraftView, type PayResult } from "./types";
+import { type PageStatus, Step } from "./status";
+import type { DraftView } from "./types";
 import { connectPhantom, getPhantom } from "./wallet";
 
-type Status =
-	| { name: "loading" }
-	| { name: "ready"; draft: DraftView }
-	| { name: "paying"; draft: DraftView }
-	| { name: "paid"; result: PayResult }
-	| { name: "error"; message: string; draft?: DraftView };
-
-const loadDraft = async (draftId: string): Promise<Status> => {
-	try {
-		const response = await fetch(
-			`/api/orders/draft/${encodeURIComponent(draftId)}`,
-		);
-		if (response.status === 404) {
-			return { name: "error", message: "draft not found or expired" };
-		}
-		const parsed = parseDraftView(await response.json());
-		if (!response.ok || !parsed.ok) {
-			return { name: "error", message: "could not load the draft" };
-		}
-
-		if (parsed.value.state === DraftState.Paid) {
-			return {
-				name: "error",
-				message: `this draft is already paid (order ${parsed.value.orderId ?? "unknown"})`,
-			};
-		}
-
-		return { name: "ready", draft: parsed.value };
-	} catch {
-		return { name: "error", message: "could not load the draft" };
-	}
-};
-
 export const PayPage = ({ draftId }: { draftId: string }) => {
-	const [status, setStatus] = useState<Status>({ name: "loading" });
+	const [status, setStatus] = useState<PageStatus>({ name: Step.Loading });
 	const [payer, setPayer] = useState<string>();
 	const { me } = useSession();
 	const phantom = getPhantom();
 
 	useEffect(() => {
 		let active = true;
+		setStatus({ name: Step.Loading });
 		void loadDraft(draftId).then((next) => {
 			if (active) {
 				setStatus(next);
@@ -58,14 +31,19 @@ export const PayPage = ({ draftId }: { draftId: string }) => {
 		};
 	}, [draftId]);
 
+	const reload = () => {
+		setStatus({ name: Step.Loading });
+		void loadDraft(draftId).then(setStatus);
+	};
+
 	const pay = async (draft: DraftView) => {
 		if (phantom === undefined) {
 			return;
 		}
-		setStatus({ name: "paying", draft });
+		setStatus({ name: Step.Paying, draft });
 		const wallet = await connectPhantom(phantom);
 		if (!wallet.ok) {
-			setStatus({ name: "error", message: wallet.error, draft });
+			setStatus({ name: Step.Failed, message: wallet.error, draft });
 			return;
 		}
 		setPayer(wallet.value.address);
@@ -76,32 +54,33 @@ export const PayPage = ({ draftId }: { draftId: string }) => {
 		});
 		setStatus(
 			paid.ok
-				? { name: "paid", result: paid.value }
-				: { name: "error", message: paid.error, draft },
+				? { name: Step.Paid, draft, result: paid.value }
+				: { name: Step.Failed, message: paid.error, draft },
 		);
 	};
 
-	if (status.name === "loading") {
-		return <p>Loading draft...</p>;
-	}
-	if (status.name === "paid") {
-		return <PaidView result={status.result} />;
-	}
-	const { draft } = status;
+	const title =
+		status.name === Step.AlreadyPaid ? "Already paid" : "Pay for translation";
 
 	return (
-		<div>
-			<h1>Pay for translation</h1>
-			{me === null && payer !== undefined && <WalletLine wallet={payer} />}
-			{status.name === "error" && <p role="alert">{status.message}</p>}
-			{draft !== undefined && (
-				<ReadyView
-					draft={draft}
-					installed={phantom !== undefined}
-					paying={status.name === "paying"}
-					onPay={() => void pay(draft)}
-				/>
-			)}
+		<div className="app pay-shell theme-big">
+			<div className="app__main">
+				<PayTop payer={payer} busy={status.name === Step.Paying} />
+				<main className="pay">
+					{status.name === Step.Paid ? null : (
+						<PayHead draftId={draftId}>
+							<h1 className="h1">{title}</h1>
+						</PayHead>
+					)}
+					<PayBody
+						status={status}
+						payer={payer}
+						guest={me === null}
+						onPay={(draft) => void pay(draft)}
+						onReload={reload}
+					/>
+				</main>
+			</div>
 		</div>
 	);
 };

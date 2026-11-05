@@ -1,0 +1,105 @@
+/* Pay page: header, total, task rows, Pay pill (pay.html mock) */
+.pay-shell {
+	container-type: inline-size;
+}
+.pay-top {
+	display: flex;
+	align-items: center;
+	gap: 6px 10px;
+	flex-wrap: wrap;
+	padding: 12px 24px;
+	border-bottom: 1px solid var(--hr-line);
+}
+.pay-top__name {
+	font: 850 17px / 1 var(--hr-sans);
+	letter-spacing: -0.01em;
+}
+.pay-top .wallet-line {
+	margin-left: auto;
+	padding: 0;
+}
+.pay-top__guest {
+	margin-left: auto;
+	font-size: 13.5px;
+	color: var(--hr-muted);
+}
+.pay {
+	max-width: 640px;
+	margin: 0 auto;
+	padding: 28px 24px 34px;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+.pay__head {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.pay__head .mono {
+	font-size: 12px;
+	text-transform: none;
+	letter-spacing: 0;
+}
+.pay__total {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+.pay-cta {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.pay-hint {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	justify-content: center;
+	font-size: 14px;
+	color: var(--hr-muted);
+	font-weight: 650;
+}
+.pay-fine {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 16px;
+	font-size: 13px;
+	color: var(--hr-muted);
+}
+.pay-fine .proof {
+	font-size: 12.5px;
+}
+@container (max-width: 520px) {
+	.pay-top {
+		padding: 10px 20px 8px;
+		gap: 2px 8px;
+		min-height: 64px;
+	}
+	.pay-top .wallet-line {
+		flex-basis: 100%;
+		margin-left: 0;
+		gap: 8px;
+		padding: 2px 0 0;
+	}
+	.pay-top__guest {
+		flex-basis: 100%;
+		margin-left: 0;
+		font-size: 13px;
+	}
+	.pay-cta {
+		position: sticky;
+		bottom: 0;
+		z-index: 2;
+		margin: 0 -20px -28px;
+		padding: 12px 20px 16px;
+		background: var(--hr-bg-plain);
+		border-top: 1px solid var(--hr-line);
+		box-shadow: 0 -10px 18px -14px rgba(31, 27, 22, 0.35);
+	}
+	.pay {
+		padding: 18px 20px 28px;
+		gap: 16px;
+	}
+}
