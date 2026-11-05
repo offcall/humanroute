@@ -18,14 +18,15 @@ A stateless server on SDK 1.32.2 streams progress notifications on the POST resp
 ## Decision
 
 - MCP tool `wait_task {draftId, seen?}`:
-  - `mcp/` polls the gateway every 2 s, using the same two reads as `get_task`.
+  - `mcp/` polls the gateway every 2 s, using the same two reads as `get_task`. Once the draft is paid it reads only the order, because a paid draft no longer changes.
   - It returns on the first change of a fingerprint: the draft state plus each language's `publicState`, including `open -> claimed`. The answer is the `get_task` text plus the new `seen`.
-  - The baseline is `seen` if given, else the first read. Calling again with the same `seen` is always safe.
+  - The baseline is `seen` if given, else the first read. Calling again with the same `seen` is always safe. `post_task` and `get_task` also print `seen`, so no change between two calls is lost.
   - It returns at once when every language is paid out or refunded.
   - It sends `notifications/progress` every 30 s when the request carries a `progressToken`.
   - Cap 60 min. On the cap it returns "still waiting" with the unchanged `seen`.
+  - Each gateway read times out after 10 s. A failed read does not end the wait: it keeps polling and returns an error with the last `seen` only after 15 failures in a row (about 30 s, enough for a gateway redeploy).
   - It stops polling when the call is aborted (Esc, `/tasks` stop, a dropped connection).
-- The tool descriptions tell Claude to call `wait_task` after `post_task` and after every result, and to end its turn while it waits.
+- The tool descriptions tell Claude to call `wait_task` right after `post_task`, and again only after a `wait_task` call returned, and to end its turn while it waits. Exactly one `wait_task` runs per draft: Claude starts none after `get_task`, `approve_task` or `reject_task`; the running one reports the payout or refund that follows.
 - Supported client: Claude Code connected directly with `claude mcp add --transport http`. claude.ai connectors are not supported: their proxy cuts a call at about 240 s.
 - The gateway is unchanged.
 - This supersedes the "No `wait_task`" rule of ADR 0027.
@@ -43,3 +44,4 @@ A stateless server on SDK 1.32.2 streams progress notifications on the POST resp
 - A redeploy drops waiting calls. Claude calls again with `seen`.
 - A background call does not survive exiting Claude Code. The order state stays in the gateway, so a new session calls `wait_task` again.
 - Every wake-up costs one model turn, including `claimed`.
+- A transfer that ends `failed` keeps its language in `paying_out` or `refunding` until an operator requeues it (ADR 0017), so the wait does not settle and returns at the cap.
