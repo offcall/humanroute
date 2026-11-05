@@ -62,15 +62,8 @@ export type Order = {
 
 export type GatewayClient = {
 	createDraft: (token: string, input: DraftInput) => Promise<Parsed<Draft>>;
-	getDraft: (
-		draftId: string,
-		cancel?: AbortSignal,
-	) => Promise<Parsed<DraftStatus>>;
-	getOrder: (
-		token: string,
-		orderId: string,
-		cancel?: AbortSignal,
-	) => Promise<Parsed<Order>>;
+	getDraft: (draftId: string) => Promise<Parsed<DraftStatus>>;
+	getOrder: (token: string, orderId: string) => Promise<Parsed<Order>>;
 	approveTask: (token: string, taskId: string) => Promise<Parsed<OrderTask>>;
 	rejectTask: (
 		token: string,

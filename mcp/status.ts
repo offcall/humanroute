@@ -1,6 +1,5 @@
 // A draft's current state for get_task and wait_task, and its fingerprint for change detection.
 import {
-	type DraftStatus,
 	type GatewayClient,
 	type Order,
 	type Parsed,
@@ -10,34 +9,24 @@ import {
 
 const SETTLED_STATES = new Set([PublicState.PaidOut, PublicState.Refunded]);
 
-const withOrder = async (
-	client: GatewayClient,
-	token: string,
-	status: DraftStatus,
-	cancel: AbortSignal,
-): Promise<Parsed<Snapshot>> => {
-	if (status.orderId === undefined) {
-		return { ok: true, value: { status, order: undefined } };
-	}
-	const order = await client.getOrder(token, status.orderId, cancel);
-
-	return order.ok ? { ok: true, value: { status, order: order.value } } : order;
-};
-
-// A paid draft never changes again, so a caller that has seen it paid passes it and skips getDraft.
 export const readStatus = async (
 	client: GatewayClient,
 	token: string,
 	draftId: string,
-	paid: DraftStatus | undefined,
-	cancel: AbortSignal,
 ): Promise<Parsed<Snapshot>> => {
-	if (paid !== undefined) {
-		return withOrder(client, token, paid, cancel);
+	const status = await client.getDraft(draftId);
+	if (!status.ok) {
+		return status;
 	}
-	const status = await client.getDraft(draftId, cancel);
+	const { orderId } = status.value;
+	if (orderId === undefined) {
+		return { ok: true, value: { status: status.value, order: undefined } };
+	}
+	const order = await client.getOrder(token, orderId);
 
-	return status.ok ? withOrder(client, token, status.value, cancel) : status;
+	return order.ok
+		? { ok: true, value: { status: status.value, order: order.value } }
+		: order;
 };
 
 // "draft" before payment, then e.g. "paid;de=claimed;fr=open".

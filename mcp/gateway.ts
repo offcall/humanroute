@@ -22,15 +22,12 @@ const call = async <T = unknown>(
 	init: RequestInit,
 	expected: number,
 	parse: (body: unknown) => Parsed<T>,
-	cancel?: AbortSignal,
 ): Promise<Parsed<T>> => {
-	const timeout = AbortSignal.timeout(TIMEOUT_MS);
 	let response: Response;
 	try {
 		response = await fetch(url, {
 			...init,
-			signal:
-				cancel === undefined ? timeout : AbortSignal.any([cancel, timeout]),
+			signal: AbortSignal.timeout(TIMEOUT_MS),
 		});
 	} catch (error) {
 		return { ok: false, error: failure(error) };
@@ -71,21 +68,19 @@ export const createGatewayClient = (baseUrl: string): GatewayClient => ({
 			201,
 			parseDraft,
 		),
-	getDraft: (draftId, cancel) =>
+	getDraft: (draftId) =>
 		call(
 			`${baseUrl}/api/orders/draft/${encodeURIComponent(draftId)}`,
 			{ method: "GET" },
 			200,
 			parseDraftStatus,
-			cancel,
 		),
-	getOrder: (token, orderId, cancel) =>
+	getOrder: (token, orderId) =>
 		call(
 			`${baseUrl}/api/orders/${encodeURIComponent(orderId)}`,
 			{ method: "GET", headers: { authorization: `Bearer ${token}` } },
 			200,
 			parseOrder,
-			cancel,
 		),
 	approveTask: (token, taskId) =>
 		call(

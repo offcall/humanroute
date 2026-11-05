@@ -72,7 +72,7 @@ export const registerWaitTool = (
 					.catch(() => undefined);
 			};
 			const outcome = await waitForChange({
-				read: (paid) => readStatus(client, token, draftId, paid, extra.signal),
+				read: () => readStatus(client, token, draftId),
 				seen,
 				signal: extra.signal,
 				report,
