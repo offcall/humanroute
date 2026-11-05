@@ -28,6 +28,7 @@ A stateless server on SDK 1.32.2 streams progress notifications on the POST resp
   - It stops polling when the call is aborted (Esc, `/tasks` stop, a dropped connection).
 - The tool descriptions give one start rule: start a `wait_task` only if none is running for this draft in this conversation, with the latest `seen` (from `post_task`, `get_task` or the last `wait_task`), and end the turn while it waits.
 - When a language changed to `submitted`, Claude asks the user and ends its turn without a new `wait_task`, then starts one after `approve_task` or `reject_task`. Claude's text shows only when its turn ends, and a new call would hold the turn in the foreground for up to 2 min (seen in a manual Claude Code run, 2026-11-05). Changes made while the user decides are reported by the next `wait_task` through `seen`.
+- Before every `wait_task` call Claude first writes its message to the user (the pay link after `post_task`, or the change it just got). Otherwise nothing shows while the call runs: in a live run Claude chained `post_task` and three `wait_task` calls in one silent turn (2026-11-05).
 - `get_task` and `wait_task` print the linguist's result as a JSON string on one line, marked as data, so the text cannot fake tool lines such as `seen:` or the settled message.
 - Supported client: Claude Code connected directly with `claude mcp add --transport http`. claude.ai connectors are not supported: their proxy cuts a call at about 240 s.
 - The gateway is unchanged.
