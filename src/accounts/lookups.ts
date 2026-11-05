@@ -26,6 +26,12 @@ export const findAgencyByWallet = (
 export const findAgencyById = (database: Database, id: string): Agency | null =>
 	toAgency(database.prepare(AGENCIES_SQL.byId).get(id));
 
+export const findAgencyByInvite = (
+	database: Database,
+	inviteCode: string,
+): Agency | null =>
+	toAgency(database.prepare(AGENCIES_SQL.byInvite).get(inviteCode));
+
 export const findLinguistByWallet = (
 	database: Database,
 	wallet: string,

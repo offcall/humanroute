@@ -19,7 +19,10 @@ export const linguistRoutes = (deps: TasksDeps): Hono => {
 			return ctx.json({ error: "not_found" }, 404);
 		}
 		const tasks = tasksByLinguist(deps.database, linguist.linguistId);
+		const agency = deps.agencyById(linguist.agencyId);
 		return ctx.json({
+			agency: agency === null ? null : { id: agency.id, name: agency.name },
+			translatorNo: deps.translatorNo(linguist.linguistId),
 			pairs: deps.linguistPairs(linguist.linguistId),
 			earnedUnits: deps.earnedUnits(tasks.map((task) => task.id)).toString(),
 			tasks: tasks.map((task) => viewOf(deps, task, true)),

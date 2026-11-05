@@ -51,9 +51,10 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | `POST /api/agency` | cookie, any | `{name}` (agency languages not stored) | `201 {agency}` | `409` agency exists | accounts |
 | `GET /api/agency` | cookie, agency | - | `200 {agency, inviteUrl}`; `inviteUrl` null before first invite | `404` no agency | accounts |
 | `POST /api/agency/invite` | cookie, agency | - | `200 {code, url}`; idempotent, one permanent link `<PUBLIC_BASE_URL>/join/<code>` | `403` | accounts |
+| `GET /api/linguist/join/:inviteCode` | none (the code is the secret) | - | `200 {agency: {id, name}}`: invite preview for the join screen | `404 not_found` unknown code | accounts |
 | `POST /api/linguist/join/:inviteCode` | cookie, any | - | `200 {linguist, agency}`; idempotent for the same agency | `404` unknown code, `409` in another agency | accounts |
 | `PUT /api/linguist/languages` | cookie, linguist | `{pairs: [pair]}` (1..10, source != target, replaces all) | `200 {pairs}` | `403`, `422 invalid_body` | accounts |
-| `GET /api/linguist` | cookie, linguist | - | `200 {pairs, earnedUnits, tasks: [TaskView]}` | `404` no linguist | accounts |
+| `GET /api/linguist` | cookie, linguist | - | `200 {agency: {id, name}, translatorNo, pairs, earnedUnits, tasks: [TaskView]}`; `translatorNo` = 1-based rank inside the agency by join order | `404` no linguist | accounts |
 
 `GET /api/linguist` is the linguist cabinet; there is no `GET /api/linguist/tasks`. One agency per linguist. The agency cabinet has no linguist list: invite link, income and rating only. Amounts in cabinets count only `confirmed` transfers (ADR 0018). Firm money totals come from `GET /api/rating/firm/:id`.
 

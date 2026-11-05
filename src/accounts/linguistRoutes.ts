@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { hasJsonType, parsePairs, readJson } from "./body.js";
 import { joinAgency, replacePairs } from "./linguists.js";
-import { findLinguistByWallet } from "./lookups.js";
+import { findAgencyByInvite, findLinguistByWallet } from "./lookups.js";
 import {
 	failure,
 	invalid,
@@ -14,6 +14,19 @@ import type { AccountsDeps } from "./types.js";
 // GET /api/linguist (cabinet) is served by the tasks slice.
 export const linguistRoutes = (deps: AccountsDeps): Hono => {
 	const app = new Hono();
+
+	// Public invite preview for the join screen (ADR 0033); the code is the secret.
+	app.get("/api/linguist/join/:inviteCode", (ctx) => {
+		const agency = findAgencyByInvite(
+			deps.database,
+			ctx.req.param("inviteCode"),
+		);
+		if (agency === null) {
+			return failure(ctx, 404, "not_found");
+		}
+
+		return ctx.json({ agency: { id: agency.id, name: agency.name } });
+	});
 
 	app.post("/api/linguist/join/:inviteCode", (ctx) => {
 		const wallet = sessionWallet(deps, ctx);
