@@ -10,14 +10,14 @@ const ICON: Record<Tab, TabIconName> = {
 	[Tab.Wallet]: TabIconName.Wallet,
 };
 
-type Props = { current: Tab; boardCount: number };
+type Props = { current: Tab; fresh: number };
 
 const open = (event: MouseEvent<HTMLAnchorElement>, tab: Tab) => {
 	event.preventDefault();
 	navigate(TAB_PATH[tab]);
 };
 
-export const Tabbar = ({ current, boardCount }: Props) => (
+export const Tabbar = ({ current, fresh }: Props) => (
 	<nav className="tabbar" aria-label="Main">
 		{Object.values(Tab).map((tab) => (
 			<a
@@ -29,11 +29,11 @@ export const Tabbar = ({ current, boardCount }: Props) => (
 			>
 				<TabIcon name={ICON[tab]} />
 				{TAB_TITLE[tab]}
-				{tab === Tab.Board && boardCount > 0 ? (
+				{tab === Tab.Board && fresh > 0 ? (
 					<span className="tabbar__count">
 						<span className="visually-hidden">, </span>
-						{boardCount}
-						<span className="visually-hidden"> open</span>
+						{fresh}
+						<span className="visually-hidden"> new</span>
 					</span>
 				) : null}
 			</a>

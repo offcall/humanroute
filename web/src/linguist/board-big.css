@@ -1,0 +1,46 @@
+/* Big board (indigo.css §13 + linguist-big page rules): drain bar, hero, more rows */
+.drain-top {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 6px;
+	background: var(--hr-drain-track);
+}
+.drain-top > i {
+	display: block;
+	height: 100%;
+	background: var(--hr-accent);
+}
+.drain-top.is-urgent > i {
+	background: var(--hr-bad);
+}
+.hero-time {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.hero-time .hero-caption {
+	font-size: 16px;
+}
+.job-meta b {
+	display: block;
+	font-size: 19px;
+	font-weight: 850;
+}
+.job-meta span {
+	display: block;
+	font-size: 14px;
+	color: var(--hr-muted);
+	margin-top: 2px;
+}
+.job-meta span b {
+	display: inline;
+	font-size: 14px;
+	color: var(--hr-ink);
+	font-weight: 750;
+}
+.job-meta .job-meta__words {
+	display: block;
+	margin-top: 2px;
+}

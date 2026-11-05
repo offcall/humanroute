@@ -1,0 +1,74 @@
+/* Big board: "More jobs" list, one button per open row */
+.more {
+	border-top: 1px solid var(--hr-line);
+	padding-top: 10px;
+}
+.more .kicker {
+	margin-bottom: 2px;
+}
+.more-row {
+	display: grid;
+	grid-template-columns: 92px minmax(0, 1fr) auto;
+	gap: 12px;
+	align-items: center;
+	width: 100%;
+	padding: 11px 0;
+	border: 0;
+	border-bottom: 1px solid var(--hr-line);
+	background: none;
+	text-align: left;
+	min-height: 64px;
+	color: var(--hr-ink);
+	font: inherit;
+}
+.more-row__when {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+.more-row .more-row__time {
+	font: 850 32px / 1 var(--hr-sans);
+	letter-spacing: -0.04em;
+}
+.more-row .more-row__time.is-urgent {
+	color: var(--hr-bad);
+}
+.more-row .more-row__time--long {
+	font-size: 26px;
+}
+.more-row__due {
+	font: 650 12px / 1.2 var(--hr-sans);
+	color: var(--hr-muted);
+}
+.more-row b {
+	display: block;
+	font-size: 16px;
+	font-weight: 850;
+}
+.more-row__sub {
+	display: block;
+	font-size: 13px;
+	color: var(--hr-muted);
+}
+.more-row:not(.is-taken) .more-row__sub {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.more-row svg {
+	color: var(--hr-muted);
+}
+.more-row.is-taken {
+	color: var(--hr-muted);
+	cursor: default;
+}
+.more-row.is-taken b {
+	color: var(--hr-void);
+}
+.more-row.is-taken .tag--taken {
+	align-self: flex-start;
+}
+.more.is-busy .more-row:not(.is-taken) {
+	opacity: 0.55;
+	cursor: not-allowed;
+}

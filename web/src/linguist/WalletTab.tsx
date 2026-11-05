@@ -1,19 +1,10 @@
-import {
-	Avatar,
-	formatUsdc,
-	LanguagePairs,
-	useSession,
-	WalletLine,
-} from "../shared";
+import { Avatar, LanguagePairs, useSession, WalletLine } from "../shared";
+import { amountOnly } from "./jobLabel";
 import type { Cabinet } from "./parseCabinet";
 import { usePairSave } from "./usePairSave";
 import "./wallet.css";
 
 type Props = { cabinet: Cabinet; reload: () => Promise<void> };
-
-// "10.24 USDC" → "10.24": the unit sits in the label next to the number.
-const amountOnly = (units: bigint): string =>
-	formatUsdc(units).replace(" USDC", "");
 
 export const WalletTab = ({ cabinet, reload }: Props) => {
 	const { me, signOut } = useSession();

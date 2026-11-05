@@ -1,46 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { navigate, RequireSession, useRoute, useSession } from "../shared";
-import { Board } from "./Board";
-import { MyTasks } from "./MyTasks";
-import type { Cabinet } from "./parseCabinet";
-import { SubmitTask } from "./SubmitTask";
+import { LinguistBody } from "./LinguistBody";
 import { Tabbar } from "./Tabbar";
 import { type Screen, screenOf, TAB_PATH, TAB_TITLE, Tab } from "./tabs";
+import { useBoard } from "./useBoard";
 import { useCabinet } from "./useCabinet";
-import { WalletTab } from "./WalletTab";
-
-type BodyProps = {
-	screen: Screen;
-	cabinet: Cabinet;
-	reload: () => Promise<void>;
-	onBoardCount: (count: number) => void;
-};
-
-const Body = ({ screen, cabinet, reload, onBoardCount }: BodyProps) => {
-	if (screen.taskId !== undefined) {
-		return (
-			<SubmitTask
-				key={screen.taskId}
-				taskId={screen.taskId}
-				onSubmitted={reload}
-				onClose={() => navigate(TAB_PATH[Tab.Tasks])}
-			/>
-		);
-	}
-	if (screen.tab === Tab.Tasks) {
-		return <MyTasks tasks={cabinet.tasks} />;
-	}
-	if (screen.tab === Tab.Wallet) {
-		return <WalletTab cabinet={cabinet} reload={reload} />;
-	}
-
-	return <Board onClaimed={reload} onCount={onBoardCount} />;
-};
 
 const LinguistShell = ({ screen }: { screen: Screen }) => {
 	const { me } = useSession();
 	const { cabinet, failed, reload } = useCabinet();
-	const [boardCount, setBoardCount] = useState(0);
+	const board = useBoard();
 
 	if (cabinet === undefined) {
 		if (failed === undefined) {
@@ -65,15 +34,15 @@ const LinguistShell = ({ screen }: { screen: Screen }) => {
 							{cabinet.agency.name} · translator #{cabinet.translatorNo}
 						</span>
 					</header>
-					<Body
+					<LinguistBody
 						screen={screen}
 						cabinet={cabinet}
+						board={board}
 						reload={reload}
-						onBoardCount={setBoardCount}
 					/>
 				</div>
 			</main>
-			<Tabbar current={screen.tab} boardCount={boardCount} />
+			<Tabbar current={screen.tab} fresh={board.fresh} />
 		</div>
 	);
 };
