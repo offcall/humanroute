@@ -1,0 +1,45 @@
+/* Join page-only rules (join.html mock) */
+.join {
+	padding: 6px 18px 26px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	max-width: 560px;
+	width: 100%;
+	margin: 0 auto;
+}
+.join-top {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding-top: 6px;
+}
+.join-top__name {
+	font: 850 17px / 1 var(--hr-sans);
+	letter-spacing: -0.01em;
+}
+.join-hero h1 {
+	font: 850 clamp(30px, 9.6vw, 36px) / 1 var(--hr-sans);
+	letter-spacing: -0.035em;
+	margin-top: 6px;
+}
+.join-hero p {
+	margin-top: 8px;
+	font-size: 15.5px;
+	line-height: 1.45;
+	color: var(--hr-muted);
+}
+.join-wallet .wallet-line {
+	background: var(--hr-card);
+	border-radius: var(--hr-radius-card);
+	padding: 8px 10px;
+	flex-wrap: wrap;
+}
+.join-foot {
+	font-size: 13px;
+	color: var(--hr-muted);
+	text-align: center;
+}
+.join-foot code {
+	font-size: 12.5px;
+}

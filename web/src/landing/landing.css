@@ -1,0 +1,75 @@
+/* Landing page-only rules (landing.html mock) */
+.land {
+	container-type: inline-size;
+	overflow-x: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding-bottom: 28px;
+}
+.land-head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	padding: 16px clamp(20px, 4cqi, 32px) 0;
+}
+.land-net {
+	font: 850 10px / 1.2 var(--hr-sans);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--hr-muted);
+	border: 1.5px solid var(--hr-mini-off);
+	border-radius: var(--hr-radius-pill);
+	padding: 4px 9px;
+}
+.land-wallet {
+	margin-left: auto;
+}
+.land-wallet .wallet-line {
+	padding: 0;
+}
+.land-main {
+	padding: clamp(18px, 4cqi, 34px) clamp(20px, 4cqi, 32px) 8px;
+}
+.land-intro {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	min-width: 0;
+	max-width: 560px;
+}
+.land-title {
+	font: 850 clamp(36px, 11.5cqi, 64px) / 0.92 var(--hr-sans);
+	letter-spacing: -0.05em;
+}
+.land-tagline {
+	font-size: clamp(18px, 5.4cqi, 22px);
+	line-height: 1.35;
+	font-weight: 650;
+	max-width: 26ch;
+}
+@container (max-width: 560px) {
+	.land-wallet {
+		margin: 4px 0 0;
+		flex-basis: 100%;
+	}
+	.land-wallet .wallet-line {
+		background: var(--hr-card);
+		border-radius: 14px;
+		padding: 8px 10px;
+		gap: 6px 8px;
+		box-shadow: var(--hr-shadow-row);
+	}
+	.land-wallet .wallet-line__addr {
+		margin-right: auto;
+	}
+	.land-wallet .btn {
+		min-height: 44px;
+		padding: 0 8px;
+	}
+	.land-wallet .btn--text {
+		padding: 0 4px;
+		gap: 4px;
+	}
+}

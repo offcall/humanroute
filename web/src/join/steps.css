@@ -1,0 +1,50 @@
+/* what happens next: done = filled + check, now = indigo, todo = outline */
+.steps {
+	display: grid;
+	gap: 12px;
+	padding: 14px 16px;
+	background: var(--hr-card);
+	border-radius: var(--hr-radius-card);
+	list-style: none;
+	margin: 0;
+}
+.steps > li {
+	display: grid;
+	grid-template-columns: 28px minmax(0, 1fr);
+	gap: 11px;
+	align-items: start;
+	font-size: 15px;
+	line-height: 1.35;
+	color: var(--hr-muted);
+}
+.steps > li b {
+	color: var(--hr-ink);
+	font-weight: 750;
+}
+.steps__dot {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	font: 850 13px / 1 var(--hr-sans);
+	color: var(--hr-muted);
+	box-shadow: inset 0 0 0 2px var(--hr-mini-off);
+}
+.steps > li.is-done .steps__dot {
+	background: var(--hr-ink);
+	color: var(--hr-on-accent);
+	box-shadow: none;
+}
+.steps > li.is-done b {
+	color: var(--hr-muted);
+	font-weight: 650;
+}
+.steps > li.is-now .steps__dot {
+	background: var(--hr-accent);
+	color: var(--hr-on-accent);
+	box-shadow: none;
+}
+.steps > li.is-now b {
+	font-weight: 850;
+}

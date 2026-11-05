@@ -1,0 +1,87 @@
+/* Invite ticket: the shared ticket shape from indigo.css §10, only the parts the invite draws */
+.ticket {
+	position: relative;
+	background: var(--hr-card);
+	border-radius: var(--hr-radius-ticket);
+	box-shadow: var(--hr-shadow-card);
+	overflow: hidden;
+	flex: none;
+}
+.ticket__body {
+	padding: 14px 16px;
+}
+.ticket__fields {
+	display: flex;
+	gap: 10px;
+	margin-top: 11px;
+	padding-top: 9px;
+	border-top: 1px solid var(--hr-hair);
+}
+.ticket__fields > div {
+	min-width: 0;
+}
+.ticket__fields > div:last-child {
+	flex: none;
+	margin-left: auto;
+}
+.ticket__fields > div:first-child {
+	flex: none;
+	max-width: 48%;
+}
+.ticket__fields span {
+	display: block;
+	font: 850 9.5px / 1.3 var(--hr-sans);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--hr-muted);
+}
+.ticket__fields b {
+	display: block;
+	font-size: 14px;
+	font-weight: 750;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.ticket__perf {
+	position: relative;
+	height: 0;
+	border-top: var(--hr-perforation);
+	margin: 0 18px;
+}
+.ticket__perf::before,
+.ticket__perf::after {
+	content: "";
+	position: absolute;
+	top: -12px;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: var(--hr-surface);
+}
+.ticket__perf::before {
+	left: -30px;
+}
+.ticket__perf::after {
+	right: -30px;
+}
+.ticket__stub {
+	padding: 12px 16px 14px;
+	display: grid;
+	gap: 10px;
+	background: var(--hr-accent);
+	color: var(--hr-on-accent);
+}
+.ticket__stub .btn {
+	min-height: 52px;
+	font-size: 16.5px;
+}
+.ticket__stub .btn--sm {
+	min-height: 44px;
+	font-size: 15px;
+	padding: 0 20px;
+}
+.ticket__stub .btn[aria-busy="true"] {
+	color: var(--hr-accent-strong);
+	opacity: 0.92;
+}

@@ -1,0 +1,70 @@
+/* Invite ticket content: agency, code, stub notes */
+.invite__agency {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.invite__agency b {
+	display: block;
+	font: 850 25px / 1.05 var(--hr-sans);
+	letter-spacing: -0.02em;
+}
+.invite__grow {
+	flex: 1;
+}
+.invite__w30 {
+	width: 30%;
+}
+.invite__w70 {
+	width: 70%;
+}
+.invite__code {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 10px;
+}
+.invite__code > div > span {
+	display: block;
+	font: 850 10px / 1.2 var(--hr-sans);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--hr-on-accent-label);
+}
+.invite__code > div > b {
+	display: block;
+	font: 800 25px / 1 var(--hr-mono);
+	letter-spacing: 0.02em;
+	margin-top: 4px;
+}
+.invite__code > div > b.is-void {
+	text-decoration: line-through;
+	text-decoration-thickness: 2px;
+	opacity: 0.8;
+}
+.invite__flag {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font: 800 13px / 1.2 var(--hr-sans);
+	color: var(--hr-on-accent-urgent);
+}
+.stub-note {
+	font: 500 13.5px / 1.4 var(--hr-sans);
+	color: var(--hr-on-accent-label);
+}
+.stub-loading {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 52px;
+	font: 750 16px / 1 var(--hr-sans);
+	color: var(--hr-on-accent);
+}
+.stub-loading .spinner {
+	width: 18px;
+	height: 18px;
+}
+.invite__agency.is-unknown b {
+	color: var(--hr-void);
+}

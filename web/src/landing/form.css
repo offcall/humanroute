@@ -1,0 +1,63 @@
+/* Landing register form: buttons, Phantom status, alerts */
+.land-form {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	margin-top: 8px;
+}
+.land-actions {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 10px;
+}
+.land-btn {
+	min-width: 0;
+	min-height: 52px;
+}
+.land-btn__label {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.land-hint {
+	font-size: 13.5px;
+	color: var(--hr-muted);
+	line-height: 1.45;
+}
+.land-status {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font: 650 14.5px / 1.35 var(--hr-sans);
+	color: var(--hr-accent-strong);
+	background: var(--hr-accent-soft);
+	border-radius: 12px;
+	padding: 10px 12px;
+}
+.land-status svg {
+	flex: none;
+}
+.alert__actions .land-btn {
+	flex: 0 1 auto;
+}
+/* actions row spans the full alert width under icon and text */
+.land .alert {
+	flex-wrap: wrap;
+}
+.land .alert > .alert__actions {
+	flex-basis: 100%;
+	margin-top: 2px;
+}
+.land .alert > div {
+	flex: 1;
+	min-width: 0;
+}
+@container (max-width: 560px) {
+	.alert__actions .land-btn {
+		flex: 1 1 100%;
+		padding: 0 14px;
+	}
+	.land-actions {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

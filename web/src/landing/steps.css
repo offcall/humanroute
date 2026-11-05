@@ -1,0 +1,42 @@
+/* Landing "How it works" cards */
+.land-steps {
+	padding: 18px clamp(20px, 4cqi, 32px) 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.land-steps ol {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+	gap: 10px;
+}
+.land-steps li {
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+	background: var(--hr-card);
+	border-radius: var(--hr-radius-card);
+	padding: 14px 16px;
+	box-shadow: var(--hr-shadow-row);
+}
+.land-steps__no {
+	flex: none;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	background: var(--hr-accent);
+	color: var(--hr-on-accent);
+	font: 850 14px / 1 var(--hr-sans);
+}
+.land-steps b {
+	display: block;
+	font: 850 16px / 1.25 var(--hr-sans);
+}
+.land-steps p {
+	font-size: 14px;
+	color: var(--hr-muted);
+	margin-top: 3px;
+	line-height: 1.45;
+}
