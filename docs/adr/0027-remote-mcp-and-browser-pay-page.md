@@ -38,6 +38,6 @@ Step 4 of the demo needs Claude to post a task to HumanRoute from a chat, and th
 
 - A second process and a second Coolify app to deploy and configure (gateway URL).
 - Coordinator needs in the gateway: a draft endpoint (create and read a draft with `totalUnits`, and `orderId` plus task statuses once paid) and the SPA fallback for `/pay/:draftId`; the web router mounts `PayPage` there.
-- Claude polls `get_task` itself; there is no blocking wait.
+- Claude polls `get_task` itself; there is no blocking wait (superseded by ADR 0031, `wait_task`).
 - Only Phantom works on the pay page until Wallet Standard lands.
 - Not verified: that the x402 client flow works from a browser with `window.phantom`.
