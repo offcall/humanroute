@@ -1,6 +1,9 @@
 /* Landing page-only rules (landing.html mock) */
 .land {
 	container-type: inline-size;
+	width: 100%;
+	max-width: 1200px;
+	margin-inline: auto;
 	overflow-x: hidden;
 	display: flex;
 	flex-direction: column;
@@ -30,6 +33,10 @@
 	padding: 0;
 }
 .land-main {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+	gap: 28px 40px;
+	align-items: start;
 	padding: clamp(18px, 4cqi, 34px) clamp(20px, 4cqi, 32px) 8px;
 }
 .land-intro {
