@@ -4,6 +4,7 @@ import {
 	fetchPushKey,
 	pushAvailable,
 	registerWorker,
+	resyncPush,
 	subscribePush,
 	unsubscribePush,
 } from "../shared";
@@ -44,6 +45,9 @@ export const usePush = () => {
 			}
 			await registerWorker();
 			const subscription = await currentPush();
+			if (subscription !== null && Notification.permission === "granted") {
+				void resyncPush(subscription);
+			}
 			if (live) {
 				setPublicKey(key);
 				setState(stateOf(subscription));

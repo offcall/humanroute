@@ -81,6 +81,19 @@ export const subscribePush = async (publicKey: string): Promise<boolean> => {
 	return res.ok;
 };
 
+// Re-sends this device's subscription, so the server row exists and belongs to this linguist
+// (upsert by endpoint). Best effort: request never throws and the answer is ignored.
+export const resyncPush = async (
+	subscription: PushSubscription,
+): Promise<void> => {
+	await request(
+		"POST",
+		"/api/push/subscribe",
+		subscription.toJSON(),
+		parseDone,
+	);
+};
+
 // Best effort: never throws.
 export const unsubscribePush = async (): Promise<void> => {
 	try {

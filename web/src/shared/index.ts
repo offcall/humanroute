@@ -32,6 +32,7 @@ export {
 	fetchPushKey,
 	pushAvailable,
 	registerWorker,
+	resyncPush,
 	subscribePush,
 	unsubscribePush,
 } from "./push";
