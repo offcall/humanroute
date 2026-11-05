@@ -9,6 +9,7 @@ import {
 	parseWindow,
 	WINDOW_PRESETS,
 } from "./valuesV2.js";
+import { parseVapid } from "./vapid.js";
 
 type Get = (name: string) => string;
 type Take = <T = unknown>(parsed: Parsed<T>, fallback: T) => T;
@@ -86,5 +87,6 @@ export const parseConfigV2 = (
 		sessionTtlSeconds: ttl("SESSION_TTL_SECONDS"),
 		nonceTtlSeconds: ttl("NONCE_TTL_SECONDS"),
 		webDistDir: take(parseNonEmpty("WEB_DIST_DIR", get("WEB_DIST_DIR")), ""),
+		vapid: parseVapid(rawEnv, fail),
 	};
 };

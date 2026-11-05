@@ -7,6 +7,7 @@ export type {
 	Network,
 	Parsed,
 	PreflightProblem,
+	Vapid,
 } from "./types.js";
 export { Commitment, TimerMode } from "./types.js";
 export { USDC_DECIMALS } from "./values.js";

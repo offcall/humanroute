@@ -33,6 +33,9 @@ export type ConfigBase = {
 	commitment: Commitment;
 };
 
+// Web Push keys (ADR 0029); null turns push off.
+export type Vapid = { publicKey: string; privateKey: string; subject: string };
+
 export type ConfigV2 = {
 	taskPriceUnits: bigint;
 	timerMode: TimerMode;
@@ -48,6 +51,7 @@ export type ConfigV2 = {
 	sessionTtlSeconds: number;
 	nonceTtlSeconds: number;
 	webDistDir: string;
+	vapid: Vapid | null;
 };
 
 export type Config = ConfigBase & ConfigV2;
