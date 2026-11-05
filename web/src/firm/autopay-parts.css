@@ -1,0 +1,70 @@
+/* Auto-pay details: meter, facts, steps, narrow inputs, presets. */
+.ap-meter {
+	height: 8px;
+	border-radius: 9px;
+	background: var(--hr-drain-track);
+	overflow: hidden;
+}
+.ap-meter > i {
+	display: block;
+	height: 100%;
+	background: var(--hr-ok);
+}
+.ap-kv {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 4px 14px;
+	margin: 0;
+	font-size: 14px;
+}
+.ap-kv dt {
+	color: var(--hr-muted);
+}
+.ap-kv dd {
+	margin: 0;
+}
+.ap-steps {
+	display: flex;
+	gap: 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.ap-step {
+	flex: 1;
+	padding-top: 6px;
+	border-top: 3px solid var(--hr-line);
+	font-size: 13px;
+	color: var(--hr-muted);
+}
+.ap-step--cur {
+	border-color: var(--hr-accent);
+	color: var(--hr-ink);
+	font-weight: 600;
+}
+.ap-step--done {
+	border-color: var(--hr-ok);
+}
+.ap-key {
+	max-width: 520px;
+}
+.ap-amount {
+	width: 96px;
+}
+.ap-chip {
+	padding: 5px 12px;
+	border: 1px solid var(--hr-line);
+	border-radius: var(--hr-radius-pill);
+	background: var(--hr-card);
+	font-size: 13px;
+	cursor: pointer;
+}
+.ap-chip[aria-pressed="true"] {
+	border-color: var(--hr-accent);
+	color: var(--hr-accent);
+}
+.ap-details summary {
+	cursor: pointer;
+	font-size: 14px;
+	color: var(--hr-muted);
+}

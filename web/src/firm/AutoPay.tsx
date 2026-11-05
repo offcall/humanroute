@@ -1,36 +1,83 @@
 import { useState } from "react";
-import { TxLink } from "../shared";
 import { AgentSetup } from "./AgentSetup";
 import { AutoPayForm, agentFromUrl } from "./AutoPayForm";
-import { AutoPayState } from "./AutoPayState";
-import { useAutopay } from "./useAutopay";
+import { AutoPayOff } from "./AutoPayOff";
+import { AutoPayOn } from "./AutoPayOn";
+import { rememberLimit } from "./autopayLimit";
+import { approveTx, revokeTx } from "./autopayTx";
+import { SetupHead } from "./SetupHead";
+import type { AutopayControl } from "./useAutopay";
+import "./autopay.css";
+import "./autopay-parts.css";
 
-// Auto-pay (ADR 0036): the firm lets its agent key spend up to a limit from its own USDC account.
-// Step 1 runs the setup command; step 2 approves the limit in Phantom.
-export const AutoPay = () => {
-	const { status, busy, note, lastTx, run } = useAutopay();
-	const [ranSetup, setRanSetup] = useState(agentFromUrl() !== "");
+enum View {
+	Summary = "summary",
+	Key = "key",
+	Limit = "limit",
+}
 
-	return (
-		<section className="stack" aria-label="Auto-pay by Claude">
-			<p className="field__hint">
-				Optional. Claude pays orders itself from your own USDC account, up to a
-				limit; the money stays in your wallet until then.
-			</p>
-			{status === undefined ? null : <AutoPayState status={status} />}
-			{status === undefined || ranSetup ? null : (
-				<AgentSetup status={status} onDone={() => setRanSetup(true)} />
-			)}
-			{status === undefined || !ranSetup ? null : (
+// Auto-pay (ADR 0036): off row, two setup steps, or the on summary.
+export const AutoPay = ({ control }: { control: AutopayControl }) => {
+	const { status, busy, note, lastTx, run } = control;
+	const [view, setView] = useState(
+		agentFromUrl() === "" ? View.Summary : View.Limit,
+	);
+	if (status === undefined) {
+		return note === undefined ? null : (
+			<p className="ap-card ap-muted">{note}</p>
+		);
+	}
+
+	const approve = async (agent: string, units: bigint) => {
+		if (await run((current) => approveTx(current, agent, units))) {
+			rememberLimit(agent, units);
+			setView(View.Summary);
+		}
+	};
+	const { delegate } = status;
+	const on = delegate !== null && status.allowanceUnits > 0n;
+	let body: React.ReactNode;
+	if (view === View.Key) {
+		body = (
+			<>
+				<SetupHead step={1} onCancel={() => setView(View.Summary)} />
+				<AgentSetup status={status} onDone={() => setView(View.Limit)} />
+			</>
+		);
+	} else if (view === View.Limit) {
+		body = (
+			<>
+				<SetupHead step={2} onCancel={() => setView(View.Summary)} />
 				<AutoPayForm
 					status={status}
 					busy={busy}
-					run={run}
-					onBack={() => setRanSetup(false)}
+					onApprove={approve}
+					onBack={() => setView(View.Key)}
 				/>
+			</>
+		);
+	} else if (on) {
+		body = (
+			<AutoPayOn
+				status={{ ...status, delegate }}
+				lastTx={lastTx}
+				busy={busy}
+				onChange={() => setView(View.Limit)}
+				onOff={() => void run(revokeTx)}
+			/>
+		);
+	} else {
+		body = <AutoPayOff onSetup={() => setView(View.Key)} />;
+	}
+
+	return (
+		<section className="ap-card stack" aria-label="Auto-pay by Claude">
+			{body}
+			{note === undefined ? null : (
+				<p role="status" className="ap-muted">
+					{note}
+				</p>
 			)}
-			{note === undefined ? null : <p role="status">{note}</p>}
-			{lastTx === undefined ? null : <TxLink signature={lastTx} />}
 		</section>
 	);
 };

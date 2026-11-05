@@ -17,12 +17,3 @@
 	border-bottom-color: var(--hr-ink);
 	color: var(--hr-ink);
 }
-.fb-autopay-toggle {
-	grid-column: 1 / -1;
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-}
-.fb-autopay-toggle > .fb-tab {
-	align-self: flex-start;
-}

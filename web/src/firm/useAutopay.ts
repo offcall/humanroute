@@ -18,6 +18,11 @@ const readStatus = async (): Promise<Autopay | undefined> => {
 	return res.ok ? res.value : undefined;
 };
 
+export const isAutopayOn = (status: Autopay | undefined): boolean =>
+	status !== undefined &&
+	status.delegate !== null &&
+	status.allowanceUnits > 0n;
+
 export const useAutopay = () => {
 	const [status, setStatus] = useState<Autopay | undefined>(undefined);
 	const [busy, setBusy] = useState(false);
@@ -33,24 +38,29 @@ export const useAutopay = () => {
 	useEffect(() => void load(), [load]);
 
 	// A blockhash lives about a minute; the page may have been open longer, so read a fresh one.
-	const run = async (build: (current: Autopay) => VersionedTransaction) => {
+	const run = async (
+		build: (current: Autopay) => VersionedTransaction,
+	): Promise<boolean> => {
 		setBusy(true);
 		setNote(undefined);
 		const fresh = await load();
 		if (fresh === undefined) {
 			setBusy(false);
-			return;
+			return false;
 		}
 		const sent = await sendWithPhantom(fresh.wallet, build(fresh));
 		setBusy(false);
 		if (!sent.ok) {
 			setNote(sent.error);
-			return;
+			return false;
 		}
 		setLastTx(sent.signature);
-		setNote("Sent. The new allowance shows once devnet confirms it.");
+		setNote("Sent. The new state shows once devnet confirms it.");
 		setTimeout(() => void load(), CONFIRM_WAIT_MS);
+		return true;
 	};
 
 	return { status, busy, note, lastTx, run };
 };
+
+export type AutopayControl = ReturnType<typeof useAutopay>;

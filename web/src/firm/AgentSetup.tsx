@@ -15,10 +15,14 @@ export const setupCommand = (status: Autopay, origin: string): string => {
 const ALLOW_SIGN =
 	'{ "permissions": { "allow": ["Bash(node ~/.humanroute/sign.mjs:*)"] } }';
 
-type Props = { status: Autopay; onDone: () => void };
-
-// Step 1 of auto-pay: run the command, then "I ran it" opens step 2.
-export const AgentSetup = ({ status, onDone }: Props) => {
+// Step 1: run the command, then "I ran it" opens step 2.
+export const AgentSetup = ({
+	status,
+	onDone,
+}: {
+	status: Autopay;
+	onDone: () => void;
+}) => {
 	const [copied, setCopied] = useState("Copy");
 	const command = setupCommand(status, window.location.origin);
 	const copy = async () => {
@@ -31,16 +35,15 @@ export const AgentSetup = ({ status, onDone }: Props) => {
 	};
 
 	return (
-		<div className="stack">
-			<p className="desk-hint">
-				Step 1 of 2. Run this in the terminal where Claude Code runs (Node 18+).
-				It creates the agent key in ~/.humanroute; the key stays there and
-				prints its public key.
+		<>
+			<p className="ap-muted">
+				Run this in the terminal where Claude Code runs (Node 18+). The key
+				stays on that machine; the command prints its public key.
 			</p>
 			<div className="codeblock">
 				<pre>{command}</pre>
 			</div>
-			<div className="row">
+			<div className="ap-row">
 				<button type="button" className="btn btn--ghost btn--sm" onClick={copy}>
 					{copied}
 				</button>
@@ -49,14 +52,19 @@ export const AgentSetup = ({ status, onDone }: Props) => {
 					className="btn btn--primary btn--sm"
 					onClick={onDone}
 				>
-					I ran it
+					I ran it →
 				</button>
 			</div>
-			<p className="field__hint">
-				Optional: let Claude sign without a prompt, so a payment is signed
-				within its one-minute blockhash. Add to{" "}
-				<code>.claude/settings.json</code>: <code>{ALLOW_SIGN}</code>
-			</p>
-		</div>
+			<details className="ap-details">
+				<summary>So Claude signs without asking each time</summary>
+				<p className="ap-muted">
+					A payment must be signed within about a minute. Add to{" "}
+					<code>.claude/settings.json</code>:
+				</p>
+				<div className="codeblock">
+					<pre>{ALLOW_SIGN}</pre>
+				</div>
+			</details>
+		</>
 	);
 };

@@ -34,22 +34,3 @@ export const ConnectTabs = ({
 		</>
 	);
 };
-
-// In the empty-state hero: one small text link that opens auto-pay below.
-export const AutoPayToggle = ({ children }: { children: ReactNode }) => {
-	const [open, setOpen] = useState(false);
-
-	return (
-		<div className="fb-autopay-toggle">
-			<button
-				type="button"
-				className="fb-tab"
-				aria-expanded={open}
-				onClick={() => setOpen(!open)}
-			>
-				{open ? "Hide auto-pay" : "Auto-pay by Claude (optional)"}
-			</button>
-			{open ? children : null}
-		</div>
-	);
-};
