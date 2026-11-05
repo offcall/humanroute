@@ -12,8 +12,12 @@ const snapshot = (): string => window.location.pathname;
 
 export const useRoute = (): string => useSyncExternalStore(subscribe, snapshot);
 
-export const navigate = (to: string): void => {
-	window.history.pushState(null, "", to);
+export const navigate = (to: string, replace = false): void => {
+	if (replace) {
+		window.history.replaceState(null, "", to);
+	} else {
+		window.history.pushState(null, "", to);
+	}
 	window.dispatchEvent(new PopStateEvent("popstate"));
 };
 
@@ -25,13 +29,19 @@ const decodeSegment = (segment: string): string | undefined => {
 	}
 };
 
+// A trailing "/*" in the pattern matches the path itself and any deeper path.
 export const matchPath = (
 	pattern: string,
 	path: string,
 ): Params | undefined => {
-	const want = pattern.split("/").filter((part) => part !== "");
+	const parts = pattern.split("/").filter((part) => part !== "");
+	const isPrefix = parts.at(-1) === "*";
+	const want = isPrefix ? parts.slice(0, -1) : parts;
 	const have = path.split("/").filter((part) => part !== "");
-	if (want.length !== have.length) {
+	const sizeOk = isPrefix
+		? have.length >= want.length
+		: have.length === want.length;
+	if (!sizeOk) {
 		return undefined;
 	}
 

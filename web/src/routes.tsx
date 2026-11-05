@@ -1,27 +1,42 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Agency } from "./agency";
 import { Firm } from "./firm";
 import { Join } from "./join";
 import { Landing } from "./landing";
 import { Linguist } from "./linguist";
-import { matchPath, useRoute, useSession, WalletLine } from "./shared";
+import {
+	matchPath,
+	navigate,
+	useRoute,
+	useSession,
+	WalletLine,
+} from "./shared";
 
 // The pay page carries the wallet and payment code; it loads only when a /pay/ link is opened.
 const PayPage = lazy(() =>
 	import("./pay").then((module) => ({ default: module.PayPage })),
 );
 
+const FirmJobsRedirect = () => {
+	useEffect(() => navigate("/firm/jobs", true), []);
+
+	return null;
+};
+
 const Page = () => {
 	const path = useRoute();
 	const join = matchPath("/join/:inviteCode", path);
 
 	if (matchPath("/firm", path)) {
+		return <FirmJobsRedirect />;
+	}
+	if (matchPath("/firm/*", path)) {
 		return <Firm />;
 	}
 	if (matchPath("/agency", path)) {
 		return <Agency />;
 	}
-	if (matchPath("/linguist", path)) {
+	if (matchPath("/linguist/*", path)) {
 		return <Linguist />;
 	}
 	if (join) {
