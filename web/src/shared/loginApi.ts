@@ -27,6 +27,11 @@ export const createRequest = async (): Promise<string | undefined> => {
 export const olderThan = (ms: number): boolean =>
 	Date.now() - Number(localStorage.getItem(CREATED_KEY)) > ms;
 
+// The stored id is shown at once only while young; an older one waits for the first claim,
+// which signs in (approved), renews (pending) or drops it (410).
+export const freshStoredId = (): string | null =>
+	olderThan(RENEW_AFTER_MS) ? null : localStorage.getItem(STORAGE_KEY);
+
 // 200 carries the wallet; 202 pending has none.
 const parseClaim = (
 	raw: unknown,

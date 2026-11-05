@@ -6,6 +6,7 @@ import {
 	CREATED_KEY,
 	claimRequest,
 	createRequest,
+	freshStoredId,
 	olderThan,
 	RENEW_AFTER_MS,
 	STORAGE_KEY,
@@ -24,9 +25,7 @@ type LoginRequest = {
 // 200 signs the tab in, 410 or an old pending request is replaced by a fresh one.
 export const useLoginRequest = (onSignedIn?: () => void): LoginRequest => {
 	const { refresh } = useSession();
-	const [requestId, setRequestId] = useState(() =>
-		localStorage.getItem(STORAGE_KEY),
-	);
+	const [requestId, setRequestId] = useState(freshStoredId);
 	const [failed, setFailed] = useState(false);
 	const busy = useRef(false);
 	const done = useRef(false);
