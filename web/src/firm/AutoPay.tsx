@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { formatUsdc, TxLink } from "../shared";
+import { AgentSetup } from "./AgentSetup";
 import { AutoPayState } from "./AutoPayState";
 import { approveTx, parseUsdcInput, revokeTx } from "./autopayTx";
 import { useAutopay } from "./useAutopay";
@@ -34,6 +35,7 @@ export const AutoPay = () => {
 				money stays in your wallet until Claude pays an order. Phantom must be
 				on Solana devnet.
 			</p>
+			{status === undefined ? null : <AgentSetup status={status} />}
 			{status === undefined ? null : <AutoPayState status={status} />}
 			<div className="field">
 				<label className="field__label" htmlFor="autopay-agent">

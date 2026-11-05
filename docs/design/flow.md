@@ -53,7 +53,13 @@ Memos: `hr:<taskId>` (approved), `hr:<taskId>:rejected`, `:unclaimed`, `:late` (
 | Same payment sent again for the same draft | same `201` response, no second order | orders |
 | Different payment for a paid draft | `409 draft_paid` | orders |
 | Payment already used for another draft | `409 payment_reused` | orders |
-| Paid on-chain but not recorded | `502 orphan_payment`, orphan row; operator refunds by hand | orders |
+| Paid on-chain but not recorded | `502 orphan_payment`, orphan row; operator refunds by hand to the owner of the paying token account (ADR 0036) | orders |
+| Auto-pay: no allowance, or revoked | `409 autopay_off`; Claude gives the pay link | orders, mcp |
+| Auto-pay: allowance below the order total | `409 autopay_limit {leftUnits}`; the firm raises the limit in the cabinet or pays by link | orders, mcp |
+| Auto-pay: firm USDC below the order total, or no USDC account | `409 insufficient_usdc {balanceUnits}` or `409 no_usdc_account`; pay link | orders, mcp |
+| Auto-pay: signature from another key than the delegate | `pay_task` refuses before sending; the firm enables auto-pay for its agent key | mcp |
+| Auto-pay: message is not a HumanRoute payment to the firm's account and HumanRoute | `sign.mjs` refuses to sign | agent machine |
+| Auto-pay: blockhash expired or funds moved before `pay_task` | `402` simulation failure; Claude calls `prepare_payment` again | orders, mcp |
 | Second linguist claims the task | `409 claim_taken`; after the claim window `409 claim_closed` | tasks |
 | Submit after the work window | `409 late`; the task is refunded as `:late` | tasks, payouts |
 | Approve or reject in the wrong state | `409 bad_state` | tasks |

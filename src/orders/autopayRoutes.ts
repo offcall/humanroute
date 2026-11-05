@@ -1,5 +1,7 @@
 // Auto-pay reads (ADR 0036): the firm's allowance for the cabinet, and the unsigned delegate
 // payment for MCP prepare_payment. Nothing is signed or sent here.
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { PublicKey } from "@solana/web3.js";
 import { Hono } from "hono";
 import { CHAIN_DOWN } from "./autopay.js";
 import { cookieFirm, denied } from "./caller.js";
@@ -32,7 +34,11 @@ export const autopayRoutes = (deps: OrdersDeps): Hono => {
 				}
 			: {};
 		const { payTo, usdcMint: mint } = deps;
-		const base = { wallet, mint, payTo, ...blockhash.value };
+		const payToAccount = getAssociatedTokenAddressSync(
+			new PublicKey(mint),
+			new PublicKey(payTo),
+		).toBase58();
+		const base = { wallet, mint, payTo, payToAccount, ...blockhash.value };
 		return ctx.json({
 			...base,
 			account: usdc.address,
