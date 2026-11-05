@@ -1,0 +1,43 @@
+/* Firm cabinet shell: page padding, jobs meta line, reject rate */
+.fb-main {
+	padding: 24px 24px 30px;
+	gap: 20px;
+}
+.fb-main > .meta-line {
+	align-items: center;
+	min-height: 36px;
+}
+.fb-meta-right {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+.fb-connect {
+	min-height: 36px;
+	font-size: 14px;
+	text-decoration: none;
+	gap: 4px;
+	margin-right: -10px;
+}
+.fb-empty {
+	padding: 22px 20px;
+}
+.fb-rate {
+	font-size: 14px;
+	color: var(--hr-muted);
+	padding-top: 4px;
+}
+.fb-rate b {
+	color: var(--hr-ink);
+}
+@media (max-width: 760px) {
+	.fb-main {
+		padding: 18px 16px 24px;
+	}
+	.fb-main > .meta-line {
+		flex-wrap: wrap;
+	}
+	.fb-connect {
+		margin-right: 0;
+	}
+}

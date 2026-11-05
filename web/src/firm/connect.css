@@ -1,0 +1,74 @@
+/* Connect Claude: empty-state hero and the dialog from the jobs header */
+.fb-lead {
+	font-size: 17px;
+	line-height: 1.5;
+	color: var(--hr-muted);
+	max-width: 60ch;
+}
+.fb-connect-hero {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+	gap: 20px 32px;
+	align-items: start;
+	padding: 26px 28px;
+	border-radius: 20px;
+	background: var(--hr-card);
+	box-shadow: var(--hr-shadow-card);
+}
+.fb-steps {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 16px;
+	border-top: 1px solid var(--hr-line);
+	padding-top: 18px;
+	margin: 0;
+	list-style: none;
+	padding-left: 0;
+}
+.fb-steps li {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+	font-size: 14.5px;
+	line-height: 1.45;
+	color: var(--hr-muted);
+}
+.fb-steps li > b {
+	flex: none;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: var(--hr-accent-soft);
+	color: var(--hr-accent-strong);
+	display: grid;
+	place-items: center;
+	font: 850 13px / 1 var(--hr-sans);
+}
+.fb-steps strong {
+	color: var(--hr-ink);
+}
+.fb-connect-hero .fb-steps {
+	grid-column: 1 / -1;
+}
+.fb-copy {
+	min-width: 168px;
+}
+pre.fb-selected {
+	background: rgba(217, 211, 255, 0.22);
+	border-radius: 4px;
+	outline: 1.5px dashed var(--hr-on-accent-label);
+	outline-offset: 4px;
+}
+@media (max-width: 760px) {
+	.fb-connect-hero {
+		grid-template-columns: 1fr;
+		padding: 20px 18px;
+	}
+	.fb-steps {
+		grid-template-columns: 1fr;
+	}
+	.codeblock pre {
+		white-space: pre-wrap;
+		word-break: break-all;
+	}
+}
