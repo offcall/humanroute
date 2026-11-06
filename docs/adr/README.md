@@ -34,8 +34,8 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0028](0028-demo-vs-public-timers.md) | Demo vs public timers in config | Proposed |
 | [0029](0029-web-push.md) | Web Push for new tasks | Proposed |
 | [0030](0030-approve-reject-from-mcp.md) | Approve and reject from MCP after asking the user | Proposed |
-| [0031](0031-wait-task.md) | wait_task with progress notifications | Proposed |
+| [0031](0031-wait-task.md) | wait_task with progress notifications, including before payment | Proposed |
 | [0032](0032-indigo-web-ui.md) | Indigo web UI: theme, CSS layout, client routes | Accepted (deeplink sign-in superseded by 0034) |
 | [0033](0033-indigo-read-fields.md) | Indigo read fields | Accepted |
 | [0034](0034-sign-in-via-approve-in-phantom.md) | Sign-in via approve in Phantom | Proposed |
-| [0036](0036-agent-autopay-spl-delegate.md) | Agent auto-pay through an SPL delegate | Accepted |
+| [0036](0036-agent-autopay-spl-delegate.md) | Agent auto-pay through an SPL delegate, with draft availability | Accepted |
