@@ -74,7 +74,7 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 
 | Route | Auth / role | Request | Response | Errors | Slice |
 | --- | --- | --- | --- | --- | --- |
-| `POST /api/orders/draft` | MCP Bearer, firm | `{text, sourceLang, targets: [{targetLang, draft}], meta?}` (1..5 targets, distinct) | `201 {draftId, payUrl, priceUnits, totalUnits, taskCount}`; `payUrl` = `<PUBLIC_BASE_URL>/pay/<draftId>` | `422 invalid_body` | orders |
+| `POST /api/orders/draft` | MCP Bearer, firm | `{text, sourceLang, targets: [{targetLang, draft}], meta?}` (1..5 targets, distinct) | `201 {draftId, payUrl, priceUnits, totalUnits, taskCount, autopay: "available" \| "unavailable" \| "unknown"}`; `payUrl` = `<PUBLIC_BASE_URL>/pay/<draftId>` | `422 invalid_body` | orders |
 | `GET /api/orders/draft/:draftId` | none (`draftId` is unguessable) | - | `200 {draftId, payUrl, state: "draft" \| "paid", sourceLang, targetLangs, taskCount, priceUnits, totalUnits, payTo, mint, network, orderId?, tasks?: [{taskId, targetLang, publicState}]}`; `orderId` and `tasks` once paid | `404` (unknown or older than 30 min and unpaid) | orders |
 | `POST /x/orders/:draftId` | x402, any wallet | no body (content is in the draft) | `201 {orderId, taskIds, payTx}` + `PAYMENT-RESPONSE`; replay of the same payment returns the same `201` | `402`, `404`, `409 draft_paid` (other payment), `409 payment_reused` (other draft), `502 orphan_payment`, `503 not_ready` | orders |
 | `GET /api/firm/autopay` | cookie, firm | - | `200 {wallet, mint, payTo, payToAccount, solLamports, blockhash, lastValidBlockHeight, account, exists, balanceUnits?, delegate?, allowanceUnits?}`: the firm's USDC token account, its SPL delegate and remaining allowance, read from chain (ADR 0036); `blockhash` for the cabinet's approve and revoke | `401`, `403`, `502 chain_unavailable` | orders |
@@ -83,6 +83,8 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | `GET /api/orders/:id` | cookie firm owner, or MCP Bearer of the same firm | - | `200 {serverTime, orderId, firmId, payTx, payer, totalUnits, createdAt, tasks: [TaskView]}`; `payer` = the x402 signer (the delegate for auto-pay, ADR 0036) | `403`, `404` | orders |
 
 `GET /api/orders/draft/:draftId` serves the pay page and MCP `get_task` (ADR 0027). Drafts live 30 min. `PAYMENT-REQUIRED` for `/x/orders/:draftId`: exact scheme, `amount = totalUnits = taskCount x priceUnits` of `USDC_MINT`, `payTo` = hold wallet. Every task refunds to the firm's login wallet (ADR 0036); the x402 payer is stored on the order as the signer. Price is fixed per task from config (`TASK_PRICE_USDC`). Paying creates the order and its N `open` tasks in one SQLite transaction (ADR 0022).
+
+`autopay` is an advisory snapshot in the authenticated creation response only (ADR 0036): `available` means the firm's USDC account has a delegate, allowance and balance covering this draft's total. Otherwise it is `unavailable`. An RPC failure, exception or read exceeding 2 s gives `unknown`, without failing draft creation. It checks neither the agent's local key nor payment readiness; `prepare_payment` validates again. No transaction is prepared. Public reads and `wait_task` do not refresh this snapshot. MCP treats a missing field from an older gateway as `unknown`, but rejects an invalid value.
 
 ### tasks (stream A)
 

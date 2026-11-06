@@ -1,3 +1,4 @@
+import { setTimeout } from "node:timers/promises";
 import { SESSION_COOKIE } from "../auth/index.js";
 import type { OrdersDeps } from "../orders/index.js";
 import { transferViewOf } from "../payouts/index.js";
@@ -40,6 +41,8 @@ export const ordersDeps = (
 		transferOf: transferViewOf(database),
 		preflightProblems: input.preflightProblems,
 		now: input.now,
+		sleep: (millis, signal) =>
+			setTimeout(millis, undefined, { signal, ref: false }),
 		newId: input.newId,
 		log: input.log("orders"),
 	};

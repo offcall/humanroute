@@ -5,6 +5,13 @@ export type Parsed<T = unknown> =
 
 export type Target = { targetLang: string; draft: string };
 
+// Mirrors the authenticated gateway draft response (ADR 0036).
+export enum AutopayStatus {
+	Available = "available",
+	Unavailable = "unavailable",
+	Unknown = "unknown",
+}
+
 export type DraftInput = {
 	text: string;
 	sourceLang: string;
@@ -17,6 +24,7 @@ export type Draft = {
 	priceUnits: string;
 	totalUnits: string;
 	taskCount: number;
+	autopay: AutopayStatus;
 };
 
 export enum DraftState {
@@ -96,5 +104,10 @@ export type WaitOutcome =
 			text: string;
 			seen: string;
 	  }
-	| { kind: WaitKind.Error; message: string; seen: string | undefined }
+	| {
+			kind: WaitKind.Error;
+			message: string;
+			seen: string | undefined;
+			permanent: boolean;
+	  }
 	| { kind: WaitKind.Aborted };

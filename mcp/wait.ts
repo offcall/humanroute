@@ -78,7 +78,12 @@ export const waitForChange = async ({
 		} else {
 			failingSince = failingSince ?? readAt;
 			if (current.permanent || deps.now() - failingSince >= FAILING_MS) {
-				return { kind: WaitKind.Error, message: current.error, seen: baseline };
+				return {
+					kind: WaitKind.Error,
+					message: current.error,
+					seen: baseline,
+					permanent: current.permanent === true,
+				};
 			}
 			line = "gateway not answering, retrying";
 		}

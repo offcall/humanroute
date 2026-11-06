@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { autopayRoutes } from "./autopayRoutes.js";
 import { parseDraftBody } from "./body.js";
 import { bearerFirm, denied } from "./caller.js";
+import { draftAutopay } from "./draftAutopay.js";
 import { insertDraft } from "./drafts.js";
 import { payRoute } from "./payRoute.js";
 import { readRoutes } from "./readRoutes.js";
@@ -27,6 +28,7 @@ export const ordersRoutes = (deps: OrdersDeps): Hono<OrdersEnv> => {
 			return ctx.json({ error: "invalid_body" }, 422);
 		}
 		const draft = insertDraft(deps, caller.firmId, body);
+		const autopay = await draftAutopay(deps, draft);
 		const base = deps.publicBaseUrl.replace(/\/$/, "");
 		return ctx.json(
 			{
@@ -35,6 +37,7 @@ export const ordersRoutes = (deps: OrdersDeps): Hono<OrdersEnv> => {
 				priceUnits: draft.priceUnits.toString(),
 				totalUnits: draft.totalUnits.toString(),
 				taskCount: draft.taskCount,
+				autopay,
 			},
 			201,
 		);

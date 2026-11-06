@@ -8,7 +8,7 @@ import {
 } from "./types.js";
 
 const TERMS = [
-	"Paid once through the pay link, with the firm's Phantom wallet on Solana devnet (test money).",
+	"Paid once through the pay link with the firm's Phantom wallet, or through authorized agent auto-pay, on Solana devnet (test money).",
 	"Per language: approved pays the linguist, agency and fee; rejected, unclaimed or late refunds the full amount to the firm wallet.",
 	"Claim and work deadlines start when paid; get_task shows them.",
 	"The pay link expires 30 minutes after creation if unpaid.",
@@ -63,6 +63,7 @@ export const renderDraft = (draft: Draft): string =>
 		`draftId: ${draft.draftId}`,
 		amountLine(draft),
 		`Pay link: ${draft.payUrl}`,
+		`Auto-pay: ${draft.autopay} (advisory chain snapshot; local signing key not checked).`,
 		"Terms:",
 		...termLines(),
 	].join("\n");
@@ -76,7 +77,7 @@ export const renderStatus = (
 	if (order === undefined) {
 		lines.push(
 			amountLine(status),
-			"Not paid yet: the firm must open the pay link returned by post_task.",
+			"Not paid yet: waiting for payment by link or authorized agent auto-pay.",
 			"Languages:",
 			...status.targetLangs.map((lang) => `- ${lang}: awaiting payment`),
 		);

@@ -26,7 +26,9 @@ const reply = (outcome: WaitOutcome) => {
 			return toolText(
 				[
 					outcome.message,
-					"If the gateway was unreachable, call wait_task again with this seen. A draft that is not found has expired.",
+					outcome.permanent
+						? "The draft was not found or has expired. Tell the user. Do not call wait_task again or create a new draft automatically."
+						: "If the gateway was unreachable, call wait_task again with this seen.",
 					`seen: ${outcome.seen ?? "none (call get_task to get one)"}`,
 				].join("\n"),
 				true,

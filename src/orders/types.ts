@@ -9,6 +9,12 @@ export enum DraftState {
 	Paid = "paid",
 }
 
+export enum AutopayStatus {
+	Available = "available",
+	Unavailable = "unavailable",
+	Unknown = "unknown",
+}
+
 export enum OrphanReason {
 	UnparsableSettle = "unparsable_settle",
 	WrongNetwork = "wrong_network",
@@ -111,6 +117,7 @@ export type OrdersDeps = PartyPorts & {
 	transferOf: (taskId: string) => TaskTransfer | null;
 	preflightProblems: () => string[];
 	now: () => number;
+	sleep: (millis: number, signal: AbortSignal) => Promise<void>;
 	newId: () => string;
 	log: (msg: string) => void;
 	// Fire-and-forget after commit; absent when push is not wired (ADR 0029).

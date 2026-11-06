@@ -1,4 +1,5 @@
 import {
+	AutopayStatus,
 	type Draft,
 	DraftState,
 	type DraftStatus,
@@ -31,19 +32,24 @@ export const parseDraft = (input: unknown): Parsed<Draft> => {
 		return { ok: false, error: "gateway draft is not an object" };
 	}
 	const { draftId, payUrl, priceUnits, totalUnits, taskCount } = input;
+	const autopay =
+		input.autopay === undefined
+			? AutopayStatus.Unknown
+			: Object.values(AutopayStatus).find((status) => status === input.autopay);
 	if (
 		typeof draftId !== "string" ||
 		typeof payUrl !== "string" ||
 		!isUnits(priceUnits) ||
 		!isUnits(totalUnits) ||
-		typeof taskCount !== "number"
+		typeof taskCount !== "number" ||
+		autopay === undefined
 	) {
 		return { ok: false, error: "gateway draft has an unexpected shape" };
 	}
 
 	return {
 		ok: true,
-		value: { draftId, payUrl, priceUnits, totalUnits, taskCount },
+		value: { draftId, payUrl, priceUnits, totalUnits, taskCount, autopay },
 	};
 };
 

@@ -1,5 +1,6 @@
 // pay_task (ADR 0036): puts the agent's signature into the prepared payment and sends it over x402.
 import { formatUsdc } from "./money.js";
+import { WAIT_AFTER_PAYMENT } from "./paymentNext.js";
 import { type PayClient, PayOutcome } from "./payTypes.js";
 import { dropPrepared, takePrepared } from "./pending.js";
 import { toolText } from "./result.js";
@@ -42,10 +43,12 @@ export const pay = async (
 	}
 	dropPrepared(token, draftId);
 	if (paid.value.outcome === PayOutcome.AlreadyPaid) {
-		return toolText("This draft is already paid. Call get_task for the order.");
+		return toolText(
+			`This draft is already paid. Do not pay again. ${WAIT_AFTER_PAYMENT}`,
+		);
 	}
 	const { orderId, payTx } = paid.value.order;
 	return toolText(
-		`Paid: you signed the payment of ${formatUsdc(prepared.amountUnits)}. orderId ${orderId}, payTx ${payTx} (Solana devnet). Tell the user you signed it, with the payTx, then call wait_task with seen: draft.`,
+		`Paid: you signed the payment of ${formatUsdc(prepared.amountUnits)}. orderId ${orderId}, payTx ${payTx} (Solana devnet). Tell the user you signed it, with the payTx. ${WAIT_AFTER_PAYMENT}`,
 	);
 };

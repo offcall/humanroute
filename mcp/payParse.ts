@@ -45,7 +45,7 @@ const refusal = (code: string | undefined, body: unknown): string => {
 		case "draft_paid":
 			return "this draft is already paid: call get_task";
 		case "not_found":
-			return "draft not found or expired: call post_task again";
+			return "draft not found or expired: tell the user; do not wait again or create a new draft automatically";
 		default:
 			return `gateway refused: ${code ?? "unknown error"}`;
 	}

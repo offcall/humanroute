@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { registerDecisionTools } from "./decisionTools.js";
 import { GET_TASK_DESCRIPTION, POST_TASK_DESCRIPTION } from "./descriptions.js";
+import { afterDraft } from "./paymentNext.js";
 import { renderDraft, renderStatus } from "./render.js";
 import { toolText } from "./result.js";
 import { fingerprint, readStatus } from "./status.js";
@@ -42,7 +43,7 @@ export const registerTools = (
 
 			return created.ok
 				? toolText(
-						`${renderDraft(created.value)}\nseen: ${DraftState.Draft}\nNext: first write the full Pay link URL above to the user verbatim, as a clickable link. Then ask whether you should pay it yourself with the agent key (prepare_payment, then pay_task), unless the user already said to pay without asking. After payment call wait_task with this seen.`,
+						`${renderDraft(created.value)}\nseen: ${DraftState.Draft}\nNext: ${afterDraft(created.value.autopay)}`,
 					)
 				: toolText(created.error, true);
 		},
