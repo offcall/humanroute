@@ -47,9 +47,9 @@ The full failure table is in [`docs/design/flow.md`](docs/design/flow.md#failure
 
 Money moves only from `src/payouts/`. Decisions (approve, reject, timers) only record state and queue a transfer.
 
-## Demo
+## Docs
 
-Two browsers, Claude Code and a phone, one script: [`docs/demo-script.md`](docs/demo-script.md). Design: [`docs/design/flow.md`](docs/design/flow.md). Endpoints and shapes: [`docs/design/api.md`](docs/design/api.md). Decisions: [`docs/adr/`](docs/adr/README.md). Not built yet: [`docs/roadmap.md`](docs/roadmap.md).
+Design: [`docs/design/flow.md`](docs/design/flow.md). Endpoints and shapes: [`docs/design/api.md`](docs/design/api.md). Decisions: [`docs/adr/`](docs/adr/README.md). Not built yet: [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Run locally
 
@@ -111,7 +111,7 @@ web/     React app (landing, firm, agency, linguist, join, pay)
 mcp/     MCP server (post_task, get_task, wait_task, approve_task, reject_task, prepare_payment, pay_task)
 scripts/ wallet setup, devnet e2e flow
 spike/   first x402 devnet proof (throwaway)
-docs/    design, ADRs, demo script, roadmap
+docs/    design, ADRs, roadmap
 ```
 
 Slices and their rules: [ADR 0019](docs/adr/0019-module-layout-v2.md). Secrets: `keys/` and `.env` are never committed.

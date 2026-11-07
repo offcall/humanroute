@@ -1,6 +1,6 @@
 # Roadmap
 
-Not built in the hackathon version. Each item is a product or architecture change; the demo script never needs them.
+Not built in the hackathon version. Each item is a product or architecture change; the demo never needs them.
 
 ## Product
 
