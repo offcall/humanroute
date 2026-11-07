@@ -8,7 +8,7 @@ import net from "node:net";
 const LOOPBACK = new Set(["127.0.0.1", "::1", "localhost", "::ffff:127.0.0.1"]);
 
 export const isLoopback = (host: string): boolean =>
-	LOOPBACK.has(host) || host.startsWith("127.");
+	LOOPBACK.has(host) || (net.isIPv4(host) && host.startsWith("127."));
 
 const record = (host: string): Error => {
 	const line = `${process.pid} ${process.argv[1] ?? "?"} ${host}\n`;
