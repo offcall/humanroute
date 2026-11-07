@@ -143,9 +143,12 @@ const sliceOf = (path: string): string | null => {
 	const parts = path.split("/");
 	return parts[0] === "src" && parts.length > 2 ? (parts[1] ?? null) : null;
 };
+// Test-only support (ADR 0037): src/testing/ and the MCP fakes, which may import vitest.
+const isTestSupport = (path: string): boolean =>
+	under(path, "src/testing") || /^mcp\/fake\w*\.ts$/.test(path);
 const isProduction = (path: string): boolean =>
 	!isTest(path) &&
-	!under(path, "src/testing") &&
+	!isTestSupport(path) &&
 	!under(path, "contracts") &&
 	!under(path, "e2e");
 const show = (edges: Edge[]): string[] =>
@@ -221,11 +224,10 @@ describe("architecture (ADR 0019, ADR 0037)", () => {
 		expect(show(clientIn)).toEqual([]);
 	});
 
-	test("production code never imports src/testing or test files", () => {
+	test("production code never imports test support or test files", () => {
 		const leaks = EDGES.filter(
 			(edge) =>
-				isProduction(edge.from) &&
-				(under(edge.to, "src/testing") || isTest(edge.to)),
+				isProduction(edge.from) && (isTestSupport(edge.to) || isTest(edge.to)),
 		);
 		expect(show(leaks)).toEqual([]);
 	});
