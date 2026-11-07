@@ -1,7 +1,7 @@
 # HumanRoute spike report: x402 V2 `exact` on Solana devnet
 
 Date: 2026-10-20. Network: `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` (devnet). Facilitator: `https://x402.org/facilitator`.
-This is throwaway code. Nothing was committed, and no keys were regenerated.
+This is throwaway code.
 
 ## Headline
 
@@ -22,7 +22,6 @@ This is throwaway code. Nothing was committed, and no keys were regenerated.
 - **Replay was rejected by the facilitator, not by the server.** The error is `invalid_exact_svm_transaction_simulation_failed`: the facilitator's simulation of the already-landed tx failed. The spike server has no idempotency or replay store of its own. Not verified: whether a replay sent *while the first settle is still in flight* (concurrent) is also rejected.
 - **The replay's first payment was not refunded.** After step 5 the hold test-mint ATA holds 500000 (0.50 test token) from tx `3QqVHy…`.
 - **Setup tx labels not verified.** The setup signatures below were recovered afterwards with `getSignaturesForAddress`. Which signature is mint creation, ATA creation or mint-to was not checked individually.
-- `scripts/setup-wallets.ts` is no longer at `scripts/`. The git index shows it staged as renamed to `old/scripts/setup-wallets.ts`, along with the rest of the old gateway. This spike did not make that change.
 - No devnet USDC ATA exists for the payer's refund leg in USDC terms. Only the test-mint refund was exercised.
 
 ## Packages (pinned, from package.json)

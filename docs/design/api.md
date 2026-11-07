@@ -154,7 +154,7 @@ Each decided task gets exactly one transfer (unique `task_id`); `transfers.statu
 | `expired_unclaimed` | full `priceUnits` to the refund wallet | `hr:<taskId>:unclaimed` |
 | `expired_late` | full `priceUnits` to the refund wallet | `hr:<taskId>:late` |
 
-## Config names (shared `src/config`, coordinator)
+## Config names (shared `src/config`)
 
 | Name | Meaning |
 | --- | --- |
