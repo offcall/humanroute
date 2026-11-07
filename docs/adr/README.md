@@ -9,7 +9,7 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0003](0003-job-and-transfer-model.md) | Job and Transfer Model | Superseded by 0022, 0023, 0024 |
 | [0004](0004-payment-identity-and-replay.md) | Payment Identity and Replay | Superseded by 0022 |
 | [0005](0005-claim-then-send.md) | Claim Then Send | Accepted |
-| [0006](0006-sign-before-send-and-resend-policy.md) | Sign Before Send and Resend Policy | Accepted |
+| [0006](0006-sign-before-send-and-resend-policy.md) | Sign Before Send and Resend Policy | Accepted (amended by 0039, 0041) |
 | [0007](0007-sqlite-one-process.md) | SQLite, One Process | Accepted |
 | [0008](0008-custody-and-devnet-only.md) | Custody and Devnet Only | Accepted (mint superseded by 0015, refund by 0036) |
 | [0009](0009-module-layout.md) | Module Layout | Superseded by 0019 |
@@ -38,4 +38,9 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0032](0032-indigo-web-ui.md) | Indigo web UI: theme, CSS layout, client routes | Accepted (deeplink sign-in superseded by 0034) |
 | [0033](0033-indigo-read-fields.md) | Indigo read fields | Accepted |
 | [0034](0034-sign-in-via-approve-in-phantom.md) | Sign-in via approve in Phantom | Proposed |
-| [0036](0036-agent-autopay-spl-delegate.md) | Agent auto-pay through an SPL delegate, with draft availability | Accepted |
+| [0036](0036-agent-autopay-spl-delegate.md) | Agent auto-pay through an SPL delegate, with draft availability | Accepted (amended by 0040) |
+| [0037](0037-test-toolchain-vitest.md) | Test toolchain: Vitest projects and test layout | Proposed |
+| [0038](0038-e2e-environments.md) | E2E environments | Proposed |
+| [0039](0039-resend-guard-history-window.md) | Resend guard history window | Proposed |
+| [0040](0040-agent-signer-validation-and-fee-policy.md) | Agent signer validation and fee policy | Proposed |
+| [0041](0041-unknown-send-errors-are-ambiguous.md) | Unknown send errors are ambiguous | Proposed |

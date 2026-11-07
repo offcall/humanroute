@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. The test deferral in the Decision is lifted by ADR 0037.
 
 ## Context
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. Amended by ADR 0040 (agent signer validation and fee policy).
 
 ## Context
 

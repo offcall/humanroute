@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. Amended by ADR 0039 (memo history window) and ADR 0041 (unknown send errors are ambiguous).
 
 ## Context
 
