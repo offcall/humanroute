@@ -9,9 +9,13 @@
 	"scripts": {
 		"dev": "tsx watch --env-file=.env src/index.ts",
 		"start": "tsx --env-file=.env src/index.ts",
-		"check": "biome check . && tsc --noEmit && tsc -p web/tsconfig.json --noEmit && tsc -p web/sw/tsconfig.json --noEmit",
+		"check": "biome check . && tsc --noEmit && tsc -p web/tsconfig.json --noEmit && tsc -p web/sw/tsconfig.json --noEmit && npm test",
 		"fix": "biome check --write .",
 		"typecheck": "tsc --noEmit && tsc -p web/tsconfig.json --noEmit && tsc -p web/sw/tsconfig.json --noEmit",
+		"test": "vitest run --project unit --project web",
+		"test:e2e": "vitest run --project e2e",
+		"test:e2e:devnet": "vitest run --project e2e-devnet",
+		"test:smoke": "vitest run --project smoke",
 		"setup:wallets": "tsx --env-file-if-exists=.env scripts/setup-wallets.ts",
 		"e2e:devnet": "bash scripts/e2e-devnet.sh",
 		"requeue": "tsx --env-file=.env src/requeue.ts",
@@ -39,14 +43,19 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.15",
+		"@testing-library/dom": "10.4.2",
+		"@testing-library/react": "16.3.3",
 		"@types/better-sqlite3": "9.6.0",
 		"@types/node": "22.20.5",
 		"@types/react": "19.3.0",
 		"@types/react-dom": "19.3.0",
 		"@types/web-push": "3.6.4",
 		"@vitejs/plugin-react": "6.1.2",
+		"jsdom": "31.0.0",
+		"playwright": "1.65.0",
 		"tsx": "4.23.15",
 		"typescript": "5.9.3",
-		"vite": "8.3.5"
+		"vite": "8.3.5",
+		"vitest": "5.1.0"
 	}
 }

@@ -2,7 +2,7 @@
 
 A firm orders human translation from an AI agent. Claude Code (over MCP) drafts the texts and posts one order; the firm pays once over x402 in USDC on Solana devnet. Linguists claim the tasks, the firm approves or rejects each result, and every task is settled on-chain: one payout transaction splits the price between the linguist, the agency and the fee, or the firm gets a full refund.
 
-Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. Tests are deferred by the owner; the gate is `npm run check`.
+Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. The gate is `npm run check` (Biome, `tsc`, unit and web tests).
 
 Live demo (devnet): https://humanroute.app.offcall.link
 
@@ -67,7 +67,7 @@ Requirements: Node 22.12 or newer, npm.
    Auto-pay (optional, ADR 0036): in the cabinet's Connect Claude panel, run the shown command on the Claude Code machine. It downloads `sign.mjs` and `setup.mjs` from the gateway and creates `~/.humanroute/agent-key.json` (mode 0600). Then enable auto-pay with a limit (the firm wallet needs a little devnet SOL for the fee, from faucet.solana.com): Phantom (on devnet) signs an SPL approve that lets the agent key spend up to the limit from the firm's own USDC account. Claude offers auto-pay only when the draft's chain snapshot says the delegate, allowance and balance cover its total; it does not check the local key. Unless already instructed to pay, Claude shows the link and immediately waits for payment, including while an auto-pay question is pending: no "paid" message from the user is needed. When instructed, it signs locally with `sign.mjs` and pays through `prepare_payment` and `pay_task`, which check availability again. One wait runs per draft. An unknown payment outcome is checked before any further payment; an orphan must not be paid again. Refunds always go to the firm's login wallet.
 7. Frontend development: `npm run web:dev` (proxies `/api`, `/x`, `/health` to the gateway on port 4021).
 
-Checks: `npm run check` runs Biome, the gateway `tsc`, the web `tsc` and the service worker `tsc`. `npm run e2e:devnet` (opt-in, real devnet, needs `keys/hold.json`, `keys/agent.json` and about 1.5 USDC on the agent wallet) starts the gateway with a fresh database and runs `scripts/e2e-flow.ts`: SIWS sign-in, order, payment, payout and refunds, checked on chain. Not part of `check` ([ADR 0011](docs/adr/0011-devnet-e2e-outside-check.md)).
+Checks: `npm run check` runs Biome, the gateway `tsc`, the web `tsc`, the service worker `tsc` and `npm test` (Vitest `unit` and `web` projects, offline; [ADR 0037](docs/adr/0037-test-toolchain-vitest.md)). `npm run test:e2e` runs the real gateway and MCP against a local validator, without internet ([ADR 0038](docs/adr/0038-e2e-environments.md)). `npm run e2e:devnet` (opt-in, real devnet, needs `keys/hold.json`, `keys/agent.json` and about 1.5 USDC on the agent wallet) starts the gateway with a fresh database and runs `scripts/e2e-flow.ts`: SIWS sign-in, order, payment, payout and refunds, checked on chain. Not part of `check` ([ADR 0011](docs/adr/0011-devnet-e2e-outside-check.md)).
 
 A database from v1 is refused (ADR 0022). Use a fresh `DB_PATH`.
 

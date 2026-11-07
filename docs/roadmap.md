@@ -29,7 +29,7 @@ Not built in the hackathon version. Each item is a product or architecture chang
 
 ## Quality
 
-- **Tests.** Deferred by the owner. The gate is `npm run check`; deterministic unit and gateway tests come later ([ADR 0012](adr/0012-deterministic-qa.md), deferred).
+- **Tests.** Vitest unit and web tests run in `npm run check`, real-process e2e on a local validator in `npm run test:e2e` ([ADR 0037](adr/0037-test-toolchain-vitest.md), [ADR 0038](adr/0038-e2e-environments.md)). No CI.
 - **Signed receipts and self-facilitation** ([ADR 0013](adr/0013-signed-receipt.md), [ADR 0014](adr/0014-self-facilitation-fallback.md)): deferred.
 - **Web playground.** Dropped for the hackathon; `scripts/e2e-flow.ts` (with `scripts/e2e/pay.ts`) plays the agent's role on devnet.
 - **Observability.** Logs only; no metrics or alerting beyond `/health`.

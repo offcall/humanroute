@@ -13,6 +13,14 @@
 		"verbatimModuleSyntax": true,
 		"noEmit": true
 	},
-	"include": ["src", "agent", "scripts", "mcp"],
+	"include": [
+		"src",
+		"agent",
+		"scripts",
+		"mcp",
+		"contracts",
+		"e2e",
+		"vitest.config.ts"
+	],
 	"exclude": ["spike", "node_modules", "web"]
 }
