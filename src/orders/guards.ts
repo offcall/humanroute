@@ -1,8 +1,9 @@
-// Runs before x402: refuse when preflight fails (503) and answer unknown or paid drafts (404, 409,
-// replay 201) so they are never charged.
+// Runs before x402: refuse when preflight fails (503) and answer unknown, paid or orphaned drafts
+// (404, 409, replay 201, 502) so they are never charged.
 import type { MiddlewareHandler } from "hono";
 import { draftById } from "./drafts.js";
 import { paymentById, receiptOf } from "./orderRepo.js";
+import { orphanBody, orphanOf } from "./orphan.js";
 import { paymentHeader, paymentId } from "./paymentId.js";
 import type { OrdersDeps, OrdersEnv } from "./types.js";
 
@@ -34,6 +35,11 @@ export const draftGate =
 			return receipt
 				? ctx.json(receipt, 201)
 				: ctx.json({ error: "draft_paid" }, 409);
+		}
+		// Money may already be taken for this draft: never verify or settle again (ADR 0043).
+		const orphan = orphanOf(deps, draft.id);
+		if (orphan) {
+			return ctx.json(orphanBody(orphan.payTx), 502);
 		}
 		ctx.set("draft", draft);
 		await next();

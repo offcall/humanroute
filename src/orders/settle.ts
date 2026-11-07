@@ -33,6 +33,27 @@ export const peekSettle = (header: string): SettlePeek => {
 	};
 };
 
+// The facilitator's verify refusals start with "invalid_"; this one follows a send attempt.
+const REFUSAL_PREFIX = "invalid_";
+const SEND_FAILED = "invalid_exact_svm_transaction_failed";
+
+// A failed settle proves nothing was broadcast only for a verify refusal without a
+// transaction; anything else may have settled (ADR 0043).
+export const isRefusal = (header: string | null): boolean => {
+	const raw = header === null ? undefined : decode(header);
+	const reason = field(raw, "errorReason") ?? "";
+	return (
+		isRecord(raw) &&
+		raw.success === false &&
+		field(raw, "transaction") === null &&
+		reason.startsWith(REFUSAL_PREFIX) &&
+		reason !== SEND_FAILED
+	);
+};
+
+export const settleFailure = (header: string): string | null =>
+	field(decode(header), "errorReason");
+
 export const isPublicKey = (value: string): boolean => {
 	try {
 		return base58.decode(value).length === 32;

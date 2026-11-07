@@ -47,6 +47,9 @@ export const payRoute = (
 	);
 	app.use(PAY_PATH, paymentMiddleware(routes, server));
 	// The x402 middleware settles after this response; capturePayment then replaces it with the order.
-	app.post(PAY_PATH, (ctx) => ctx.json({ pending: true }, 200));
+	app.post(PAY_PATH, (ctx) => {
+		ctx.set("settleStarted", true);
+		return ctx.json({ pending: true }, 200);
+	});
 	return app;
 };

@@ -1,8 +1,11 @@
 // Wraps the x402 middleware: replay check before it, order creation from PAYMENT-RESPONSE after it.
 // Known payment + same draft -> same 201; other draft -> 409 payment_reused (ADR 0022).
+// A failed settle that may have broadcast becomes an orphan, not a 402 (ADR 0043).
 import type { MiddlewareHandler } from "hono";
 import { paymentById, receiptOf } from "./orderRepo.js";
+import { settleUnknown } from "./orphan.js";
 import { paymentHeader, paymentId } from "./paymentId.js";
+import { isRefusal } from "./settle.js";
 import { settled } from "./settled.js";
 import type { OrdersDeps, OrdersEnv } from "./types.js";
 
@@ -36,11 +39,14 @@ export const capturePayment =
 		try {
 			await next();
 			const header = ctx.res.headers.get("PAYMENT-RESPONSE");
-			// 402 / 4xx / 5xx pass through untouched
-			if (ctx.res.status >= 300 || !header) {
+			if (ctx.res.status < 300 && header) {
+				ctx.res = settled(deps, ctx, header, draft, payId);
 				return;
 			}
-			ctx.res = settled(deps, ctx, header, draft, payId);
+			// Answers before settle and verify refusals of settle pass through (ADR 0043).
+			if (ctx.get("settleStarted") && !isRefusal(header)) {
+				ctx.res = settleUnknown(deps, ctx, header, draft);
+			}
 		} finally {
 			inflight.delete(payId);
 			inflight.delete(draftKey);

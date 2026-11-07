@@ -22,6 +22,8 @@ export enum OrphanReason {
 	WrongNetwork = "wrong_network",
 	InvalidPayer = "invalid_payer",
 	RecordFailed = "record_failed",
+	// The settle may have broadcast: pending, transport error, timeout, 5xx (ADR 0043).
+	SettleUnknown = "settle_unknown",
 }
 
 export type DraftTarget = { targetLang: string; draft: string };
@@ -126,4 +128,7 @@ export type OrdersDeps = PartyPorts & {
 	onTasksCreated?: (tasks: CreatedTask[]) => Promise<void>;
 };
 
-export type OrdersEnv = { Variables: { draft: Draft | undefined } };
+// settleStarted: the pay handler ran, so the x402 middleware calls settle next (ADR 0043).
+export type OrdersEnv = {
+	Variables: { draft: Draft | undefined; settleStarted: boolean | undefined };
+};

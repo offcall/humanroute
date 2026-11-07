@@ -48,6 +48,27 @@ export const ORPHAN_DRAFT_SQL = [
 	"CREATE INDEX orphans_draft ON orphans (draft_id)",
 ];
 
+// Rebuilds orphans so the reason check allows settle_unknown (ADR 0043).
+export const ORPHAN_REASON_SQL = [
+	`CREATE TABLE orphans_new (
+  id INTEGER PRIMARY KEY,
+  pay_tx TEXT UNIQUE,
+  payer TEXT,
+  network TEXT,
+  raw_header TEXT NOT NULL,
+  reason TEXT NOT NULL CHECK (reason IN ('unparsable_settle', 'wrong_network', 'invalid_payer', 'record_failed', 'settle_unknown')),
+  created_at INTEGER NOT NULL,
+  resolved_at INTEGER,
+  draft_id TEXT
+)`,
+	`INSERT INTO orphans_new (id, pay_tx, payer, network, raw_header, reason, created_at, resolved_at, draft_id)
+  SELECT id, pay_tx, payer, network, raw_header, reason, created_at, resolved_at, draft_id FROM orphans`,
+	"DROP TABLE orphans",
+	"ALTER TABLE orphans_new RENAME TO orphans",
+	"CREATE INDEX orphans_unresolved ON orphans (resolved_at)",
+	"CREATE INDEX orphans_draft ON orphans (draft_id)",
+];
+
 export const ORDERS_SQL = {
 	insertDraft: `INSERT INTO drafts (id, firm_id, text, source_lang, targets_json, meta_json,
        price_units, total_units, task_count, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
