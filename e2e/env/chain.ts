@@ -11,10 +11,10 @@ import {
 	LAMPORTS_PER_SOL,
 	type PublicKey,
 } from "@solana/web3.js";
+import { FIRM_COUNT } from "../support/firms.js";
 
 const USDC_DECIMALS = 6;
 export const FIRM_USDC_UNITS = 20_000_000n;
-const FIRM_COUNT = 16;
 
 export type LocalChain = {
 	mint: PublicKey;

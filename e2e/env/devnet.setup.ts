@@ -12,7 +12,8 @@ import type { TestProject } from "vitest/node";
 import { readKeypair } from "../../src/config/index.js";
 import { startGateway, startMcp } from "./apps.js";
 import { createCleanup } from "./cleanup.js";
-import { fundFirms } from "./devnetFunds.js";
+import { fundFirms, newFirms } from "./devnetFunds.js";
+import { sweepFirms } from "./devnetSweep.js";
 import { E2eMode } from "./types.js";
 
 const DEFAULTS = {
@@ -38,6 +39,11 @@ const keyAt = (name: string, fallback: string) => {
 export default async (
 	project: Pick<TestProject, "provide">,
 ): Promise<() => Promise<void>> => {
+	if (process.env.E2E_DEVNET !== "1") {
+		throw new Error(
+			"e2e-devnet spends devnet funds: run it only via npm run test:e2e:devnet (sets E2E_DEVNET=1)",
+		);
+	}
 	const feeWallet = process.env.FEE_WALLET;
 	if (!feeWallet) {
 		throw new Error("FEE_WALLET is required: npx tsx scripts/fee-pubkey.ts");
@@ -55,7 +61,9 @@ export default async (
 	cleanup.add(() => rmSync(workDir, { recursive: true, force: true }));
 	try {
 		const connection = new Connection(rpcUrl, "confirmed");
-		const firms = await fundFirms(connection, agent.key, mint);
+		const firms = newFirms();
+		cleanup.add(() => sweepFirms(connection, agent.key, mint, firms));
+		await fundFirms(connection, agent.key, mint, firms);
 		const gateway = await startGateway(
 			{
 				RPC_URL: rpcUrl,

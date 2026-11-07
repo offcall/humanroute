@@ -30,7 +30,7 @@ describe("MCP token", () => {
 		});
 		expect(res.status).toBe(401);
 
-		const firm = await firmAt(FirmSlot.Mcp);
+		const firm = await firmAt(FirmSlot.McpAccess);
 		const right = await connectMcp(firm.mcpToken);
 		const wrong = await connectMcp("not-a-real-token");
 		try {

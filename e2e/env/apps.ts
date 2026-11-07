@@ -11,6 +11,8 @@ import {
 
 const ROOT = join(import.meta.dirname, "../..");
 const READY_MS = 60_000;
+// One readiness probe; waitUntil retries until READY_MS.
+const PROBE_MS = 2_000;
 
 // Localnet only: E2E_EGRESS_LOG is set by the localnet setup, never by the devnet one.
 const guard = (): string[] =>
@@ -39,7 +41,9 @@ const tsx = (
 	});
 
 const gatewayReady = async (url: string): Promise<boolean> => {
-	const res = await fetch(`${url}/health`);
+	const res = await fetch(`${url}/health`, {
+		signal: AbortSignal.timeout(PROBE_MS),
+	});
 	const body: unknown = await res.json();
 	return (
 		typeof body === "object" &&
@@ -92,7 +96,9 @@ export const startMcp = async (
 	);
 	const stop = () => stopProcess(running);
 	// GET /mcp answers 405 once the server listens.
-	const ready = async () => (await fetch(url)).status === 405;
+	const ready = async () =>
+		(await fetch(url, { signal: AbortSignal.timeout(PROBE_MS) })).status ===
+		405;
 	try {
 		await waitUntil(running, ready, READY_MS);
 	} catch (error) {
@@ -123,7 +129,12 @@ export const startFacilitator = async (
 		logDir,
 	);
 	const stop = () => stopProcess(running);
-	const ready = async () => (await fetch(`${url}/supported`)).ok;
+	const ready = async () =>
+		(
+			await fetch(`${url}/supported`, {
+				signal: AbortSignal.timeout(PROBE_MS),
+			})
+		).ok;
 	try {
 		await waitUntil(running, ready, READY_MS);
 	} catch (error) {

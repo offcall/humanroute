@@ -34,6 +34,7 @@ const healthy = async (rpcUrl: string): Promise<boolean> => {
 		method: "POST",
 		headers: { "content-type": "application/json" },
 		body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getHealth" }),
+		signal: AbortSignal.timeout(2_000),
 	});
 	const body: unknown = await res.json();
 	return typeof body === "object" && body !== null && "result" in body;
