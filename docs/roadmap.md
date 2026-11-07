@@ -31,7 +31,7 @@ Not built in the hackathon version. Each item is a product or architecture chang
 
 - **Tests.** Deferred by the owner. The gate is `npm run check`; deterministic unit and gateway tests come later ([ADR 0012](adr/0012-deterministic-qa.md), deferred).
 - **Signed receipts and self-facilitation** ([ADR 0013](adr/0013-signed-receipt.md), [ADR 0014](adr/0014-self-facilitation-fallback.md)): deferred.
-- **Web playground.** Dropped for the hackathon; `scripts/create-order.ts` plays the agent's role on devnet.
+- **Web playground.** Dropped for the hackathon; `scripts/e2e-flow.ts` (with `scripts/e2e/pay.ts`) plays the agent's role on devnet.
 - **Observability.** Logs only; no metrics or alerting beyond `/health`.
 - **Home redirect on a failed session read.** A network or 5xx error on `/api/me` uses up the one-shot home redirect; only a 200 or 401 should.
 - **Home redirect flag.** The redirect flag is a module-level `let` read during render; move it to a ref or a router-level decision.
