@@ -40,14 +40,14 @@ export const notifyNewTasks =
 			return;
 		}
 
-		// Tasks in parallel; allSettled, so one failing task never stops the others.
+		// Tasks and devices in parallel; allSettled, so one failing push never stops the others.
 		await Promise.allSettled(
 			tasks.map((task) => {
 				const pair = { source: task.source, target: task.target };
 				const linguistIds = findLinguistIdsByPair(deps.database, pair);
 				const targets = subscriptionsOf(deps.database, linguistIds);
 
-				return Promise.all(
+				return Promise.allSettled(
 					targets.map((target) => deliver(deps, sender, target, task)),
 				);
 			}),

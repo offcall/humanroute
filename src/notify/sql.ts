@@ -6,9 +6,10 @@ export const NOTIFY_SCHEMA_SQL: string[] = [
 ];
 
 export const PUSH_SQL = {
-	// One device belongs to the last linguist who subscribed on it.
+	// One device belongs to the last linguist who subscribed on it. REPLACE gives the row a new,
+	// highest rowid, so trim keeps a refreshed device even at an equal created_at.
 	upsert:
-		"INSERT INTO push_subscriptions (endpoint, linguist_id, p256dh, auth, created_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT (endpoint) DO UPDATE SET linguist_id = excluded.linguist_id, p256dh = excluded.p256dh, auth = excluded.auth, created_at = excluded.created_at",
+		"INSERT OR REPLACE INTO push_subscriptions (endpoint, linguist_id, p256dh, auth, created_at) VALUES (?, ?, ?, ?, ?)",
 	remove: "DELETE FROM push_subscriptions WHERE endpoint = ?",
 	// Keeps a linguist's newest ? rows; the upsert just made the current device the newest.
 	trim: "DELETE FROM push_subscriptions WHERE linguist_id = ? AND endpoint NOT IN (SELECT endpoint FROM push_subscriptions WHERE linguist_id = ? ORDER BY created_at DESC, rowid DESC LIMIT ?)",
