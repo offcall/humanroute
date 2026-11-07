@@ -13,7 +13,7 @@ const EscrowPromise = ({ draft }: { draft: DraftView }) => (
 			<span>
 				<b>Held in escrow, paid to nobody yet.</b> Each translator is paid only
 				after you approve the translation. Rejected, late or unclaimed tasks are
-				refunded to the paying wallet.
+				refunded to your firm's wallet.
 			</span>
 		</p>
 		<p className="pay-fine">
