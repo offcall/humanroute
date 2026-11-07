@@ -92,12 +92,12 @@ Format:
 
 ## Testing
 
-Target state. Tests are deferred for now by decision of the owner; do not add tests until the owner lifts that.
+Vitest, layout and projects in ADR 0037. `npm test` (unit + web) is part of `npm run check`; the local e2e is `npm run test:e2e` (ADR 0038).
 
 - Behavior change ships with tests in the same commit.
 - Tests are deterministic: no real network, no wall-clock or machine-specific paths. Unit tests never touch the network.
-- Devnet runs only via `npm run e2e:devnet`, outside `npm run check`, and only with explicit user permission.
-- One row of the README failure table = one test.
+- Devnet runs only via `npm run e2e:devnet` or `npm run test:e2e:devnet`, outside `npm run check`, and only with explicit user permission for each run.
+- Every row of the failure table in `docs/design/flow.md` has at least one test.
 
 ## Workflow
 
