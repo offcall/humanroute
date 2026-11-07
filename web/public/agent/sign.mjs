@@ -1,8 +1,9 @@
-// HumanRoute agent signer (ADR 0036). Node built-ins only; the key never leaves this machine.
+// HumanRoute agent signer (ADR 0036, 0040). Node built-ins only; the key never leaves this machine.
 // Usage: node ~/.humanroute/sign.mjs <base64 message from prepare_payment>
 // Signs only a HumanRoute x402 payment: compute limit, compute price, one USDC TransferChecked
 // from the firm's account to HumanRoute's account with this key as authority, and a memo.
-import { createPrivateKey, sign } from "node:crypto";
+// Fails closed (ADR 0040): any rule broken prints "sign.mjs refused: <reason>" and exits 1.
+import { createPrivateKey, createPublicKey, sign } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -17,7 +18,19 @@ const PKCS8_PREFIX = Buffer.from("302e020100300506032b657004220420", "hex");
 const COMPUTE_BUDGET = "ComputeBudget111111111111111111111111111111";
 const TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 const MEMO_PROGRAM = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";
+const PROGRAMS = [COMPUTE_BUDGET, COMPUTE_BUDGET, TOKEN_PROGRAM, MEMO_PROGRAM];
 const USDC_DECIMALS = 6;
+const MAX_MESSAGE_BYTES = 1232;
+const HEADER = "2,1,4";
+const KEY_COUNT = 8;
+const MAX_COMPUTE_LIMIT = 40_000;
+const MAX_COMPUTE_PRICE = 1000n;
+const MAX_MEMO_BYTES = 64;
+
+const malformed = (what) => new Error(`malformed message: ${what}`);
+const notOurs = () =>
+	new Error("this is not a HumanRoute payment for this agent key");
+const badFile = (what) => new Error(`bad key or config file: ${what}`);
 
 export const base58 = (bytes) => {
 	let value = BigInt(`0x${Buffer.from(bytes).toString("hex") || "0"}`);
@@ -30,95 +43,214 @@ export const base58 = (bytes) => {
 	return "1".repeat(zeros === -1 ? bytes.length : zeros) + text;
 };
 
-// Solana compact-u16 length prefix: [value, next offset].
-const readLength = (bytes, start) => {
-	let value = 0;
-	for (let index = 0; index < 3; index += 1) {
-		const byte = bytes[start + index];
-		value |= (byte & 0x7f) << (7 * index);
-		if ((byte & 0x80) === 0) {
-			return [value, start + index + 1];
+// A cursor that never reads past the end of the buffer.
+const reader = (bytes) => {
+	let offset = 0;
+	const take = (size) => {
+		if (offset + size > bytes.length) {
+			throw malformed("truncated");
 		}
-	}
-	throw new Error("bad length prefix");
+		offset += size;
+		return bytes.subarray(offset - size, offset);
+	};
+	const byte = () => take(1)[0];
+	// Solana compact-u16: at most 3 bytes, no redundant zero byte, value <= 0xffff.
+	const length = () => {
+		let value = 0;
+		for (let index = 0; index < 3; index += 1) {
+			const next = byte();
+			value |= (next & 0x7f) << (7 * index);
+			if ((next & 0x80) === 0) {
+				if ((index > 0 && next === 0) || value > 0xffff) {
+					throw malformed("non-canonical length");
+				}
+				return value;
+			}
+		}
+		throw malformed("length prefix longer than 3 bytes");
+	};
+	return { take, byte, length, done: () => offset === bytes.length };
 };
 
 const parseMessage = (bytes) => {
-	if (bytes[0] !== 0x80) {
-		throw new Error("not a v0 transaction message");
+	const read = reader(bytes);
+	if (read.byte() !== 0x80) {
+		throw malformed("not a v0 transaction message");
 	}
-	const signerCount = bytes[1];
-	let [count, offset] = readLength(bytes, 4);
+	const header = [...read.take(3)];
 	const keys = [];
-	for (let index = 0; index < count; index += 1, offset += 32) {
-		keys.push(base58(bytes.subarray(offset, offset + 32)));
+	for (let count = read.length(); keys.length < count; ) {
+		keys.push(base58(read.take(32)));
 	}
-	[count, offset] = readLength(bytes, offset + 32);
+	read.take(32);
 	const instructions = [];
-	for (let index = 0; index < count; index += 1) {
-		const program = keys[bytes[offset]];
-		let size;
-		[size, offset] = readLength(bytes, offset + 1);
-		const accounts = [...bytes.subarray(offset, offset + size)].map(
-			(at) => keys[at],
+	for (let count = read.length(); instructions.length < count; ) {
+		const programAt = read.byte();
+		const accountsAt = [...read.take(read.length())];
+		const data = read.take(read.length());
+		if ([programAt, ...accountsAt].some((at) => at >= keys.length)) {
+			throw malformed("key index out of range");
+		}
+		instructions.push({ programAt, accountsAt, data });
+	}
+	if (read.length() !== 0) {
+		throw malformed("address lookup tables are not allowed");
+	}
+	if (!read.done()) {
+		throw malformed("trailing bytes");
+	}
+	return { header, keys, instructions };
+};
+
+const checkCompute = (limit, price) => {
+	if (limit.data.length !== 5 || limit.data[0] !== 2) {
+		throw notOurs();
+	}
+	if (price.data.length !== 9 || price.data[0] !== 3) {
+		throw notOurs();
+	}
+	const units = limit.data.readUInt32LE(1);
+	if (units > MAX_COMPUTE_LIMIT) {
+		throw new Error(`compute limit ${units} above ${MAX_COMPUTE_LIMIT}`);
+	}
+	const microLamports = price.data.readBigUInt64LE(1);
+	if (microLamports > MAX_COMPUTE_PRICE) {
+		throw new Error(
+			`compute price ${microLamports} above ${MAX_COMPUTE_PRICE}`,
 		);
-		[size, offset] = readLength(bytes, offset + size);
-		instructions.push({
-			program,
-			accounts,
-			data: bytes.subarray(offset, offset + size),
-		});
-		offset += size;
 	}
-	if (readLength(bytes, offset)[0] !== 0) {
-		throw new Error("address lookup tables are not allowed");
+};
+
+const isUtf8 = (data) => {
+	try {
+		new TextDecoder("utf-8", { fatal: true }).decode(data);
+		return true;
+	} catch {
+		return false;
 	}
-	return { signers: keys.slice(0, signerCount), instructions };
 };
 
 // Returns the amount in base units, or throws when the message is not a HumanRoute payment.
 export const checkPayment = (message, config, agent) => {
-	const { signers, instructions } = parseMessage(message);
-	const programs = instructions.map((ix) => ix.program).join(",");
-	const expected = [
-		COMPUTE_BUDGET,
-		COMPUTE_BUDGET,
-		TOKEN_PROGRAM,
-		MEMO_PROGRAM,
-	].join(",");
-	if (programs !== expected || !signers.includes(agent)) {
-		throw new Error("this is not a HumanRoute payment for this agent key");
+	const { header, keys, instructions } = parseMessage(Buffer.from(message));
+	if (keys[0] === agent) {
+		throw new Error("the agent key must not pay the fee");
 	}
-	const [limit, price, transfer] = instructions;
+	const programs = instructions.map((ix) => keys[ix.programAt]);
 	if (
-		limit.data[0] !== 2 ||
-		price.data[0] !== 3 ||
-		transfer.data[0] !== 12 ||
-		transfer.data.length !== 10
+		header.join(",") !== HEADER ||
+		keys.length !== KEY_COUNT ||
+		new Set(keys).size !== KEY_COUNT ||
+		keys[1] !== agent ||
+		programs.join(",") !== PROGRAMS.join(",") ||
+		instructions.some((ix) => ix.programAt < header[0])
 	) {
-		throw new Error("unexpected instruction data");
+		throw notOurs();
 	}
-	const [source, mint, destination, authority] = transfer.accounts;
+	const [limit, price, transfer, memo] = instructions;
+	if ([limit, price, memo].some((ix) => ix.accountsAt.length > 0)) {
+		throw notOurs();
+	}
+	checkCompute(limit, price);
+	const accounts = transfer.accountsAt.map((at) => keys[at]).join(",");
 	const pinned = [config.source, config.mint, config.destination, agent];
-	if ([source, mint, destination, authority].join(",") !== pinned.join(",")) {
-		throw new Error(
-			"the transfer is not from your USDC account to HumanRoute with this key",
-		);
+	const { data } = transfer;
+	if (
+		accounts !== pinned.join(",") ||
+		data.length !== 10 ||
+		data[0] !== 12 ||
+		data[9] !== USDC_DECIMALS ||
+		data.readBigUInt64LE(1) === 0n
+	) {
+		throw notOurs();
 	}
-	if (transfer.data[9] !== USDC_DECIMALS) {
-		throw new Error("unexpected token decimals");
+	if (memo.data.length < 1 || memo.data.length > MAX_MEMO_BYTES) {
+		throw notOurs();
 	}
-	return Buffer.from(transfer.data).readBigUInt64LE(1);
+	if (!isUtf8(memo.data)) {
+		throw notOurs();
+	}
+	return data.readBigUInt64LE(1);
 };
 
-export const readKey = () =>
-	Uint8Array.from(JSON.parse(readFileSync(KEY_FILE, "utf8")));
+const readJson = (file) => {
+	try {
+		return JSON.parse(readFileSync(file, "utf8"));
+	} catch {
+		throw badFile(`cannot read ${file}`);
+	}
+};
+
+const publicKeyOf = (seed) =>
+	createPublicKey(
+		createPrivateKey({
+			key: Buffer.concat([PKCS8_PREFIX, seed]),
+			format: "der",
+			type: "pkcs8",
+		}),
+	)
+		.export({ format: "der", type: "spki" })
+		.subarray(-32);
+
+// 64 bytes: the Ed25519 seed, then its public key.
+export const readKey = () => {
+	const raw = readJson(KEY_FILE);
+	const isByte = (item) => Number.isInteger(item) && item >= 0 && item <= 255;
+	if (!Array.isArray(raw) || raw.length !== 64 || !raw.every(isByte)) {
+		throw badFile("the key is not 64 bytes");
+	}
+	const secret = Uint8Array.from(raw);
+	if (!publicKeyOf(secret.subarray(0, 32)).equals(secret.subarray(32))) {
+		throw badFile("the public key does not match the secret key");
+	}
+	return secret;
+};
+
+const fromBase58 = (text) => {
+	let value = 0n;
+	for (const char of text) {
+		value = value * 58n + BigInt(ALPHABET.indexOf(char));
+	}
+	const hex = value === 0n ? "" : value.toString(16);
+	const body = Buffer.from(hex.length % 2 === 1 ? `0${hex}` : hex, "hex");
+	const zeros = text.length - text.replace(/^1+/, "").length;
+	return Buffer.concat([Buffer.alloc(zeros), body]);
+};
+
+const isAddress = (text) =>
+	typeof text === "string" &&
+	/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(text) &&
+	fromBase58(text).length === 32;
+
+const readConfig = () => {
+	const raw = readJson(CONFIG_FILE);
+	const fields = ["source", "destination", "mint"];
+	if (typeof raw !== "object" || raw === null) {
+		throw badFile("the config is not an object");
+	}
+	const wrong = fields.find((field) => !isAddress(raw[field]));
+	if (wrong !== undefined) {
+		throw badFile(`${wrong} is not a Solana address`);
+	}
+	return { source: raw.source, destination: raw.destination, mint: raw.mint };
+};
+
+const decodeMessage = (encoded) => {
+	const message = Buffer.from(encoded ?? "", "base64");
+	if (message.length === 0 || message.toString("base64") !== encoded) {
+		throw malformed("not canonical base64");
+	}
+	if (message.length > MAX_MESSAGE_BYTES) {
+		throw malformed(`longer than ${MAX_MESSAGE_BYTES} bytes`);
+	}
+	return message;
+};
 
 const main = (encoded) => {
 	const secret = readKey();
 	const agent = base58(secret.subarray(32, 64));
-	const config = JSON.parse(readFileSync(CONFIG_FILE, "utf8"));
-	const message = Buffer.from(encoded ?? "", "base64");
+	const config = readConfig();
+	const message = decodeMessage(encoded);
 	const units = checkPayment(message, config, agent);
 	const usdc = `${units / 1_000_000n}.${(units % 1_000_000n).toString().padStart(6, "0")}`;
 	console.error(
