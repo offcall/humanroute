@@ -6,7 +6,7 @@ Proposed. Lifts the owner's test deferral (owner, 2026-11-07). Replaces the "tes
 
 ## Context
 
-The repository has no tests; `npm run check` runs Biome and `tsc`, and `npm run e2e:devnet` is a manual bash run on devnet. The gateway already keeps side effects behind injected interfaces (clock and ids in each slice's deps, `SolanaClient`, the x402 `FacilitatorClient`, the push sender), and SQLite opens as `:memory:`. The tests must cover the gateway, the MCP server, the web (which imports CSS and JSX), the agent scripts, and the real processes on a local validator. ADR 0002 requires an ADR for a tool change.
+The repository has no tests; `npm run check` runs Biome and `tsc`, and `npm run e2e:devnet` was a manual bash run on devnet (replaced by the `e2e-devnet` project, ADR 0044). The gateway already keeps side effects behind injected interfaces (clock and ids in each slice's deps, `SolanaClient`, the x402 `FacilitatorClient`, the push sender), and SQLite opens as `:memory:`. The tests must cover the gateway, the MCP server, the web (which imports CSS and JSX), the agent scripts, and the real processes on a local validator. ADR 0002 requires an ADR for a tool change.
 
 ## Decision
 

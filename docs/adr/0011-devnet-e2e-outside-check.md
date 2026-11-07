@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted. The test deferral in the Decision is lifted by ADR 0037.
+Accepted. The test deferral in the Decision is lifted by ADR 0037. The bash script is replaced by the `e2e-devnet` Vitest project, ADR 0044.
 
 ## Context
 
