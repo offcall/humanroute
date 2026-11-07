@@ -4,7 +4,7 @@
 // (hold key HOLD_KEYPAIR_PATH, default keys/hold.json) and MCP on free ports with a fresh DB, and
 // funds fresh firm wallets from the agent wallet (AGENT_KEYPAIR_PATH, default keys/agent.json).
 // FEE_WALLET is required (npx tsx scripts/fee-pubkey.ts prints it). No egress guard here.
-import { mkdtempSync, rmSync } from "node:fs";
+import { cpSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Connection } from "@solana/web3.js";
@@ -59,6 +59,16 @@ export default async (
 	const cleanup = createCleanup();
 	const workDir = mkdtempSync(join(tmpdir(), "hr-e2e-devnet-"));
 	cleanup.add(() => rmSync(workDir, { recursive: true, force: true }));
+	// E2E_KEEP_LOGS=<dir> keeps the process logs (gateway, MCP) after the run.
+	const keepLogs = process.env.E2E_KEEP_LOGS;
+	if (keepLogs) {
+		cleanup.add(() =>
+			cpSync(workDir, keepLogs, {
+				recursive: true,
+				filter: (path) => !path.endsWith(".db"),
+			}),
+		);
+	}
 	try {
 		const connection = new Connection(rpcUrl, "confirmed");
 		const firms = newFirms();

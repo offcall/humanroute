@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Amends the read side of ADR 0016 and ADR 0022; their decisions stay.
+Proposed. Amends the read side of ADR 0016 and ADR 0022; their decisions stay. Amended by ADR 0043 (the pay route refuses an orphaned draft).
 
 ## Context
 

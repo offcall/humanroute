@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Amended by ADR 0042 (the draft read reports orphans and settling).
+Proposed. Amended by ADR 0042 (the draft read reports orphans and settling) and ADR 0043 (unknown settle outcome; an orphaned draft cannot be paid).
 
 ## Context
 

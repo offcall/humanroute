@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted. Amended by ADR 0042 (the draft read reports orphans and settling).
+Accepted. Amended by ADR 0042 (the draft read reports orphans and settling) and ADR 0043 (a settle that may have broadcast is an orphan, `settle_unknown`).
 
 ## Context
 
