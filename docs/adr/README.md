@@ -47,3 +47,4 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0042](0042-draft-read-reports-orphans.md) | The draft read reports orphans and settling | Accepted (amended by 0043) |
 | [0043](0043-settle-unknown-outcome.md) | A settle that may have broadcast is an unknown outcome | Accepted |
 | [0044](0044-devnet-e2e-on-vitest.md) | Devnet e2e on Vitest | Accepted |
+| [0045](0045-autopay-confirm-endpoint.md) | The cabinet waits for the auto-pay transaction through the gateway | Proposed |
