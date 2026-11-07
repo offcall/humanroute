@@ -18,6 +18,7 @@ const PAYER = "Payer11111111111111111111111111111111111111";
 const HOLD = "Hold1111111111111111111111111111111111111111";
 const MINT = "Mint1111111111111111111111111111111111111111";
 const TOTAL = "2000000";
+const ORPHAN_TX = "OrphanTx1111111111111111111111111111111111111";
 
 // The x402 scheme signs without Phantom or RPC; `cancel` makes it fail like a Phantom 4001.
 const signing = vi.hoisted(() => ({ cancel: false }));
@@ -65,6 +66,7 @@ const draftBody = (state: string) => ({
 	mint: MINT,
 	network: SOLANA_DEVNET_CAIP2,
 	...(state === "paid" ? { orderId: "ord_1" } : {}),
+	...(state === "orphaned" ? { payTx: ORPHAN_TX } : {}),
 });
 
 const json = (status: number, body: unknown): Response =>
@@ -184,10 +186,48 @@ describe("the pay page never offers Pay again after an unknown outcome", () => {
 
 			expect(payButton()).toBeNull();
 			fireEvent.click(screen.getByRole("button", { name: "Check status" }));
-			await screen.findByText(/Not paid yet as far as we can see/);
+			await screen.findByText(/No payment confirmed yet/);
 			expect(payButton()).toBeNull();
 		},
 	);
+
+	const openPage = (draftState: string): void => {
+		stubGateway({ draftState, paid: networkError });
+		render(
+			<SessionProvider>
+				<PayPage draftId={DRAFT_ID} />
+			</SessionProvider>,
+		);
+	};
+
+	test("a reload with an orphaned draft shows the orphan and no Pay button", async () => {
+		openPage("orphaned");
+
+		await screen.findByText(/Money was taken for this draft/);
+		expect(payButton()).toBeNull();
+		expect(screen.getByRole("button", { name: "Copy draft id" })).toBeTruthy();
+		const proof = screen.getByRole("link", { name: /transaction/ });
+		expect(proof.getAttribute("href")).toContain(ORPHAN_TX);
+	});
+
+	test("a reload with a settling draft shows no Pay button", async () => {
+		openPage("settling");
+
+		await screen.findByText(/is being settled. Do not pay again/);
+		expect(payButton()).toBeNull();
+		expect(screen.getByRole("button", { name: "Check again" })).toBeTruthy();
+	});
+
+	test("a check that finds the draft orphaned shows the orphan", async () => {
+		const gateway = { draftState: "draft", paid: networkError };
+		await payOnce(gateway);
+		gateway.draftState = "orphaned";
+
+		fireEvent.click(screen.getByRole("button", { name: "Check status" }));
+
+		await screen.findByText(/Money was taken for this draft/);
+		expect(payButton()).toBeNull();
+	});
 
 	test("a check that finds the draft paid shows the paid state", async () => {
 		const gateway = { draftState: "draft", paid: networkError };

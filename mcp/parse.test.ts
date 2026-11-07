@@ -82,6 +82,23 @@ describe("gateway response parsers", () => {
 		expect(parseDraftStatus({ ...status, state: "expired" }).ok).toBe(false);
 	});
 
+	test("parseDraftStatus accepts orphaned with payTx and settling", () => {
+		const orphaned = { ...status, state: "orphaned", payTx: "pay-tx-1" };
+		expect(parseDraftStatus(orphaned)).toEqual({
+			ok: true,
+			value: { ...orphaned, state: DraftState.Orphaned },
+		});
+		expect(parseDraftStatus({ ...orphaned, payTx: null })).toEqual({
+			ok: true,
+			value: { ...orphaned, state: DraftState.Orphaned, payTx: null },
+		});
+		expect(parseDraftStatus({ ...orphaned, payTx: 7 }).ok).toBe(false);
+		expect(parseDraftStatus({ ...status, state: "settling" })).toEqual({
+			ok: true,
+			value: { ...status, state: DraftState.Settling },
+		});
+	});
+
 	test("parseOrder fails the whole order on an unknown public state", () => {
 		expect(parseOrder({ orderId: "ord_1", tasks: [task] })).toEqual({
 			ok: true,

@@ -60,6 +60,7 @@ export const parseDraftStatus = (input: unknown): Parsed<DraftStatus> => {
 	const {
 		draftId,
 		orderId,
+		payTx,
 		payUrl,
 		priceUnits,
 		totalUnits,
@@ -71,6 +72,7 @@ export const parseDraftStatus = (input: unknown): Parsed<DraftStatus> => {
 		typeof draftId !== "string" ||
 		state === undefined ||
 		(orderId !== undefined && typeof orderId !== "string") ||
+		(payTx !== undefined && !isNullableString(payTx)) ||
 		(payUrl !== undefined && typeof payUrl !== "string") ||
 		!isUnits(priceUnits) ||
 		!isUnits(totalUnits) ||
@@ -92,6 +94,9 @@ export const parseDraftStatus = (input: unknown): Parsed<DraftStatus> => {
 	}
 	if (payUrl !== undefined) {
 		status.payUrl = payUrl;
+	}
+	if (payTx !== undefined) {
+		status.payTx = payTx;
 	}
 
 	return { ok: true, value: status };

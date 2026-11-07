@@ -70,6 +70,9 @@ export const parseDraftView = (input: unknown): Parsed<DraftView> => {
 	if (typeof input.orderId === "string") {
 		view.orderId = input.orderId;
 	}
+	if (typeof input.payTx === "string" || input.payTx === null) {
+		view.payTx = input.payTx;
+	}
 
 	return { ok: true, value: view };
 };

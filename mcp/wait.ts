@@ -8,6 +8,7 @@ import {
 	progressLine,
 } from "./status.js";
 import {
+	DraftState,
 	type Parsed,
 	type Snapshot,
 	type WaitDeps,
@@ -30,7 +31,7 @@ type WaitInput = {
 };
 
 const answer = (
-	kind: WaitKind.Changed | WaitKind.Settled | WaitKind.Cap,
+	kind: WaitKind.Changed | WaitKind.Settled | WaitKind.Orphaned | WaitKind.Cap,
 	snapshot: Snapshot,
 	changes: string[],
 ): WaitOutcome => ({
@@ -66,6 +67,10 @@ export const waitForChange = async ({
 				baseline === undefined ? [] : changesSince(baseline, snapshot);
 			if (isSettled(snapshot.order)) {
 				return answer(WaitKind.Settled, snapshot, changes);
+			}
+			// Nothing changes an orphan; only the operator can help (ADR 0042).
+			if (snapshot.status.state === DraftState.Orphaned) {
+				return answer(WaitKind.Orphaned, snapshot, changes);
 			}
 			if (baseline !== undefined && !onlyTransient(changes)) {
 				return answer(WaitKind.Changed, snapshot, changes);

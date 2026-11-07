@@ -1,3 +1,4 @@
+import { Orphaned, Settling } from "./OrphanStates";
 import { PaidView } from "./PaidView";
 import { AlreadyPaid, DraftGone, LoadFailed, LoadingDraft } from "./PayStates";
 import { PayView } from "./PayView";
@@ -23,6 +24,10 @@ export const PayBody = (props: {
 			return <LoadFailed onRetry={props.onReload} />;
 		case Step.AlreadyPaid:
 			return <AlreadyPaid orderId={status.orderId} />;
+		case Step.Orphaned:
+			return <Orphaned draftId={status.draftId} payTx={status.payTx} />;
+		case Step.Settling:
+			return <Settling onReload={props.onReload} />;
 		case Step.Paid:
 			return (
 				<PaidView

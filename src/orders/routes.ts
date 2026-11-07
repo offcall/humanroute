@@ -11,6 +11,8 @@ import type { OrdersDeps, OrdersEnv } from "./types.js";
 
 export const ordersRoutes = (deps: OrdersDeps): Hono<OrdersEnv> => {
 	const app = new Hono<OrdersEnv>();
+	// The in-flight settlement lock, shared by the pay route and the draft read (ADR 0042).
+	const inflight = new Set<string>();
 
 	app.post("/api/orders/draft", async (ctx) => {
 		const caller = bearerFirm(deps, ctx);
@@ -44,7 +46,7 @@ export const ordersRoutes = (deps: OrdersDeps): Hono<OrdersEnv> => {
 	});
 
 	app.route("/", autopayRoutes(deps));
-	app.route("/", payRoute(deps));
-	app.route("/", readRoutes(deps));
+	app.route("/", payRoute(deps, inflight));
+	app.route("/", readRoutes(deps, inflight));
 	return app;
 };

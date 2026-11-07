@@ -69,13 +69,22 @@ export const insertDraft = (
 	return draft;
 };
 
+// Any stored draft, expired or not; null when unknown.
+export const storedDraft = (
+	deps: OrdersDeps,
+	draftId: string,
+): Draft | null => {
+	const found = row(deps.database.prepare(ORDERS_SQL.draftById).get(draftId));
+	return found ? toDraft(found) : null;
+};
+
+// Unpaid and older than DRAFT_TTL_SECONDS.
+export const isExpired = (deps: OrdersDeps, draft: Draft): boolean =>
+	draft.orderId === null &&
+	draft.createdAt + deps.draftTtlSeconds * 1000 <= deps.now();
+
 // null when unknown, or unpaid and older than DRAFT_TTL_SECONDS.
 export const draftById = (deps: OrdersDeps, draftId: string): Draft | null => {
-	const found = row(deps.database.prepare(ORDERS_SQL.draftById).get(draftId));
-	if (!found) {
-		return null;
-	}
-	const draft = toDraft(found);
-	const expired = draft.createdAt + deps.draftTtlSeconds * 1000 <= deps.now();
-	return draft.orderId === null && expired ? null : draft;
+	const draft = storedDraft(deps, draftId);
+	return draft === null || isExpired(deps, draft) ? null : draft;
 };

@@ -15,8 +15,9 @@ export const CheckStatus = ({ checked, onCheck }: Props) => (
 		</button>
 		{checked ? (
 			<p role="status">
-				Not paid yet as far as we can see. It may still be settling: check again
-				in a moment. If it stays unpaid, send support the draft id.
+				No payment confirmed yet. It may still be settling, or the check did not
+				get through: check again in a moment. If it stays unpaid, send support
+				the draft id.
 			</p>
 		) : null}
 	</>

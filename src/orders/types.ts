@@ -7,6 +7,8 @@ import type { PartyPorts, TaskTransfer } from "../tasks/index.js";
 export enum DraftState {
 	Draft = "draft",
 	Paid = "paid",
+	Orphaned = "orphaned",
+	Settling = "settling",
 }
 
 export enum AutopayStatus {

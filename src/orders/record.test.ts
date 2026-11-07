@@ -56,7 +56,8 @@ describe("recordOrder atomicity", () => {
 			payTx: "pay-tx-1",
 		});
 		expectNothingRecorded(gateway);
-		expect(draft.state).toBe("draft");
+		expect(draft.state).toBe("orphaned");
+		expect(draft.payTx).toBe("pay-tx-1");
 		expect(draft.orderId).toBeUndefined();
 		const orphan = gateway.database.prepare("SELECT * FROM orphans").get();
 		expect(orphan).toEqual(

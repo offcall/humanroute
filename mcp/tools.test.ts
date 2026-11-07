@@ -10,6 +10,7 @@ import {
 import { fakePayClient } from "./fakePayment.js";
 import { callTool, connectTools, replyOf } from "./fakeServer.js";
 import {
+	draftStatus,
 	fakeGateway,
 	fakeWaitClock,
 	nth,
@@ -22,6 +23,7 @@ import { registerTools } from "./tools.js";
 import {
 	AutopayStatus,
 	type Draft,
+	DraftState,
 	type GatewayClient,
 	type Parsed,
 	PublicState,
@@ -340,6 +342,45 @@ describe("MCP tools", () => {
 		expect(SERVER_INSTRUCTIONS).toContain(
 			"Start a wait_task only if none is running for this draft",
 		);
+	});
+
+	test("get_task and wait_task tell Claude not to pay an orphaned or settling draft again", async () => {
+		const orphaned: Snapshot = {
+			status: draftStatus({ state: DraftState.Orphaned, payTx: "pay-tx-1" }),
+			order: undefined,
+		};
+		const settling: Snapshot = {
+			status: draftStatus({ state: DraftState.Settling }),
+			order: undefined,
+		};
+		const { client } = await connect(reading([ok(orphaned)]));
+
+		const read = await callTool(client, "get_task", { draftId: "drf_1" });
+		expect(read.isError).toBe(false);
+		expect(read.text).toContain("state: orphaned\n");
+		expect(read.text).toContain("payTx: pay-tx-1");
+		expect(read.text).toContain("Do not pay again");
+		expect(read.text).toContain("contact the operator");
+		expect(read.text).toContain("- de: no order");
+		expect(read.text.split("\n").at(-1)).toBe("seen: orphaned");
+
+		const wait = await callTool(client, "wait_task", {
+			draftId: "drf_1",
+			seen: "draft",
+		});
+		expect(wait.isError).toBe(false);
+		expect(wait.text).toContain(
+			"Do not pay again and do not call wait_task again for this draft.",
+		);
+		expect(wait.text).toContain("changes: order: draft -> orphaned");
+
+		const other = await connect(reading([ok(settling)]));
+		const busy = await callTool(other.client, "get_task", { draftId: "drf_1" });
+		expect(busy.text).toContain("state: settling\n");
+		expect(busy.text).toContain(
+			"A payment for this draft is being settled right now. Do not pay again",
+		);
+		expect(busy.text).not.toContain("Not paid yet");
 	});
 
 	test("wait_task replies tell Claude what to do next", async () => {

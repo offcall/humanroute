@@ -1,7 +1,15 @@
 import { describe, expect, test } from "vitest";
-import { fakeWaitClock, nth, orderTask, paidWith, unpaid } from "./fakes.js";
+import {
+	draftStatus,
+	fakeWaitClock,
+	nth,
+	orderTask,
+	paidWith,
+	unpaid,
+} from "./fakes.js";
 import { fingerprint } from "./status.js";
 import {
+	DraftState,
 	type Parsed,
 	PublicState,
 	type Snapshot,
@@ -100,6 +108,33 @@ describe("waitForChange", () => {
 		expect(run.outcome.kind === WaitKind.Changed && run.outcome.text).toContain(
 			"changes: order: draft -> paid; de: awaiting payment -> open",
 		);
+	});
+
+	test("returns at once on an orphaned draft and waits through settling", async () => {
+		const settling: Snapshot = {
+			status: draftStatus({ state: DraftState.Settling }),
+			order: undefined,
+		};
+		const orphaned: Snapshot = {
+			status: draftStatus({ state: DraftState.Orphaned, payTx: "pay-tx-1" }),
+			order: undefined,
+		};
+
+		const direct = await runWait([orphaned], undefined);
+		expect(direct.outcome).toMatchObject({
+			kind: WaitKind.Orphaned,
+			seen: "orphaned",
+		});
+		expect(direct.sleeps).toEqual([]);
+
+		const run = await runWait([settling, settling, orphaned], "draft");
+		expect(run.reads()).toBe(3);
+		expect(run.reports.map(([, line]) => line)).toEqual([
+			"payment settling: do not pay again",
+		]);
+		expect(
+			run.outcome.kind === WaitKind.Orphaned && run.outcome.text,
+		).toContain("changes: order: settling -> orphaned");
 	});
 
 	test("does not wake for a change only to paying_out or refunding", async () => {

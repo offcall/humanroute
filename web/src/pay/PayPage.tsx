@@ -66,7 +66,11 @@ export const PayPage = ({ draftId }: { draftId: string }) => {
 	};
 
 	const title =
-		status.name === Step.AlreadyPaid ? "Already paid" : "Pay for translation";
+		status.name === Step.AlreadyPaid
+			? "Already paid"
+			: status.name === Step.Orphaned
+				? "Payment taken, no order"
+				: "Pay for translation";
 
 	return (
 		<div className="app pay-shell theme-big">

@@ -1,5 +1,6 @@
 // A draft's current state for get_task and wait_task, and its fingerprint for change detection.
 import {
+	DraftState,
 	type GatewayClient,
 	type Order,
 	type Parsed,
@@ -66,8 +67,12 @@ export const changesSince = (seen: string, snapshot: Snapshot): string[] => {
 	return lines;
 };
 
-// paying_out and refunding settle within seconds after a decision; waking Claude for them adds nothing.
-const TRANSIENT_STATES = [PublicState.PayingOut, PublicState.Refunding];
+// paying_out, refunding and a settling payment end within seconds; waking Claude for them adds nothing.
+const TRANSIENT_STATES: string[] = [
+	PublicState.PayingOut,
+	PublicState.Refunding,
+	DraftState.Settling,
+];
 
 export const onlyTransient = (changes: string[]): boolean =>
 	changes.every((change) =>
@@ -80,9 +85,11 @@ export const isSettled = (order: Order | undefined): boolean =>
 // Claude Code shows this line under the running call, so the pay link stays visible while it waits.
 export const progressLine = ({ status, order }: Snapshot): string =>
 	order === undefined
-		? status.payUrl === undefined
-			? AWAITING
-			: `${AWAITING}: ${status.payUrl}`
+		? status.state === DraftState.Settling
+			? "payment settling: do not pay again"
+			: status.payUrl === undefined
+				? AWAITING
+				: `${AWAITING}: ${status.payUrl}`
 		: order.tasks
 				.map((task) => `${task.targetLang}: ${task.publicState}`)
 				.join(", ");

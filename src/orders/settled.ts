@@ -51,7 +51,7 @@ export const settled = (
 	);
 	const parsed = parseSettleHeader(header, deps.network);
 	if ("reason" in parsed) {
-		recordOrphan(deps, header, seen, parsed);
+		recordOrphan(deps, draft.id, header, seen, parsed);
 		return ctx.json(orphanBody(seen), 502, { "PAYMENT-RESPONSE": header });
 	}
 	let receipt: Receipt;
@@ -60,7 +60,7 @@ export const settled = (
 	} catch (err) {
 		const error = err instanceof Error ? err.message : String(err);
 		const reason = OrphanReason.RecordFailed;
-		recordOrphan(deps, header, seen, { reason, error });
+		recordOrphan(deps, draft.id, header, seen, { reason, error });
 		return ctx.json(orphanBody(seen), 502, { "PAYMENT-RESPONSE": header });
 	}
 	deps.log(

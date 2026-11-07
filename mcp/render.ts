@@ -6,6 +6,7 @@ import {
 	type OrderTask,
 	PublicState,
 } from "./types.js";
+import { langNote, unpaidLines } from "./unpaid.js";
 
 const TERMS = [
 	"Paid once through the pay link with the firm's Phantom wallet, or through authorized agent auto-pay, on Solana devnet (test money).",
@@ -77,9 +78,9 @@ export const renderStatus = (
 	if (order === undefined) {
 		lines.push(
 			amountLine(status),
-			"Not paid yet: waiting for payment by link or authorized agent auto-pay.",
+			...unpaidLines(status),
 			"Languages:",
-			...status.targetLangs.map((lang) => `- ${lang}: awaiting payment`),
+			...status.targetLangs.map((lang) => `- ${lang}: ${langNote(status)}`),
 		);
 
 		return lines.join("\n");

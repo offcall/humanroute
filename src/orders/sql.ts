@@ -42,6 +42,12 @@ export const ORDERS_SCHEMA_SQL = [
 	"CREATE INDEX orphans_unresolved ON orphans (resolved_at)",
 ];
 
+// The draft an orphan was paid for, so the public draft read reports it (ADR 0042).
+export const ORPHAN_DRAFT_SQL = [
+	"ALTER TABLE orphans ADD COLUMN draft_id TEXT",
+	"CREATE INDEX orphans_draft ON orphans (draft_id)",
+];
+
 export const ORDERS_SQL = {
 	insertDraft: `INSERT INTO drafts (id, firm_id, text, source_lang, targets_json, meta_json,
        price_units, total_units, task_count, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -56,7 +62,9 @@ export const ORDERS_SQL = {
 		"INSERT INTO payments (payment_id, draft_id, order_id, created_at) VALUES (?, ?, ?, ?)",
 	paymentById: "SELECT * FROM payments WHERE payment_id = ?",
 	insertOrphan:
-		"INSERT OR IGNORE INTO orphans (pay_tx, payer, network, raw_header, reason, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+		"INSERT OR IGNORE INTO orphans (pay_tx, payer, network, raw_header, reason, created_at, draft_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+	orphanByDraft:
+		"SELECT pay_tx FROM orphans WHERE draft_id = ? ORDER BY id LIMIT 1",
 	unresolvedOrphans:
 		"SELECT COUNT(*) AS total FROM orphans WHERE resolved_at IS NULL",
 };

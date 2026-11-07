@@ -12,7 +12,10 @@ import type { OrdersDeps, OrdersEnv } from "./types.js";
 
 const PAY_PATH = "/x/orders/:draftId";
 
-export const payRoute = (deps: OrdersDeps): Hono<OrdersEnv> => {
+export const payRoute = (
+	deps: OrdersDeps,
+	inflight: Set<string>,
+): Hono<OrdersEnv> => {
 	const server = new x402ResourceServer(
 		loggedFacilitator(deps.facilitator, deps.log),
 	).register(deps.network, new ExactSvmScheme());
@@ -40,7 +43,7 @@ export const payRoute = (deps: OrdersDeps): Hono<OrdersEnv> => {
 		PAY_PATH,
 		readinessGate(deps.preflightProblems),
 		draftGate(deps),
-		capturePayment(deps),
+		capturePayment(deps, inflight),
 	);
 	app.use(PAY_PATH, paymentMiddleware(routes, server));
 	// The x402 middleware settles after this response; capturePayment then replaces it with the order.

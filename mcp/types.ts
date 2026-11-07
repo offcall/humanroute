@@ -27,15 +27,20 @@ export type Draft = {
 	autopay: AutopayStatus;
 };
 
+// Mirrors src/orders/types.ts DraftState (ADR 0042); an unknown value fails the read.
 export enum DraftState {
 	Draft = "draft",
 	Paid = "paid",
+	Orphaned = "orphaned",
+	Settling = "settling",
 }
 
 export type DraftStatus = {
 	draftId: string;
 	state: DraftState;
 	orderId?: string;
+	// Only when orphaned: the settle transaction, null when the settle response had none.
+	payTx?: string | null;
 	// Absent from a gateway older than ADR 0031's pay link change.
 	payUrl?: string;
 	priceUnits: string;
@@ -93,6 +98,7 @@ export type WaitDeps = {
 export enum WaitKind {
 	Changed = "changed",
 	Settled = "settled",
+	Orphaned = "orphaned",
 	Cap = "cap",
 	Error = "error",
 	Aborted = "aborted",
@@ -100,7 +106,11 @@ export enum WaitKind {
 
 export type WaitOutcome =
 	| {
-			kind: WaitKind.Changed | WaitKind.Settled | WaitKind.Cap;
+			kind:
+				| WaitKind.Changed
+				| WaitKind.Settled
+				| WaitKind.Orphaned
+				| WaitKind.Cap;
 			text: string;
 			seen: string;
 	  }

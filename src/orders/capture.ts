@@ -6,13 +6,12 @@ import { paymentHeader, paymentId } from "./paymentId.js";
 import { settled } from "./settled.js";
 import type { OrdersDeps, OrdersEnv } from "./types.js";
 
-export const capturePayment = (
-	deps: OrdersDeps,
-): MiddlewareHandler<OrdersEnv> => {
-	// Payment ids and draft ids being settled right now.
-	const inflight = new Set<string>();
+export const draftKeyOf = (draftId: string): string => `draft:${draftId}`;
 
-	return async (ctx, next) => {
+// inflight: payment ids and draft keys being settled right now (see draftKeyOf).
+export const capturePayment =
+	(deps: OrdersDeps, inflight: Set<string>): MiddlewareHandler<OrdersEnv> =>
+	async (ctx, next) => {
 		const draft = ctx.get("draft");
 		const payId = paymentId(paymentHeader((name) => ctx.req.header(name)));
 		if (!draft || payId === null) {
@@ -28,7 +27,7 @@ export const capturePayment = (
 				? ctx.json(receipt, 201)
 				: ctx.json({ error: "payment_reused" }, 409);
 		}
-		const draftKey = `draft:${draft.id}`;
+		const draftKey = draftKeyOf(draft.id);
 		if (inflight.has(payId) || inflight.has(draftKey)) {
 			return ctx.json({ error: "payment_in_progress" }, 409);
 		}
@@ -47,4 +46,3 @@ export const capturePayment = (
 			inflight.delete(draftKey);
 		}
 	};
-};

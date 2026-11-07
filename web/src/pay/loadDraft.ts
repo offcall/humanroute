@@ -15,8 +15,16 @@ export const loadDraft = async (draftId: string): Promise<PageStatus> => {
 			return { name: Step.LoadError };
 		}
 
-		if (parsed.value.state === DraftState.Paid) {
+		const { state, payTx } = parsed.value;
+		if (state === DraftState.Paid) {
 			return { name: Step.AlreadyPaid, orderId: parsed.value.orderId };
+		}
+		// Money already moved or is moving: never offer Pay (ADR 0042).
+		if (state === DraftState.Orphaned) {
+			return { name: Step.Orphaned, draftId, payTx: payTx ?? null };
+		}
+		if (state === DraftState.Settling) {
+			return { name: Step.Settling };
 		}
 
 		return { name: Step.Ready, draft: parsed.value };

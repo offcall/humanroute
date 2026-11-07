@@ -6,6 +6,8 @@ export enum Step {
 	NotFound = "not-found",
 	LoadError = "load-error",
 	AlreadyPaid = "already-paid",
+	Orphaned = "orphaned",
+	Settling = "settling",
 	Ready = "ready",
 	Paying = "paying",
 	Paid = "paid",
@@ -13,7 +15,8 @@ export enum Step {
 }
 
 export type PageStatus =
-	| { name: Step.Loading | Step.NotFound | Step.LoadError }
+	| { name: Step.Loading | Step.NotFound | Step.LoadError | Step.Settling }
+	| { name: Step.Orphaned; draftId: string; payTx: string | null }
 	| { name: Step.AlreadyPaid; orderId: string | undefined }
 	| { name: Step.Ready | Step.Paying; draft: DraftView }
 	| { name: Step.Paid; draft: DraftView; result: PayResult }

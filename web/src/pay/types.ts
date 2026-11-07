@@ -5,6 +5,8 @@ export type Parsed<T> = { ok: true; value: T } | { ok: false; error: string };
 export enum DraftState {
 	Draft = "draft",
 	Paid = "paid",
+	Orphaned = "orphaned",
+	Settling = "settling",
 }
 
 export type DraftView = {
@@ -19,6 +21,8 @@ export type DraftView = {
 	mint: string;
 	network: string;
 	orderId?: string;
+	// Only when orphaned: the settle transaction, null when unknown (ADR 0042).
+	payTx?: string | null;
 };
 
 export type PayResult = {

@@ -2,19 +2,21 @@
 import { type Context, Hono } from "hono";
 import { publicState, tasksByOrder, viewOf } from "../tasks/index.js";
 import { bearerFirm, cookieFirm, denied } from "./caller.js";
-import { draftById } from "./drafts.js";
+import { readState } from "./draftState.js";
+import { storedDraft } from "./drafts.js";
 import { orderById, ordersByFirm } from "./orderRepo.js";
-import { DraftState, type Order, type OrdersDeps } from "./types.js";
+import type { Order, OrdersDeps } from "./types.js";
 
-export const readRoutes = (deps: OrdersDeps): Hono => {
+export const readRoutes = (deps: OrdersDeps, inflight: Set<string>): Hono => {
 	const app = new Hono();
 	const taskViews = (order: Order) =>
 		tasksByOrder(deps.database, order.id).map((task) => viewOf(deps, task));
 	const serverTime = () => new Date(deps.now()).toISOString();
 
 	app.get("/api/orders/draft/:draftId", (ctx) => {
-		const draft = draftById(deps, ctx.req.param("draftId"));
-		if (!draft) {
+		const draft = storedDraft(deps, ctx.req.param("draftId"));
+		const read = draft === null ? null : readState(deps, inflight, draft);
+		if (draft === null || read === null) {
 			return ctx.json({ error: "not_found" }, 404);
 		}
 		const paid =
@@ -31,7 +33,7 @@ export const readRoutes = (deps: OrdersDeps): Hono => {
 		return ctx.json({
 			draftId: draft.id,
 			payUrl: `${deps.publicBaseUrl.replace(/\/$/, "")}/pay/${draft.id}`,
-			state: draft.orderId === null ? DraftState.Draft : DraftState.Paid,
+			...read,
 			sourceLang: draft.sourceLang,
 			targetLangs: draft.targets.map((target) => target.targetLang),
 			taskCount: draft.taskCount,

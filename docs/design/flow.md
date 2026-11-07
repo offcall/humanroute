@@ -53,8 +53,8 @@ Memos: `hr:<taskId>` (approved), `hr:<taskId>:rejected`, `:unclaimed`, `:late` (
 | Same payment sent again for the same draft | same `201` response, no second order | orders |
 | Different payment for a paid draft | `409 draft_paid` | orders |
 | Payment already used for another draft | `409 payment_reused` | orders |
-| Paid on-chain but not recorded | `502 orphan_payment`, orphan row; operator refunds by hand to the owner of the paying token account (ADR 0036) | orders |
-| Pay page: network error, 5xx or `409 payment_in_progress` after signing | no Pay button; "Check status" re-reads the draft and only a paid draft changes the page | web |
+| Paid on-chain but not recorded | `502 orphan_payment`, orphan row with the draft id; the draft reads `orphaned` with `payTx` and does not expire, MCP says do not pay again (ADR 0042); operator refunds by hand to the owner of the paying token account (ADR 0036) | orders |
+| Pay page: network error, 5xx or `409 payment_in_progress` after signing | no Pay button; "Check status" re-reads the draft and only a paid or orphaned draft changes the page; after a reload an `orphaned` or `settling` draft shows no Pay button (ADR 0042) | web |
 | Auto-pay: firm wallet has no SOL for the approve or revoke fee | cabinet disables the buttons and links the devnet faucet | web |
 | Auto-pay: no allowance, or revoked | `409 autopay_off`; Claude gives the pay link | orders, mcp |
 | Auto-pay: allowance below the order total | `409 autopay_limit {leftUnits}`; the firm raises the limit in the cabinet or pays by link | orders, mcp |
