@@ -10,7 +10,7 @@ Demo steps 1-3 sign in a firm, an agency and a linguist with Phantom. Each cabin
 
 ## Decision
 
-- Sign-In With Solana with a server-built message. `POST /api/auth/nonce {wallet}` returns `{nonce, message}`. The server builds the SIWS-format text (domain and URI from `PUBLIC_BASE_URL`, address, statement, version 1, chain `solana:devnet`, nonce, issued-at, expiration) and stores it with the nonce. The client signs exactly that text with Phantom `signMessage`.
+- Sign-In With Solana with a server-built message. `POST /api/auth/nonce {wallet}` returns `{nonce, message}`. The server builds the SIWS-format text (domain and URI from `PUBLIC_BASE_URL`, address, statement, version 1, nonce, issued-at, expiration) and stores it with the nonce. The message has no Chain ID line: Phantom refuses to sign when it differs from the wallet's network, and sign-in is off-chain. The client signs exactly that text with Phantom `signMessage`.
 - Nonce: random, bound to the wallet, valid 5 minutes, single use.
 - `POST /api/auth/verify {wallet, nonce, signature}` marks the nonce used, verifies the Ed25519 signature over the stored text with `node:crypto`, and starts a session. The server never parses client-supplied message text. Every failure is `401` with one generic error.
 - Session: random 32-byte token in cookie `hr_session` (HttpOnly, SameSite=Lax, Path=/, Secure when `PUBLIC_BASE_URL` is https). The `sessions` table stores only the sha256 of the token. TTL 7 days. Nonce and session TTLs are constants in `src/auth`, not env.

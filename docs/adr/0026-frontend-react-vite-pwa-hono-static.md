@@ -11,7 +11,7 @@ The v2 demo script shows a firm cabinet, an agency cabinet and a linguist cabine
 ## Decision
 
 - Stack: `web/` is React + Vite + TypeScript strict, with its own `web/tsconfig.json`. Build output is `web/dist`.
-- Delivery: the gateway serves `web/dist` with Hono `serveStatic`, plus an SPA fallback to `index.html` for paths outside `/api`, `/x` and `/health`. In dev, Vite proxies `/api`, `/x` and `/health` to the gateway on port 4021, so cookies stay same-origin.
+- Delivery: the gateway serves `web/dist` with its own Hono handler in `src/http/web.ts` (`readFile` and a MIME map), plus an SPA fallback to `index.html`; `/api`, `/x` and `/health` get a `404` JSON instead. In dev, Vite proxies `/api`, `/x` and `/health` to the gateway on port 4021, so cookies stay same-origin.
 - Isolation: `web/` never imports `src/` internals. Response types are declared in `web/src/shared` and produced by parsers.
 - Wallet: the injected Phantom provider only, no wallet-adapter library. On mobile, when no provider is found, a deep link opens the page in the Phantom in-app browser.
 - Sign-in: Sign-In With Solana. The server builds the message (`POST /api/auth/nonce`), the client signs it, and the server verifies it and sets an HttpOnly session cookie. ADR 0020 owns the session rules.
