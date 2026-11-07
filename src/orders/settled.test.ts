@@ -49,6 +49,7 @@ const seam = (onTasksCreated?: OrdersDeps["onTasksCreated"]) => {
 		firmWallet: () => WALLETS.firm.address,
 		tokenAccountOf: unused,
 		solBalanceOf: unused,
+		signatureStatusOf: unused,
 		latestBlockhash: unused,
 		transferOf: () => null,
 		preflightProblems: () => [],

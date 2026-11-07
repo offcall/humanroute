@@ -85,6 +85,10 @@ export type FirmTokenAccount =
 			delegate: string | null;
 			delegatedAmount: bigint;
 	  };
+// A transaction's state at the gateway's commitment; wired from chain signatureStatus.
+export type TxStatus =
+	| { state: "unknown" | "pending" | "confirmed" }
+	| { state: "failed"; error: string };
 export type ChainRead<T = unknown> =
 	| { ok: true; value: T }
 	| { ok: false; error: string };
@@ -115,6 +119,7 @@ export type OrdersDeps = PartyPorts & {
 	firmWallet: (firmId: string) => string | null;
 	tokenAccountOf: (owner: string) => Promise<ChainRead<FirmTokenAccount>>;
 	solBalanceOf: (owner: string) => Promise<ChainRead<number>>;
+	signatureStatusOf: (signature: string) => Promise<ChainRead<TxStatus>>;
 	latestBlockhash: () => Promise<
 		ChainRead<{ blockhash: string; lastValidBlockHeight: number }>
 	>;

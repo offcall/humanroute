@@ -5,8 +5,10 @@ import { request } from "../shared";
 import { type Autopay, parseAutopay } from "./autopayParse";
 import { sendWithPhantom } from "./phantomSend";
 
-const CONFIRM_WAIT_MS = 4000;
 const READ_FAILED = "Could not read your USDC account from devnet; try again.";
+const WAITING = "Sent. Waiting for devnet to confirm it…";
+const NOT_CONFIRMED =
+	"Devnet has not confirmed it yet; reload the page in a minute to see the new state.";
 
 const readStatus = async (): Promise<Autopay | undefined> => {
 	const res = await request(
@@ -17,6 +19,10 @@ const readStatus = async (): Promise<Autopay | undefined> => {
 	);
 	return res.ok ? res.value : undefined;
 };
+
+// The gateway answers once the transaction reaches its commitment (ADR 0045).
+const confirmSent = (signature: string) =>
+	request("POST", "/api/firm/autopay/confirm", { signature }, parseAutopay);
 
 export const isAutopayOn = (status: Autopay | undefined): boolean =>
 	status !== undefined &&
@@ -49,15 +55,27 @@ export const useAutopay = () => {
 			return false;
 		}
 		const sent = await sendWithPhantom(fresh.wallet, build(fresh));
-		setBusy(false);
 		if (!sent.ok) {
+			setBusy(false);
 			setNote(sent.error);
 			return false;
 		}
 		setLastTx(sent.signature);
-		setNote("Sent. The new state shows once devnet confirms it.");
-		setTimeout(() => void load(), CONFIRM_WAIT_MS);
-		return true;
+		setNote(WAITING);
+		const confirmed = await confirmSent(sent.signature);
+		setBusy(false);
+		if (confirmed.ok) {
+			setStatus(confirmed.value);
+			setNote(undefined);
+			return true;
+		}
+		const { error, message } = confirmed.error;
+		setNote(
+			error === "tx_failed"
+				? `The transaction failed on devnet: ${message ?? "no reason given"}.`
+				: NOT_CONFIRMED,
+		);
+		return error !== "tx_failed";
 	};
 
 	return { status, busy, note, lastTx, run };
