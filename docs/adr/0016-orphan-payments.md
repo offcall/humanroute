@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. Amended by ADR 0042 (the draft read reports orphans and settling).
 
 ## Context
 

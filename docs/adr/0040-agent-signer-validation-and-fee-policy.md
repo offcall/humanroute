@@ -6,6 +6,8 @@ Proposed
 
 ## Context
 
+Line numbers below refer to `main` at `681c295`.
+
 ADR 0036 lets `sign.mjs` sign only an x402 payment with a fixed layout. The parser in `web/public/agent/sign.mjs` reads lengths and indices without bounds (`readLength` at `:34`, key and instruction loops at `:53`-`:72`), does not check that the whole buffer is consumed (`:73`), and checks only the first data byte of the compute budget instructions (`:94`). It accepts any signer position: a message where the agent key is the fee payer, with an extreme compute unit price, is signed, and the agent's SOL would pay the fee.
 
 The gateway builds the message in `src/orders/unsignedTx.ts:35`: fee payer = the facilitator fee payer from the 402 requirements (`src/orders/unsignedRoute.ts:41`), then SetComputeUnitLimit 20,000, SetComputeUnitPrice 1 microlamport, TransferChecked with the delegate as authority, Memo with 32 random hex characters; v0, no lookup tables. Compiled: header (2, 1, 4), 8 static keys, the agent at index 1, instruction data 5, 9, 10 and 32 bytes, 367 bytes in total (checked locally with web3.js).
@@ -34,5 +36,5 @@ A refusal prints nothing on stdout, prints `sign.mjs refused: <reason>` on stder
 
 - Amends ADR 0036 ("sign.mjs signs only a message with exactly that layout"); the rest of ADR 0036 stands.
 - Code: `web/public/agent/sign.mjs` only, about 60 more lines; it may split the parser into `web/public/agent/message.mjs`, then `setup.mjs` downloads both. Gateway unchanged.
-- Tests NEW-12 and CT-02..05 assert: the gateway's own message is signed; refusal (exit 1, empty stdout, reason prefix) for agent as fee payer, limit 40,001, price 1,001, a truncated buffer, trailing bytes, an out-of-range key index, a non-canonical length, a legacy message, a lookup table, a fifth instruction, a wrong signer count or a wrong destination.
+- Tests in `contracts/agent-signer-boundary.test.ts` and `contracts/agent-autopay.test.ts` assert: the gateway's own message is signed; refusal (exit 1, empty stdout, reason prefix) for agent as fee payer, limit 40,001, price 1,001, a truncated buffer, trailing bytes, an out-of-range key index, a non-canonical length, a legacy message, a lookup table, a fifth instruction, a wrong signer count or a wrong destination.
 - A gateway that raises its compute values above the caps needs a new ADR and a new `sign.mjs` for every firm.

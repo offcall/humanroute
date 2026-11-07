@@ -21,6 +21,7 @@ The repository has no tests; `npm run check` runs Biome and `tsc`, and `npm run 
 - Layout:
   - A test is a `*.test.ts(x)` file next to the code it tests. A slice's own tests import its files directly.
   - `src/testing/` is test-only support: a hand-moved clock and ids, deterministic wallets, a scriptable fake `SolanaClient`, a fake facilitator, request helpers and `createTestGateway`, which wires every slice through `src/wiring` with these fakes and an in-memory database. Production code never imports it.
+  - `mcp/fake*.ts` are test-only support for `mcp/*.test.ts` and may import `vitest`. Production files never import them.
   - `contracts/` holds tests of contracts between processes (gateway, MCP, web, agent scripts).
   - `e2e/` holds real-process tests: `e2e/env/` (environments and global setup), suites by flow, `e2e/web/` (browser), `e2e/smoke/`.
 - Import exceptions to ADR 0019, for test files only: `src/testing/` may import any slice's `index.ts` and `src/wiring`; a `*.test.ts` may import `src/testing/`; `contracts/` and `e2e/` may import `src/`, `mcp/` and `web/public/agent/`, and `contracts/` may load `web/src/` parsers at runtime (dynamic import; the web `tsconfig` type-checks them), to compare both sides of a contract or start a process. Production files keep the ADR 0019 rules.
@@ -36,7 +37,7 @@ The repository has no tests; `npm run check` runs Biome and `tsc`, and `npm run 
 
 ## Consequences
 
-- New dev dependencies: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/dom`.
+- New dev dependencies: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/dom`, and `playwright` for the browser e2e (ADR 0038).
 - `npm run check` takes longer by the unit and web run.
 - The fakes implement the real interfaces, so `tsc` flags them when an interface changes.
 - No coverage report and no CI.

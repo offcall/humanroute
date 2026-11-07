@@ -20,8 +20,8 @@ ADR 0037 adds the `e2e`, `e2e-devnet` and `smoke` projects. The real proof of Hu
   - Only one Chromium runs on the host at a time. Each browser file takes the mkdir lock `/tmp/hr-shot.lock` and releases it.
   - Each role gets its own context with a fake Phantom. The page only moves bytes; Node signs over `exposeBinding` and sends to the run's RPC.
   - `page.route` answers the devnet RPC host from the local RPC. It aborts and records any other non-loopback request, and a case fails on any recorded request. Chromium starts with a dead proxy, so its own traffic cannot leave the host either.
-  - The web is built once (`npm run build`) before browser runs.
-- `e2e-devnet` (`npm run test:e2e:devnet`) runs the same files against devnet and x402.org. It uses the hold and agent keys from `keys/` (or `HOLD_KEYPAIR_PATH`, `AGENT_KEYPAIR_PATH`), requires `FEE_WALLET`, and funds fresh firm wallets from the agent wallet. It runs manually and only with the owner's permission for each run. Localnet-only cases (EE-01, EE-19) skip there.
+  - `npm run test:e2e` and `npm run test:e2e:devnet` build the web first (`npm run build && vitest run --project …`), so browser runs never use a stale `web/dist`.
+- `e2e-devnet` (`npm run test:e2e:devnet`) runs the same files against devnet and x402.org. It uses the hold and agent keys from `keys/` (or `HOLD_KEYPAIR_PATH`, `AGENT_KEYPAIR_PATH`), requires `FEE_WALLET`, and funds fresh firm wallets from the agent wallet. It runs manually and only with the owner's permission for each run. Its setup throws unless `E2E_DEVNET=1`, which only that script sets, so a bare `npx vitest run` cannot spend devnet funds. Each firm slot gets its own devnet USDC amount (`DEVNET_FIRM_UNITS` in `e2e/support/firms.ts`, about 15 USDC upfront); setup checks the agent balance first. Localnet-only suites (`e2e/environment.e2e.test.ts`, `e2e/order-restart.e2e.test.ts`) skip there.
 - `smoke` (`npm run test:smoke`) makes read-only GET checks of a running target: `SMOKE_GATEWAY_URL`, plus optionally `SMOKE_MCP_URL` and `SMOKE_MCP_TOKEN`. It has no setup and skips without a target. `node --import tsx e2e/env/serve.ts` starts a localnet target and prints these variables.
 
 ## Alternatives
@@ -37,3 +37,4 @@ ADR 0037 adds the `e2e`, `e2e-devnet` and `smoke` projects. The real proof of Hu
 - A full localnet run takes minutes, most of it waiting on real claim and work windows and on blockhash expiry. It uses one Vitest worker.
 - On localnet the hold wallet is younger than the 600 s window of the memo guard (ADR 0039). A restart after a dropped send therefore ends in operator action, not a resend; the resend path needs an older hold wallet (devnet).
 - The facilitator shim must be revisited when `@x402/svm` or `@solana/kit` changes.
+- Test harness code and scripts send transactions only with test, firm or agent keys, never with the hold key (the hold is used only for its public key). The AGENTS.md rule that transactions are sent only from `src/payouts/` covers gateway code.

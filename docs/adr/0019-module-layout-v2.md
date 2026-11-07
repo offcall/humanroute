@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Supersedes ADR 0009.
+Proposed. Supersedes ADR 0009. Amended by ADR 0037 (import exceptions for test files).
 
 ## Context
 

@@ -19,13 +19,13 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0013](0013-signed-receipt.md) | Signed Receipt | Proposed (deferred) |
 | [0014](0014-self-facilitation-fallback.md) | Self-Facilitation Fallback | Proposed (deferred) |
 | [0015](0015-devnet-test-mint-for-the-demo.md) | Devnet Test Mint for the Demo | Accepted |
-| [0016](0016-orphan-payments.md) | Orphan Payments | Accepted |
+| [0016](0016-orphan-payments.md) | Orphan Payments | Accepted (amended by 0042) |
 | [0017](0017-operator-requeue-of-failed-transfers.md) | Operator Requeue of Failed Transfers | Accepted |
 | [0018](0018-public-job-state-and-payout-progress.md) | Public Job State and Payout Progress | Superseded by 0023 |
-| [0019](0019-module-layout-v2.md) | Module Layout v2 | Proposed |
+| [0019](0019-module-layout-v2.md) | Module Layout v2 | Proposed (amended by 0037) |
 | [0020](0020-siws-sessions-and-roles.md) | SIWS Sessions and Roles | Proposed |
 | [0021](0021-firms-agencies-linguists-invites.md) | Firms, Agencies, Linguists and Invites | Proposed |
-| [0022](0022-order-one-payment-many-tasks.md) | Order = one payment, many tasks | Proposed |
+| [0022](0022-order-one-payment-many-tasks.md) | Order = one payment, many tasks | Proposed (amended by 0042) |
 | [0023](0023-task-lifecycle.md) | Task lifecycle: claim, timers, approve/reject with reason, memos | Proposed |
 | [0024](0024-split-payout-and-ata.md) | Split payout in one transaction and ATA creation | Proposed |
 | [0025](0025-rating-and-firm-reject-rate.md) | Rating and Firm Reject Rate | Proposed |
@@ -44,3 +44,4 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0039](0039-resend-guard-history-window.md) | Resend guard history window | Proposed |
 | [0040](0040-agent-signer-validation-and-fee-policy.md) | Agent signer validation and fee policy | Proposed |
 | [0041](0041-unknown-send-errors-are-ambiguous.md) | Unknown send errors are ambiguous | Proposed |
+| [0042](0042-draft-read-reports-orphans.md) | The draft read reports orphans and settling | Proposed |
