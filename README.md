@@ -4,6 +4,37 @@ A firm orders human translation from an AI agent. Claude Code (over MCP) drafts 
 
 Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. Tests are deferred by the owner; the gate is `npm run check`.
 
+Live demo (devnet): https://humanroute.app.offcall.link
+
+## How x402 is used
+
+- **One payment per order.** `POST /x/orders/:draftId` answers `402` with `PAYMENT-REQUIRED`: x402 V2, scheme `exact`, price `taskCount x TASK_PRICE_USDC`, `payTo` the hold wallet. The firm signs one USDC transfer; the x402.org facilitator verifies and settles it on Solana, and pays the network fee.
+- **The paid resource is the work.** Settlement creates the order and one task per language. The agent then reads the human results through MCP (`get_task`, `wait_task`), and the money for each task is released or refunded on-chain.
+- **Two payers, one route.** A person pays on the pay page with Phantom. The agent pays by itself (auto-pay, ADR 0036): the gateway builds the unsigned x402 payment from the firm's own USDC account under an SPL delegate allowance, and Claude signs it locally. Both go through the same verify and settle.
+- **Payment identity.** One payment pays one draft: the same payment sent again returns the same order, and a payment reused for another draft gets `409` (ADR 0004).
+
+## How Solana powers it
+
+- USDC (SPL, 6 decimals) is the money for payment, payout and refund; amounts are `bigint` base units end to end.
+- Sign-In With Solana (Phantom) is the only login for firms, agencies and linguists, on desktop and on the phone (ADR 0020, ADR 0034).
+- Each decided task is one on-chain transaction: a payout with three legs (linguist, agency, fee) or a refund to the firm. Every transfer carries a memo `hr:<taskId>` (`:rejected`, `:unclaimed`, `:late` for refunds), so the explorer shows what each payment was for (ADR 0024).
+- Auto-pay is an SPL `approve` with a limit, signed by the firm in Phantom and revocable; the agent key never holds the firm's funds (ADR 0036).
+
+## Failed payments
+
+The full failure table is in [`docs/design/flow.md`](docs/design/flow.md#failure-table). The main payment cases:
+
+| Case | What happens |
+| --- | --- |
+| No payment header | `402` with `PAYMENT-REQUIRED` |
+| Same payment sent again for the same draft | Same `201` answer, no second order |
+| Another payment for a paid draft, or a payment reused for another draft | `409 draft_paid` / `409 payment_reused` |
+| Hold wallet or facilitator not ready | `503 not_ready` with reasons; payouts pause, nothing is sent |
+| Paid on-chain but not recorded | `502 orphan_payment`; the agent is told not to pay again |
+| Agent payment outcome unknown (timeout, broken connection) | Claude checks `get_task` and asks the user before any new payment |
+| Task never claimed, submitted late, or rejected | Full refund to the firm, memo `:unclaimed`, `:late` or `:rejected` |
+| Payout broadcast fails | Retried from `pending` with backoff; resend only when the memo is not on chain (ADR 0006) |
+
 ## Parts
 
 | Part | What | Where |
@@ -12,12 +43,13 @@ Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. Tests are d
 | Web app | React + Vite, PWA manifest, Indigo UI (ADR 0032): landing, firm (jobs, review, task detail), agency, linguist (board, my tasks, wallet), join, approve and pay pages; sign-in from Safari or the home-screen icon via approve in Phantom (ADR 0034); Web Push for new tasks (ADR 0029) | `web/` |
 | MCP server | Remote MCP over Streamable HTTP, tools `post_task`, `get_task`, `wait_task` (waits for the next change) and `approve_task` and `reject_task` (Claude asks the user before deciding), `prepare_payment` and `pay_task` (auto-pay: Claude signs the order payment locally with the firm's agent key, ADR 0036); talks to the gateway over HTTP only | `mcp/` |
 | Scripts | Devnet wallet setup and an opt-in e2e flow | `scripts/` |
+| Spike | First proof of x402 V2 `exact` on devnet (2026-10-20): payment, settle, replay, refund. Throwaway code kept with its report and raw fixtures | `spike/` |
 
 Money moves only from `src/payouts/`. Decisions (approve, reject, timers) only record state and queue a transfer.
 
 ## Demo
 
-Three browsers and a phone, one script: [`docs/demo-script.md`](docs/demo-script.md). Design: [`docs/design/flow.md`](docs/design/flow.md). Endpoints and shapes: [`docs/design/api.md`](docs/design/api.md). Decisions: [`docs/adr/`](docs/adr/README.md). Not built yet: [`docs/roadmap.md`](docs/roadmap.md).
+Two browsers, Claude Code and a phone, one script: [`docs/demo-script.md`](docs/demo-script.md). Design: [`docs/design/flow.md`](docs/design/flow.md). Endpoints and shapes: [`docs/design/api.md`](docs/design/api.md). Decisions: [`docs/adr/`](docs/adr/README.md). Not built yet: [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Run locally
 
@@ -78,6 +110,7 @@ src/     gateway: config, store, chain, auth, accounts, tasks, orders, payouts, 
 web/     React app (landing, firm, agency, linguist, join, pay)
 mcp/     MCP server (post_task, get_task, wait_task, approve_task, reject_task, prepare_payment, pay_task)
 scripts/ wallet setup, devnet e2e flow
+spike/   first x402 devnet proof (throwaway)
 docs/    design, ADRs, demo script, roadmap
 ```
 
