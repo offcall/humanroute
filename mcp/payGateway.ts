@@ -6,6 +6,7 @@ import {
 	PAY_TIMEOUT_MS,
 	parsePaid,
 	parseUnsigned,
+	payFailed,
 	payUnknown,
 	STILL_SETTLING,
 } from "./payParse.js";
@@ -84,10 +85,7 @@ export const createPayClient = (baseUrl: string): PayClient => {
 			}
 			const response = sent.value;
 			if (response.status === 402) {
-				return {
-					ok: false,
-					error: `payment failed: ${failureReason(response)}`,
-				};
+				return { ok: false, error: payFailed(failureReason(response)) };
 			}
 			if (response.status === 409) {
 				const code = await errorCode(response);

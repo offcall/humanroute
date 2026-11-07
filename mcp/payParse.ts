@@ -11,6 +11,13 @@ export const PAY_TIMEOUT_MS = 45_000;
 export const payUnknown = (reason: string) =>
 	`${reason}; the payment may have settled. Call get_task. If it shows no order, tell the user the outcome is unknown and ask before calling prepare_payment or pay_task again`;
 
+// Only a definitive 402 from the facilitator's simulation invites a new prepare_payment; an
+// unknown outcome never does, whatever its text says.
+export const payFailed = (reason: string) =>
+	reason.includes("simulation")
+		? `payment failed: ${reason}. The blockhash may have expired or the allowance changed: call prepare_payment again`
+		: `payment failed: ${reason}`;
+
 export const STILL_SETTLING =
 	"the payment is still settling: call get_task in a few seconds; do not call prepare_payment";
 

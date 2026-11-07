@@ -20,7 +20,7 @@ const NEXT = {
 	[WaitKind.Cap]: `Nothing changed in ${CAP_MS / 60_000} minutes. Call wait_task again with this seen.`,
 };
 
-const reply = (outcome: WaitOutcome) => {
+export const reply = (outcome: WaitOutcome) => {
 	switch (outcome.kind) {
 		case WaitKind.Error:
 			return toolText(

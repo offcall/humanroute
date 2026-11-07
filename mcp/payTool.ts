@@ -36,10 +36,7 @@ export const pay = async (
 	);
 	const paid = await payClient.pay(draftId, header);
 	if (!paid.ok) {
-		const retry = paid.error.includes("simulation")
-			? " The blockhash may have expired or the allowance changed: call prepare_payment again."
-			: "";
-		return toolText(`${paid.error}.${retry}`, true);
+		return toolText(`${paid.error}.`, true);
 	}
 	dropPrepared(token, draftId);
 	if (paid.value.outcome === PayOutcome.AlreadyPaid) {
