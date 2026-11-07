@@ -10,6 +10,8 @@ type Props = {
 	busy: Busy;
 	error: LandError | undefined;
 	wallet: string | undefined;
+	hasFirm: boolean;
+	hasAgency: boolean;
 	onFirm: (name: string) => void;
 	onAgency: () => void;
 };
@@ -23,6 +25,8 @@ export const RegisterForm = ({
 	busy,
 	error,
 	wallet,
+	hasFirm,
+	hasAgency,
 	onFirm,
 	onAgency,
 }: Props) => {
@@ -31,6 +35,7 @@ export const RegisterForm = ({
 	const noWallet = error?.kind === Failure.NoWallet;
 	const firmBusy = BUSY_LABELS[busy];
 	const alert = error === undefined ? null : <LandAlert error={error} />;
+	const agencyFirst = hasAgency && !hasFirm;
 
 	return (
 		<form
@@ -38,33 +43,35 @@ export const RegisterForm = ({
 			aria-label="Register"
 			onSubmit={(event) => event.preventDefault()}
 		>
-			<div className="field">
-				<label className="field__label" htmlFor="firm-name">
-					Firm name
-				</label>
-				<input
-					className="input"
-					id="firm-name"
-					name="firmName"
-					autoComplete="organization"
-					value={name}
-					disabled={locked}
-					onChange={(event) => setName(event.target.value)}
-				/>
-			</div>
+			{hasFirm ? null : (
+				<div className="field">
+					<label className="field__label" htmlFor="firm-name">
+						Firm name
+					</label>
+					<input
+						className="input"
+						id="firm-name"
+						name="firmName"
+						autoComplete="organization"
+						value={name}
+						disabled={locked}
+						onChange={(event) => setName(event.target.value)}
+					/>
+				</div>
+			)}
 			{noWallet ? alert : null}
 			<div className="land-actions">
 				<RegisterButton
-					label="Register firm"
+					label={hasFirm ? "Open firm cabinet" : "Register firm"}
 					busyLabel={firmBusy}
-					primary={!noWallet}
+					primary={!noWallet && !agencyFirst}
 					locked={locked}
 					onClick={() => onFirm(name)}
 				/>
 				<RegisterButton
-					label="Register agency"
+					label={hasAgency ? "Open agency cabinet" : "Register agency"}
 					busyLabel={busy === Busy.SignAgency ? "Signing…" : undefined}
-					primary={false}
+					primary={!noWallet && agencyFirst}
 					locked={locked}
 					onClick={onAgency}
 				/>

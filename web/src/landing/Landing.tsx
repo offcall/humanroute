@@ -42,6 +42,8 @@ export const Landing = () => {
 						busy={busy}
 						error={error}
 						wallet={me?.wallet}
+						hasFirm={me !== null && me.firm !== null}
+						hasAgency={me !== null && me.agency !== null}
 						onFirm={registerFirm}
 						onAgency={registerAgency}
 					/>
