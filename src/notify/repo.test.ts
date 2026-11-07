@@ -1,5 +1,5 @@
 // Push subscriptions per linguist (ADR 0029): at most 5 devices, newest kept.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { openStore } from "../store/index.js";
 import { START, testClock } from "../testing/index.js";
 import { notifySlice } from "./migrations.js";
@@ -25,7 +25,7 @@ const names = (indexes: number[]) =>
 	indexes.map((index) => device(index).endpoint).sort();
 
 describe("push subscriptions", () => {
-	it("NT-16 keeps at most 5 devices per linguist and moves a re-subscribed device to the last linguist", () => {
+	test("keeps at most 5 devices per linguist and moves a re-subscribed device to the last linguist", () => {
 		const { clock, database, endpoints } = setup();
 		for (const index of [1, 2, 3, 4, 5, 6]) {
 			clock.advance(1000);
@@ -39,7 +39,7 @@ describe("push subscriptions", () => {
 		expect(endpoints("ling-b")).toEqual(names([4]));
 	});
 
-	it("NEW-18 refreshing an existing device at an equal timestamp does not evict the refreshed device", () => {
+	test("refreshing an existing device at an equal timestamp does not evict the refreshed device", () => {
 		const { database, endpoints } = setup();
 		for (const index of [1, 2, 3, 4, 5]) {
 			saveSubscription(database, "ling-a", device(index), START);

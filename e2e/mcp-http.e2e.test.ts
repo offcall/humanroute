@@ -1,5 +1,5 @@
-// NEW-14: the MCP HTTP boundary (mcp/index.ts) on the real process: body limit, JSON, methods, paths.
-import { describe, expect, it } from "vitest";
+// The MCP HTTP boundary (mcp/index.ts) on the real process: body limit, JSON, methods, paths.
+import { describe, expect, test } from "vitest";
 import { e2eEnv } from "./support/env.js";
 
 const LIMIT = 1_048_576;
@@ -26,7 +26,7 @@ const errorOf = async (res: Response): Promise<unknown> => {
 };
 
 describe("MCP HTTP boundary", () => {
-	it("NEW-14 the MCP HTTP boundary rejects malformed and oversized bodies", async () => {
+	test("the MCP HTTP boundary rejects malformed and oversized bodies", async () => {
 		const malformed = await post("{not json");
 		expect(malformed.status).toBe(400);
 		expect(await errorOf(malformed)).toBe("bad_request");

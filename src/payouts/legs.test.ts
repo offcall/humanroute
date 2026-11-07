@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { type Task, TaskState } from "../tasks/index.js";
 import { WALLETS } from "../testing/index.js";
 import { memoFor, refundLegs, splitLegs } from "./legs.js";
@@ -39,7 +39,7 @@ const unitsByRole = (priceUnits: bigint) =>
 	);
 
 describe("payout legs", () => {
-	it("PO-01 splits 0.50 USDC into 400000 / 90000 / 10000 for linguist, agency and fee", () => {
+	test("splits 0.50 USDC into 400000 / 90000 / 10000 for linguist, agency and fee", () => {
 		expect(splitLegs(task(500_000n), SHARES)).toEqual([
 			{
 				role: LegRole.Linguist,
@@ -51,7 +51,7 @@ describe("payout legs", () => {
 		]);
 	});
 
-	it("PO-02 keeps the sum equal to the price and gives the rounding remainder to the linguist", () => {
+	test("keeps the sum equal to the price and gives the rounding remainder to the linguist", () => {
 		const prices = [
 			...Array.from({ length: 20_000 }, (_, index) => BigInt(index + 1)),
 			333_333n,
@@ -82,7 +82,7 @@ describe("payout legs", () => {
 		});
 	});
 
-	it("PO-04 throws when the task has no payee snapshot", () => {
+	test("throws when the task has no payee snapshot", () => {
 		expect(() => splitLegs(task(500_000n, false), SHARES)).toThrow(
 			"task task-1 has no payee snapshot",
 		);
@@ -92,13 +92,13 @@ describe("payout legs", () => {
 		expect(() => splitLegs(noLinguist, SHARES)).toThrow(/no payee snapshot/);
 	});
 
-	it("PO-05 refunds the full price to the task's refund wallet in one leg", () => {
+	test("refunds the full price to the task's refund wallet in one leg", () => {
 		expect(refundLegs(task(1_234_567n))).toEqual([
 			{ role: LegRole.Refund, wallet: WALLETS.firm.address, units: 1_234_567n },
 		]);
 	});
 
-	it("PO-06 builds memos hr:<id>, :rejected, :unclaimed, :late and throws for open, claimed or submitted", () => {
+	test("builds memos hr:<id>, :rejected, :unclaimed, :late and throws for open, claimed or submitted", () => {
 		expect(memoFor("t1", TaskState.Approved)).toBe("hr:t1");
 		expect(memoFor("t1", TaskState.Rejected)).toBe("hr:t1:rejected");
 		expect(memoFor("t1", TaskState.ExpiredUnclaimed)).toBe("hr:t1:unclaimed");

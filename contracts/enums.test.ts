@@ -1,5 +1,5 @@
 // State sets shared by the gateway, the MCP server and the web (they cannot import src/ values).
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import * as mcp from "../mcp/types.js";
 import { DraftState } from "../src/orders/index.js";
 import { AutopayStatus } from "../src/orders/types.js";
@@ -63,24 +63,24 @@ const NATURAL: Record<PublicState, TaskState> = {
 	[PublicState.Refunded]: TaskState.ExpiredLate,
 };
 
-describe("CT-12 shared state sets match across processes", () => {
-	it("CT-12 src and mcp PublicState and AutopayStatus are equal", () => {
+describe("shared state sets match across processes", () => {
+	test("src and mcp PublicState and AutopayStatus are equal", () => {
 		expect(values(mcp.PublicState)).toEqual(values(PublicState));
 		expect(values(mcp.AutopayStatus)).toEqual(values(AutopayStatus));
 	});
 
-	it("CT-12 src and web TaskState are equal", async () => {
+	test("src and web TaskState are equal", async () => {
 		const web = await webModule("shared/types.ts");
 		expect(values(web.TaskState)).toEqual(values(TaskState));
 	});
 
-	it("CT-12 src, mcp and web DraftState are equal", async () => {
+	test("src, mcp and web DraftState are equal", async () => {
 		const web = await webModule("pay/types.ts");
 		expect(values(mcp.DraftState)).toEqual(values(DraftState));
 		expect(values(web.DraftState)).toEqual(values(DraftState));
 	});
 
-	it("CT-12 web statusOf maps every PublicState of its natural task state", async () => {
+	test("web statusOf maps every PublicState of its natural task state", async () => {
 		const tagOf = await webStatusOf();
 		for (const publicState of Object.values(PublicState)) {
 			expect(tagOf(NATURAL[publicState], publicState), publicState).toBe(
@@ -91,7 +91,7 @@ describe("CT-12 shared state sets match across processes", () => {
 
 	// open, claimed and submitted fall through to the task-state switch in web/src/shared/status.ts,
 	// so a publicState that disagrees with the state shows the state's tag (lane WEB).
-	it("CT-12 web statusOf maps every PublicState explicitly, not through the fallback", async () => {
+	test("web statusOf maps every PublicState explicitly, not through the fallback", async () => {
 		const tagOf = await webStatusOf();
 		for (const publicState of Object.values(PublicState)) {
 			for (const state of Object.values(TaskState)) {
@@ -102,7 +102,7 @@ describe("CT-12 shared state sets match across processes", () => {
 		}
 	});
 
-	it("CT-12 web Language is a subset of the gateway's /^[a-z]{2}$/ codes, which also takes unlisted ones", async () => {
+	test("web Language is a subset of the gateway's /^[a-z]{2}$/ codes, which also takes unlisted ones", async () => {
 		const web = await webModule("shared/types.ts");
 		const languages = values(web.Language);
 		expect(languages).toEqual(["de", "en", "es", "fr", "it", "pt", "ru"]);

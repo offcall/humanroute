@@ -1,5 +1,5 @@
 // Facilitator preflight (failure table row 4): exact on the configured network, failures caught.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { fakeFacilitator, WALLETS } from "../testing/index.js";
 import { checkFacilitator } from "./facilitator.js";
 
@@ -24,7 +24,7 @@ const facilitatorOn = (network: `${string}:${string}`, scheme = "exact") => {
 };
 
 describe("facilitator preflight", () => {
-	it("NEW-05 facilitator readiness requires exact on the configured network and catches support failure", async () => {
+	test("facilitator readiness requires exact on the configured network and catches support failure", async () => {
 		expect(
 			await checkFacilitator(facilitatorOn(NETWORK), URL, NETWORK),
 		).toEqual([]);

@@ -1,8 +1,8 @@
-// Browser BR-14: sign-in from a tab without Phantom through the approve page (ADR 0034). Two
+// Sign-in from a tab without Phantom through the approve page (ADR 0034). Two
 // isolated contexts in one Chromium: the provider-free tab owns the login request, the context
 // with Phantom only approves it.
 import { Keypair } from "@solana/web3.js";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { e2eEnv } from "../support/env.js";
 import { registerFirm } from "../support/people.js";
 import { openBrowser, type Session } from "./browser.js";
@@ -20,7 +20,7 @@ describe("sign-in via approve", () => {
 	});
 	captureFailures(() => session);
 
-	it("BR-14 signs in from a tab without Phantom through the approve page", async () => {
+	test("signs in from a tab without Phantom through the approve page", async () => {
 		const key = Keypair.generate();
 		await registerFirm(e2eEnv().gatewayUrl, key);
 		const waiting = await session.role(null);

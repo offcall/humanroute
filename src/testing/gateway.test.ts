@@ -1,6 +1,6 @@
 // Checks of the test gateway itself: it starts offline, the x402 middleware accepts the fake
 // facilitator, and a payment through it records an order (failure table: pay without header).
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -16,7 +16,7 @@ import {
 } from "./index.js";
 
 describe("test gateway", () => {
-	it("H-01 starts ready and reports preflight problems on /health", async () => {
+	test("starts ready and reports preflight problems on /health", async () => {
 		const gateway = createTestGateway();
 		const health = () => send(gateway.app, "GET", "/health");
 
@@ -28,7 +28,7 @@ describe("test gateway", () => {
 		expect(failing).toEqual({ ok: true, ready: false });
 	});
 
-	it("H-02 answers a payment without header with 402 and the fake fee payer", async () => {
+	test("answers a payment without header with 402 and the fake fee payer", async () => {
 		const gateway = createTestGateway();
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
 		const draft = await createDraft(gateway.app, firm.mcpToken);
@@ -49,7 +49,7 @@ describe("test gateway", () => {
 		expect(gateway.facilitator.calls.settle).toBe(0);
 	});
 
-	it("H-03 records an order with one open task per language once the fake settles", async () => {
+	test("records an order with one open task per language once the fake settles", async () => {
 		const { app, facilitator } = createTestGateway();
 		const firm = await registerFirm(app, WALLETS.firm);
 		const draftId = textField(await createDraft(app, firm.mcpToken), "draftId");

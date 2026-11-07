@@ -1,5 +1,5 @@
 // The MCP server as a real process in front of the real gateway: tools, waits, decisions, token.
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { txFacts } from "./support/chain.js";
 import { e2eEnv } from "./support/env.js";
 import { FirmSlot } from "./support/firms.js";
@@ -30,7 +30,7 @@ describe("MCP over the real gateway", () => {
 		await mcp?.close();
 	});
 
-	it("EE-20 post_task returns the pay link and seen, and get_task reads the draft and an escaped result", async () => {
+	test("post_task returns the pay link and seen, and get_task reads the draft and an escaped result", async () => {
 		const posted = await postTask(mcp, ["es"]);
 		expect(posted.isError).toBe(false);
 		const draft = draftOf(posted);
@@ -62,7 +62,7 @@ describe("MCP over the real gateway", () => {
 		expect(lineValue(read, "seen")).toBe("paid;es=submitted");
 	});
 
-	it("EE-21 wait_task returns on payment, claim and submit with the changes line", async () => {
+	test("wait_task returns on payment, claim and submit with the changes line", async () => {
 		const draft = draftOf(await postTask(mcp, ["fr"]));
 		const wait = (seen: string) =>
 			mcp.call("wait_task", { draftId: draft.draftId, seen });
@@ -92,7 +92,7 @@ describe("MCP over the real gateway", () => {
 		expect(lineValue(third, "seen")).toBe("paid;fr=submitted");
 	});
 
-	it("EE-22 approve_task and reject_task move the money", async () => {
+	test("approve_task and reject_task move the money", async () => {
 		const env = e2eEnv();
 		const { draft, paid, tasks } = await paidVia(firm, mcp, ["es", "de"]);
 		const [es, de] = [taskOf(tasks, "es").taskId, taskOf(tasks, "de").taskId];
@@ -127,7 +127,7 @@ describe("MCP over the real gateway", () => {
 		expect(read.text).toContain(`  reason: ${reason}`);
 	});
 
-	it("EE-23 wait_task returns settled at once for a settled order", async () => {
+	test("wait_task returns settled at once for a settled order", async () => {
 		const { draft, paid, tasks } = await paidVia(firm, mcp, ["fr"]);
 		const taskId = taskOf(tasks, "fr").taskId;
 		await claim(people.linguist.jar, taskId);

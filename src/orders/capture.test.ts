@@ -1,5 +1,5 @@
 // Replay and conflicts of one payment (failure table rows 5-7, ADR 0004, ADR 0022).
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -40,7 +40,7 @@ const paidDraft = async (gateway: TestGateway, memo: string) => {
 };
 
 describe("payment replay and conflicts", () => {
-	it("OR-20 the same payment for the same draft returns the same 201 without a second settlement", async () => {
+	test("the same payment for the same draft returns the same 201 without a second settlement", async () => {
 		const gateway = createTestGateway();
 		const { draftId, header, first } = await paidDraft(gateway, "first");
 		expect(first.headers.get("PAYMENT-RESPONSE")).not.toBeNull();
@@ -54,7 +54,7 @@ describe("payment replay and conflicts", () => {
 		expect(gateway.facilitator.calls.verify).toBe(1);
 	});
 
-	it("OR-21 a different payment for a paid draft answers 409 draft_paid before the facilitator", async () => {
+	test("a different payment for a paid draft answers 409 draft_paid before the facilitator", async () => {
 		const gateway = createTestGateway();
 		const { draftId, other, first } = await paidDraft(gateway, "first");
 		await expectJson(first, 201);
@@ -66,7 +66,7 @@ describe("payment replay and conflicts", () => {
 		expect(gateway.facilitator.calls).toEqual({ verify: 1, settle: 1 });
 	});
 
-	it("OR-22 the same payment for another draft answers 409 payment_reused and records nothing", async () => {
+	test("the same payment for another draft answers 409 payment_reused and records nothing", async () => {
 		const gateway = createTestGateway();
 		const { firm, header, first } = await paidDraft(gateway, "first");
 		await expectJson(first, 201);

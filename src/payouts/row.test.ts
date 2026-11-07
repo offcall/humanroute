@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { insertTasks, taskById } from "../tasks/index.js";
 import { createTestGateway, WALLETS } from "../testing/index.js";
 import { taskLedger } from "./ledger.js";
@@ -8,8 +8,8 @@ import { LegRole, PayoutKind } from "./taskTypes.js";
 const ABOVE_SAFE = BigInt(Number.MAX_SAFE_INTEGER) + 2n;
 const U64_MAX = 2n ** 64n - 1n;
 
-describe("NEW-17 large bigint amounts roundtrip SQLite and JSON without precision loss", () => {
-	it("keeps payout leg units above 2^53 and at u64 max exact", () => {
+describe("large bigint amounts roundtrip SQLite and JSON without precision loss", () => {
+	test("keeps payout leg units above 2^53 and at u64 max exact", () => {
 		const { database, clock } = createTestGateway();
 		const ledger = taskLedger(database);
 		const legs = [
@@ -41,7 +41,7 @@ describe("NEW-17 large bigint amounts roundtrip SQLite and JSON without precisio
 		expect(legsJson(legs)).toContain('"units":"18446744073709551615"');
 	});
 
-	it("keeps task prices above 2^53 exact", () => {
+	test("keeps task prices above 2^53 exact", () => {
 		const { database, clock } = createTestGateway();
 		const task = {
 			id: "task-1",
@@ -65,7 +65,7 @@ describe("NEW-17 large bigint amounts roundtrip SQLite and JSON without precisio
 		expect(taskById(database, "task-2")?.priceUnits).toBe(ABOVE_SAFE);
 	});
 
-	it.each([
+	test.each([
 		["negative", '"-1"'],
 		["fractional", '"1.5"'],
 		["non-numeric", '"abc"'],

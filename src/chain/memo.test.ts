@@ -1,11 +1,11 @@
-// NEW-03, adapter half: the paged memo search of ADR 0039. The worker and requeue halves are in
+// The paged memo search of ADR 0039. The worker and requeue halves are in
 // src/payouts/recover.test.ts and src/payouts/requeue.test.ts.
 import {
 	type ConfirmedSignatureInfo,
 	Connection,
 	Keypair,
 } from "@solana/web3.js";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { findMemo } from "./memo.js";
 import { ErrorKind } from "./types.js";
 
@@ -53,15 +53,15 @@ const search = (entries: ConfirmedSignatureInfo[]) => {
 
 const covered = (index: number) => info(index, { blockTime: OLDER });
 
-describe("NEW-03 memo lookup distinguishes a successful exact memo from misleading or incomplete history", () => {
-	it("ignores a failed transaction carrying the memo and a null memo", async () => {
+describe("memo lookup distinguishes a successful exact memo from misleading or incomplete history", () => {
+	test("ignores a failed transaction carrying the memo and a null memo", async () => {
 		const failed = info(1, { memo: MEMO, err: { InstructionError: [0, "x"] } });
 		const { result } = search([info(0), failed, covered(2)]);
 
 		expect(await result).toEqual({ ok: true, value: { state: "absent" } });
 	});
 
-	it("finds the memo in the RPC format [len] memo", async () => {
+	test("finds the memo in the RPC format [len] memo", async () => {
 		const hit = info(1, { memo: `[${MEMO.length}] ${MEMO}` });
 		const { result, pages } = search([info(0), hit, covered(2)]);
 
@@ -72,7 +72,7 @@ describe("NEW-03 memo lookup distinguishes a successful exact memo from misleadi
 		expect(pages).toHaveBeenCalledWith(hold, { limit: 1000 }, "confirmed");
 	});
 
-	it("finds a successful memo on the second page behind 1,000 newer signatures", async () => {
+	test("finds a successful memo on the second page behind 1,000 newer signatures", async () => {
 		const entries = [
 			...unrelated(1000),
 			info(1000, { memo: MEMO }),
@@ -92,7 +92,7 @@ describe("NEW-03 memo lookup distinguishes a successful exact memo from misleadi
 		);
 	});
 
-	it("is absent only once a block time is older than since minus 10 minutes", async () => {
+	test("is absent only once a block time is older than since minus 10 minutes", async () => {
 		const edge = info(1, { blockTime: SINCE / 1000 - 600 });
 		expect(await search([info(0), edge]).result).toEqual({
 			ok: true,
@@ -104,7 +104,7 @@ describe("NEW-03 memo lookup distinguishes a successful exact memo from misleadi
 		});
 	});
 
-	it.each([
+	test.each([
 		["10 full pages newer than since", unrelated(10_001)],
 		["a short page before coverage", unrelated(1500)],
 		[
@@ -123,14 +123,14 @@ describe("NEW-03 memo lookup distinguishes a successful exact memo from misleadi
 		expect(pages.mock.calls.length).toBeLessThanOrEqual(10);
 	});
 
-	it("stops after 10 pages", async () => {
+	test("stops after 10 pages", async () => {
 		const { result, pages } = search(unrelated(12_000));
 
 		expect(await result).toEqual({ ok: true, value: { state: "uncovered" } });
 		expect(pages).toHaveBeenCalledTimes(10);
 	});
 
-	it("reports an RPC error on any page as an error, not a decision", async () => {
+	test("reports an RPC error on any page as an error, not a decision", async () => {
 		const { conn, pages } = history(unrelated(2000));
 		pages.mockResolvedValueOnce(unrelated(1000));
 		pages.mockRejectedValueOnce(new Error("503 Service Unavailable"));

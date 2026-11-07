@@ -1,8 +1,8 @@
-// setup.mjs (ADR 0036) as a real child with a temp HOME: one key, a pinned config, no secret printed.
+// Setup.mjs (ADR 0036) as a real child with a temp HOME: one key, a pinned config, no secret printed.
 import { readFileSync, rmSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { Keypair } from "@solana/web3.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { runScript, SIGNER_CONFIG, tempHome } from "./agent-signer.js";
 
 const ARGS = [
@@ -18,7 +18,7 @@ const ARGS = [
 const modeOf = (path: string) => statSync(path).mode & 0o777;
 
 describe("agent key setup", () => {
-	it("CT-09 setup.mjs creates the agent key once and writes the pinned config", () => {
+	test("setup.mjs creates the agent key once and writes the pinned config", () => {
 		const home = tempHome();
 		const dir = join(home, ".humanroute");
 		const keyFile = join(dir, "agent-key.json");

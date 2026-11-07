@@ -1,5 +1,5 @@
 // New-task pushes (ADR 0029) with explicit NotifyDeps and a fake PushSender.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createTestGateway,
 	expectJson,
@@ -94,7 +94,7 @@ const endpoints = (names: string[]) =>
 	names.map((name) => device(name).endpoint).sort();
 
 describe("notifyNewTasks", () => {
-	it("NT-10 sends one push per new task to every subscribed device of every linguist with that pair", async () => {
+	test("sends one push per new task to every subscribed device of every linguist with that pair", async () => {
 		const scene = await setup(ok);
 		await notifyNewTasks(scene.deps)([
 			notice("task-es", "es"),
@@ -106,7 +106,7 @@ describe("notifyNewTasks", () => {
 		expect(scene.sent("task-fr")).toEqual(endpoints(["b1"]));
 	});
 
-	it("NT-11 the payload has task id, pair and claim deadline only, never the text or the price", async () => {
+	test("the payload has task id, pair and claim deadline only, never the text or the price", async () => {
 		const scene = await setup(ok);
 		await notifyNewTasks(scene.deps)([notice("task-fr", "fr")]);
 
@@ -119,7 +119,7 @@ describe("notifyNewTasks", () => {
 		});
 	});
 
-	it("NT-12 sends with TTL = claim window", async () => {
+	test("sends with TTL = claim window", async () => {
 		const scene = await setup(ok);
 		await notifyNewTasks({ ...scene.deps, claimWindowSeconds: 1800 })([
 			notice("task-fr", "fr"),
@@ -130,7 +130,7 @@ describe("notifyNewTasks", () => {
 		]);
 	});
 
-	it("NT-13 a gone subscription is deleted and other failures are logged with the task id", async () => {
+	test("a gone subscription is deleted and other failures are logged with the task id", async () => {
 		const scene = await setup(async (target) => {
 			if (target.endpoint === device("a1").endpoint) {
 				return { kind: "gone" };
@@ -153,7 +153,7 @@ describe("notifyNewTasks", () => {
 		]);
 	});
 
-	it("NT-14 one failing push does not stop the others", async () => {
+	test("one failing push does not stop the others", async () => {
 		let settled = 0;
 		let started = 0;
 		const scene = await setup(async (target) => {
@@ -181,7 +181,7 @@ describe("notifyNewTasks", () => {
 		expect(settled).toBe(2);
 	});
 
-	it("NT-15 push off sends nothing and /api/push/key answers {publicKey: null}", async () => {
+	test("push off sends nothing and /api/push/key answers {publicKey: null}", async () => {
 		const scene = await setup(ok);
 		await notifyNewTasks({ ...scene.deps, sender: null })([
 			notice("task-es", "es"),

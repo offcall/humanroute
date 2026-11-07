@@ -1,5 +1,5 @@
 // Browser: the pay page with a fake Phantom over the real gateway and the local chain.
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { txFacts, usdcOf } from "../support/chain.js";
 import { e2eEnv, firmKey, pollUntil } from "../support/env.js";
 import { FirmSlot } from "../support/firms.js";
@@ -26,7 +26,7 @@ describe("pay page", () => {
 	});
 	captureFailures(() => session);
 
-	it("BR-06 the pay page shows the total and one row per language, pays with Phantom and shows Paid and IN ESCROW with the explorer link", async () => {
+	test("the pay page shows the total and one row per language, pays with Phantom and shows Paid and IN ESCROW with the explorer link", async () => {
 		const env = e2eEnv();
 		const { page } = await session.role(firmKey(FirmSlot.BrowserPay));
 		const draft = await createDraft(firm.mcpToken, ["es", "fr", "de"]);
@@ -73,7 +73,7 @@ describe("pay page", () => {
 		expect(session.blocked).toEqual([]);
 	});
 
-	it("BR-08 a rejected Phantom signature shows that nothing was paid and offers Pay again", async () => {
+	test("a rejected Phantom signature shows that nothing was paid and offers Pay again", async () => {
 		const { page, phantom } = await session.role(firmKey(FirmSlot.BrowserPay));
 		const draft = await createDraft(firm.mcpToken, ["es"]);
 		const wallet = firm.key.publicKey.toBase58();

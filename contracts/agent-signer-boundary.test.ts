@@ -1,6 +1,6 @@
-// sign.mjs fails closed on framing and the fee policy (ADR 0040, finding 5). Valid messages come
+// Sign.mjs fails closed on framing and the fee policy (ADR 0040, finding 5). Valid messages come
 // from the gateway's own builder; every refusal is a real child run with a temp HOME.
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { WALLETS } from "../src/testing/index.js";
 import {
 	type AgentHome,
@@ -42,7 +42,7 @@ const withKeyCount = (prefix: number[]) => {
 	]);
 };
 
-describe("NEW-12 the signer rejects malformed framing", () => {
+describe("the signer rejects malformed framing", () => {
 	const valid = gatewayMessage();
 	const rows: [string, Buffer, string][] = [
 		["a truncated buffer (last byte cut)", valid.subarray(0, -1), MALFORMED],
@@ -122,14 +122,14 @@ describe("NEW-12 the signer rejects malformed framing", () => {
 		],
 	];
 
-	it.each(rows)(
+	test.each(rows)(
 		"%s → fail closed, zero signature output",
 		(_name, bytes, reason) => {
 			expectRefused(sign(bytes), reason);
 		},
 	);
 
-	it("NEW-12 non-canonical base64 → fail closed", () => {
+	test("non-canonical base64 → fail closed", () => {
 		const text = valid.toString("base64");
 		for (const encoded of [`${text}!`, text.replace(/=+$/, ""), ` ${text}`]) {
 			expectRefused(agent.sign(encoded), `${MALFORMED} not canonical base64`);
@@ -181,7 +181,7 @@ describe("NEW-12 the signer rejects malformed framing", () => {
 		],
 	];
 
-	it.each(files)("NEW-12 %s → bad key or config file", (_name, broken) => {
+	test.each(files)("%s → bad key or config file", (_name, broken) => {
 		const home = agentHome(broken);
 		try {
 			expectRefused(
@@ -194,15 +194,15 @@ describe("NEW-12 the signer rejects malformed framing", () => {
 	});
 });
 
-describe("CT-14 the signer refuses the agent key as fee payer, a signer count other than 2 and compute values outside the fee policy", () => {
-	it("CT-14 signs the gateway's own message (header 2,1,4; 8 keys; 367 bytes)", () => {
+describe("the signer refuses the agent key as fee payer, a signer count other than 2 and compute values outside the fee policy", () => {
+	test("signs the gateway's own message (header 2,1,4; 8 keys; 367 bytes)", () => {
 		const message = gatewayMessage();
 		expect([...message.subarray(1, 5)]).toEqual([2, 1, 4, 8]);
 		expect(message).toHaveLength(367);
 		expectSigned(sign(message), message);
 	});
 
-	it("CT-14 refuses the agent key as fee payer", () => {
+	test("refuses the agent key as fee payer", () => {
 		const agentPays = gatewayMessage({ feePayer: WALLETS.agent.address });
 		expectRefused(sign(agentPays), "the agent key must not pay the fee");
 	});
@@ -213,20 +213,17 @@ describe("CT-14 the signer refuses the agent key as fee payer, a signer count ot
 		["the agent key writable", 2, 0],
 	];
 
-	it.each(signerCounts)(
-		"CT-14 refuses %s",
-		(_name, required, readonlySigned) => {
-			const bytes = recompile(gatewayMessage(), (parts) => ({
-				...parts,
-				header: {
-					...parts.header,
-					numRequiredSignatures: required,
-					numReadonlySignedAccounts: readonlySigned,
-				},
-			}));
-			expectRefused(sign(bytes), NOT_OURS);
-		},
-	);
+	test.each(signerCounts)("refuses %s", (_name, required, readonlySigned) => {
+		const bytes = recompile(gatewayMessage(), (parts) => ({
+			...parts,
+			header: {
+				...parts.header,
+				numRequiredSignatures: required,
+				numReadonlySignedAccounts: readonlySigned,
+			},
+		}));
+		expectRefused(sign(bytes), NOT_OURS);
+	});
 
 	const limitTo = (units: number) =>
 		recompile(
@@ -239,7 +236,7 @@ describe("CT-14 the signer refuses the agent key as fee payer, a signer count ot
 			withInstruction(PRICE, dataOf(u64Data(3, microLamports))),
 		);
 
-	it("CT-14 compute limit: 40000 signed, 40001 refused", () => {
+	test("compute limit: 40000 signed, 40001 refused", () => {
 		const atCap = limitTo(40_000);
 		expectSigned(sign(atCap), atCap);
 		expectRefused(sign(limitTo(40_001)), "compute limit 40001 above 40000");
@@ -249,7 +246,7 @@ describe("CT-14 the signer refuses the agent key as fee payer, a signer count ot
 		);
 	});
 
-	it("CT-14 compute price: 1000 microlamports signed, 1001 refused", () => {
+	test("compute price: 1000 microlamports signed, 1001 refused", () => {
 		const atCap = priceTo(1000n);
 		expectSigned(sign(atCap), atCap);
 		expectRefused(sign(priceTo(1001n)), "compute price 1001 above 1000");

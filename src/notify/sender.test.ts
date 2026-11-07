@@ -1,6 +1,6 @@
 // The web-push adapter (ADR 0029) with sendNotification replaced: no network.
 
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import webpush from "web-push";
 import { createPushSender } from "./sender.js";
 
@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 describe("createPushSender", () => {
-	it("NT-12 sends with TTL, urgency high and the VAPID details", async () => {
+	test("sends with TTL, urgency high and the VAPID details", async () => {
 		const spy = vi
 			.spyOn(webpush, "sendNotification")
 			.mockResolvedValue({ statusCode: 201, body: "", headers: {} });
@@ -44,14 +44,14 @@ describe("createPushSender", () => {
 		);
 	});
 
-	it.each([404, 410])("NT-13 a WebPushError %i is gone", async (status) => {
+	test.each([404, 410])("a WebPushError %i is gone", async (status) => {
 		failWith(pushError(status, "expired"));
 		expect(await createPushSender(VAPID)(TARGET, "{}", 60)).toEqual({
 			kind: "gone",
 		});
 	});
 
-	it("NT-13 another WebPushError fails with its status and a short one-line reason", async () => {
+	test("another WebPushError fails with its status and a short one-line reason", async () => {
 		const body = `{"reason":\n  "BadJwtToken"}   ${"x".repeat(200)}`;
 		failWith(pushError(403, body));
 
@@ -61,7 +61,7 @@ describe("createPushSender", () => {
 		expect(outcome).toEqual({ kind: "failed", status: 403, reason });
 	});
 
-	it("NT-13 a non-WebPushError fails with status null", async () => {
+	test("a non-WebPushError fails with status null", async () => {
 		failWith(new Error("getaddrinfo ENOTFOUND"));
 		expect(await createPushSender(VAPID)(TARGET, "{}", 60)).toEqual({
 			kind: "failed",

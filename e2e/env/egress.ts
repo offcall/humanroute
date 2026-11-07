@@ -1,5 +1,5 @@
 // Loopback-only network for e2e processes (ADR 0038): any TCP connect or DNS lookup to a
-// non-loopback host is refused and appended to E2E_EGRESS_LOG, which EE-01 expects empty.
+// non-loopback host is refused and appended to E2E_EGRESS_LOG, which the environment test expects empty.
 // Child processes load it through egressPreload.ts; the e2e workers and the setup call it directly.
 import dns from "node:dns";
 import { appendFileSync } from "node:fs";

@@ -1,5 +1,5 @@
 // Draft intake and order reads (api.md, failure table rows 1-2, ADR 0022).
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -27,7 +27,7 @@ const postDraft = (gateway: TestGateway, token: string, body: unknown) =>
 	send(gateway.app, "POST", "/api/orders/draft", { bearer: token, body });
 
 describe("draft intake", () => {
-	it("OR-01 creates a draft priced task count × TASK_PRICE_USDC with a pay link under PUBLIC_BASE_URL", async () => {
+	test("creates a draft priced task count × TASK_PRICE_USDC with a pay link under PUBLIC_BASE_URL", async () => {
 		const gateway = createTestGateway();
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
 		const draft = await createDraft(gateway.app, firm.mcpToken, withTargets(3));
@@ -43,7 +43,7 @@ describe("draft intake", () => {
 		);
 	});
 
-	it("OR-02 refuses a draft without a Bearer token, with an unknown token, and with a firm session cookie instead of the MCP token (401)", async () => {
+	test("refuses a draft without a Bearer token, with an unknown token, and with a firm session cookie instead of the MCP token (401)", async () => {
 		const gateway = createTestGateway();
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
 		const path = "/api/orders/draft";
@@ -59,7 +59,7 @@ describe("draft intake", () => {
 	});
 });
 
-describe("OR-03T draft body and draft read refusals", () => {
+describe("draft body and draft read refusals", () => {
 	const refused: [string, unknown][] = [
 		["blank text", { ...LEAFLET, text: "" }],
 		["whitespace-only text", { ...LEAFLET, text: " \n\t " }],
@@ -83,8 +83,8 @@ describe("OR-03T draft body and draft read refusals", () => {
 		["array body", [LEAFLET]],
 		["string body", "hello"],
 	];
-	it.each(refused)(
-		"OR-03 refuses %s with 422 invalid_body",
+	test.each(refused)(
+		"refuses %s with 422 invalid_body",
 		async (_name, body) => {
 			const gateway = createTestGateway();
 			const firm = await registerFirm(gateway.app, WALLETS.firm);
@@ -102,13 +102,13 @@ describe("OR-03T draft body and draft read refusals", () => {
 		["object meta", { ...LEAFLET, meta: { ref: "7" } }],
 		["an empty target draft", { ...LEAFLET, targets: [target("es", "")] }],
 	];
-	it.each(accepted)("OR-03 accepts %s", async (_name, body) => {
+	test.each(accepted)("accepts %s", async (_name, body) => {
 		const gateway = createTestGateway();
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
 		await expectJson(await postDraft(gateway, firm.mcpToken, body), 201);
 	});
 
-	it("OR-04 answers 400 invalid_json for malformed JSON", async () => {
+	test("answers 400 invalid_json for malformed JSON", async () => {
 		const gateway = createTestGateway();
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
 		const res = await gateway.app.request("/api/orders/draft", {
@@ -138,7 +138,7 @@ describe("OR-03T draft body and draft read refusals", () => {
 	const readDraft = (gateway: TestGateway, draftId: string) =>
 		send(gateway.app, "GET", `/api/orders/draft/${draftId}`);
 
-	it("OR-05 the public draft read shows no autopay field and, once paid, the order id and each task's public state", async () => {
+	test("the public draft read shows no autopay field and, once paid, the order id and each task's public state", async () => {
 		const gateway = createTestGateway();
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
 		const draftId = textField(
@@ -169,7 +169,7 @@ describe("OR-03T draft body and draft read refusals", () => {
 		);
 	});
 
-	it("OR-06 hides an unknown draft and an unpaid draft at its TTL, never a paid one, without a chain read", async () => {
+	test("hides an unknown draft and an unpaid draft at its TTL, never a paid one, without a chain read", async () => {
 		const gateway = createTestGateway();
 		const ttl = gateway.config.draftTtlSeconds * 1000;
 		const { firm, draftId: paidId } = await paidOrder(gateway);
@@ -200,7 +200,7 @@ describe("OR-03T draft body and draft read refusals", () => {
 		expect(gateway.chain.calls.length).toBe(chainCalls);
 	});
 
-	it("OR-07a GET /api/orders lists only the cookie firm's own orders", async () => {
+	test("GET /api/orders lists only the cookie firm's own orders", async () => {
 		const gateway = createTestGateway();
 		const { firm, orderId } = await paidOrder(gateway);
 		const other = await registerFirm(gateway.app, WALLETS.agency);
@@ -220,7 +220,7 @@ describe("OR-03T draft body and draft read refusals", () => {
 		expect((await list({ cookie: linguist })).status).toBe(403);
 	});
 
-	it("OR-07b GET /api/orders/:id answers only the owning firm", async () => {
+	test("GET /api/orders/:id answers only the owning firm", async () => {
 		const gateway = createTestGateway();
 		const { firm, orderId } = await paidOrder(gateway);
 		const other = await registerFirm(gateway.app, WALLETS.agency);

@@ -1,6 +1,6 @@
 // POST /x/orders/:draftId refusals before and around the facilitator (failure table rows 3, 4, 16).
 import { FacilitatorResponseError } from "@x402/core/server";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -47,7 +47,7 @@ const withAmount = (header: string, amount: string): string => {
 };
 
 describe("pay route", () => {
-	it("OR-11 answers 404 for an unknown or expired draft without verify or settle", async () => {
+	test("answers 404 for an unknown or expired draft without verify or settle", async () => {
 		const gateway = createTestGateway();
 		const { draftId, header } = await draftWithPayment(gateway);
 		const unknown = await payDraft(gateway.app, "no-such-draft", header);
@@ -59,7 +59,7 @@ describe("pay route", () => {
 		expect(gateway.facilitator.calls).toEqual({ verify: 0, settle: 0 });
 	});
 
-	it("OR-12 answers 503 not_ready with reasons and Retry-After 30 while the preflight fails", async () => {
+	test("answers 503 not_ready with reasons and Retry-After 30 while the preflight fails", async () => {
 		const gateway = createTestGateway();
 		const { draftId, header } = await draftWithPayment(gateway);
 		gateway.problems.push("hold wallet needs at least 0.05 SOL for fees");
@@ -73,7 +73,7 @@ describe("pay route", () => {
 		expect(gateway.facilitator.calls).toEqual({ verify: 0, settle: 0 });
 	});
 
-	it("OR-13 refuses a payment whose accepted amount differs from the draft total before the facilitator", async () => {
+	test("refuses a payment whose accepted amount differs from the draft total before the facilitator", async () => {
 		const gateway = createTestGateway();
 		const { draftId, header } = await draftWithPayment(gateway);
 
@@ -87,7 +87,7 @@ describe("pay route", () => {
 		expectNothingRecorded(gateway);
 	});
 
-	it("OR-14 answers 402 and records nothing when verify says invalid", async () => {
+	test("answers 402 and records nothing when verify says invalid", async () => {
 		const gateway = createTestGateway();
 		const { draftId, header } = await draftWithPayment(gateway);
 		gateway.facilitator.answer.verify = async () => ({
@@ -101,7 +101,7 @@ describe("pay route", () => {
 		expectNothingRecorded(gateway);
 	});
 
-	it("OR-15 answers 402 and records nothing when settle returns success false", async () => {
+	test("answers 402 and records nothing when settle returns success false", async () => {
 		const gateway = createTestGateway();
 		const { draftId, header } = await draftWithPayment(gateway);
 		gateway.facilitator.answer.settle = async () => ({
@@ -117,7 +117,7 @@ describe("pay route", () => {
 		expectNothingRecorded(gateway);
 	});
 
-	it("OR-16 a facilitator error during settlement answers 502 without orphan_payment and the draft can be paid again", async () => {
+	test("a facilitator error during settlement answers 502 without orphan_payment and the draft can be paid again", async () => {
 		vi.spyOn(console, "error").mockImplementation(() => {});
 		const gateway = createTestGateway();
 		const { draftId, header } = await draftWithPayment(gateway);

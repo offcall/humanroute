@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import { encodePaymentRequiredHeader } from "@x402/core/http";
 import { SOLANA_DEVNET_CAIP2 } from "@x402/svm";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { SessionProvider } from "../shared";
 import { PayPage } from "./PayPage";
 import { phantomError } from "./phantomError";
@@ -168,8 +168,8 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-describe("WEB-01 the pay page never offers Pay again after an unknown outcome", () => {
-	it.each([
+describe("the pay page never offers Pay again after an unknown outcome", () => {
+	test.each([
 		["payment aborted after signing", networkError],
 		["generic post-send 5xx", async () => json(500, { error: "internal" })],
 		[
@@ -189,7 +189,7 @@ describe("WEB-01 the pay page never offers Pay again after an unknown outcome", 
 		},
 	);
 
-	it("a check that finds the draft paid shows the paid state", async () => {
+	test("a check that finds the draft paid shows the paid state", async () => {
 		const gateway = { draftState: "draft", paid: networkError };
 		await payOnce(gateway);
 		gateway.draftState = "paid";
@@ -201,7 +201,7 @@ describe("WEB-01 the pay page never offers Pay again after an unknown outcome", 
 	});
 
 	// Known outcomes keep their own next step (reload, copy draft id, firm cabinet).
-	it.each([
+	test.each([
 		["201 unreadable body", async () => json(201, { orderId: 7 }), "Reload"],
 		[
 			"orphan_payment",
@@ -216,7 +216,7 @@ describe("WEB-01 the pay page never offers Pay again after an unknown outcome", 
 		expect(screen.getByText(new RegExp(next))).toBeTruthy();
 	});
 
-	it.each([
+	test.each([
 		["Phantom 4001 cancel", true, networkError],
 		["402 refusal", false, async () => json(402, { error: "invalid_payment" })],
 	])("%s still offers Pay again", async (_row, cancel, paid) => {

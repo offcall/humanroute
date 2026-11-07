@@ -1,5 +1,5 @@
 // What a paid order records: tasks, deadlines, payer and refund wallet (ADR 0022, ADR 0036).
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { tasksByOrder } from "../tasks/index.js";
 import {
 	createDraft,
@@ -45,7 +45,7 @@ const payAs = async (gateway: TestGateway, payer: TestWallet) => {
 };
 
 describe("recorded order", () => {
-	it("OR-26 a paid order creates N open tasks with claim deadline = payment time + claim window and refund wallet = firm login wallet", async () => {
+	test("a paid order creates N open tasks with claim deadline = payment time + claim window and refund wallet = firm login wallet", async () => {
 		const gateway = createTestGateway();
 		const { paidAt, tasks } = await payAs(gateway, WALLETS.firm);
 		const deadline = paidAt + gateway.config.claimWindowSeconds * 1000;
@@ -59,7 +59,7 @@ describe("recorded order", () => {
 		}
 	});
 
-	it("OR-27 an auto-pay order stores the delegate as payer while refunds still go to the firm wallet", async () => {
+	test("an auto-pay order stores the delegate as payer while refunds still go to the firm wallet", async () => {
 		const gateway = createTestGateway();
 		settledBy(gateway, WALLETS.agent);
 		const { orderId, tasks } = await payAs(gateway, WALLETS.agent);
@@ -73,7 +73,7 @@ describe("recorded order", () => {
 		}
 	});
 
-	it("NEW-22 a pay-link payer different from the firm's login wallet still refunds the firm", async () => {
+	test("a pay-link payer different from the firm's login wallet still refunds the firm", async () => {
 		const gateway = createTestGateway();
 		const friend = testWallet(9);
 		settledBy(gateway, friend);

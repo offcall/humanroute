@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { draftStatus, orderTask, paidWith, unpaid } from "./fakes.js";
 import {
 	changesSince,
@@ -13,14 +13,14 @@ const { Open, Claimed, Submitted, PayingOut, Refunding, PaidOut, Refunded } =
 	PublicState;
 
 describe("status", () => {
-	it("MC-01 fingerprint is the draft state before payment and paid;<lang>=<state> sorted by language after", () => {
+	test("fingerprint is the draft state before payment and paid;<lang>=<state> sorted by language after", () => {
 		expect(fingerprint(unpaid())).toBe("draft");
 		expect(
 			fingerprint(paidWith(orderTask("fr", Open), orderTask("de", Claimed))),
 		).toBe("paid;de=claimed;fr=open");
 	});
 
-	it("MC-02 changesSince lists the order change and each moved language", () => {
+	test("changesSince lists the order change and each moved language", () => {
 		const snapshot = paidWith(orderTask("de", Claimed), orderTask("fr", Open));
 
 		expect(changesSince("draft", snapshot)).toEqual([
@@ -48,7 +48,7 @@ describe("status", () => {
 		]);
 	});
 
-	it("MC-03 onlyTransient is true only when every change ends in paying_out or refunding", () => {
+	test("onlyTransient is true only when every change ends in paying_out or refunding", () => {
 		expect(onlyTransient([])).toBe(true);
 		expect(
 			onlyTransient(["de: submitted -> paying_out", "fr: open -> refunding"]),
@@ -60,7 +60,7 @@ describe("status", () => {
 		expect(onlyTransient(["de: paying_out -> paid_out"])).toBe(false);
 	});
 
-	it("MC-04 isSettled is true only when every language is paid_out or refunded", () => {
+	test("isSettled is true only when every language is paid_out or refunded", () => {
 		expect(isSettled(undefined)).toBe(false);
 		expect(
 			isSettled(
@@ -78,7 +78,7 @@ describe("status", () => {
 		expect(isSettled(paidWith().order)).toBe(true);
 	});
 
-	it("MC-05 progressLine shows the pay link while unpaid and the language states after", () => {
+	test("progressLine shows the pay link while unpaid and the language states after", () => {
 		expect(progressLine(unpaid())).toBe(
 			"awaiting payment: https://gateway.test/pay/drf_1",
 		);

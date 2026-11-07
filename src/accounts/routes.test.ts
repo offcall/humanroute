@@ -1,5 +1,5 @@
 // Firm, agency and linguist registration through the cabinet routes (ADR 0020, 0021, 0033).
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createTestGateway,
 	expectJson,
@@ -21,7 +21,7 @@ const pairs = (count: number) =>
 	}));
 
 describe("accounts routes", () => {
-	it("AC-01 /api/me lists every role of the wallet; 401 without session", async () => {
+	test("/api/me lists every role of the wallet; 401 without session", async () => {
 		const { app } = createTestGateway();
 		expect((await send(app, "GET", "/api/me")).status).toBe(401);
 
@@ -48,7 +48,7 @@ describe("accounts routes", () => {
 		});
 	});
 
-	it("AC-02 one firm per wallet; the MCP URL and token come back and GET /api/firm shows the same token", async () => {
+	test("one firm per wallet; the MCP URL and token come back and GET /api/firm shows the same token", async () => {
 		const { app, config } = createTestGateway();
 		const cookie = await signIn(app, WALLETS.firm);
 		const created = await expectJson(
@@ -72,7 +72,7 @@ describe("accounts routes", () => {
 		expect(await expectJson(again, 409)).toEqual({ error: "firm_exists" });
 	});
 
-	it("AC-03 one agency per wallet; the invite is created once and reused under PUBLIC_BASE_URL", async () => {
+	test("one agency per wallet; the invite is created once and reused under PUBLIC_BASE_URL", async () => {
 		const { app, config } = createTestGateway();
 		const agency = await registerAgency(app, WALLETS.agency);
 		const { cookie } = agency;
@@ -97,7 +97,7 @@ describe("accounts routes", () => {
 		expect(await expectJson(again, 409)).toEqual({ error: "agency_exists" });
 	});
 
-	it("AC-04 the invite preview shows the agency name without a session; an unknown code answers 404", async () => {
+	test("the invite preview shows the agency name without a session; an unknown code answers 404", async () => {
 		const { app } = createTestGateway();
 		const agency = await registerAgency(app, WALLETS.agency);
 
@@ -114,7 +114,7 @@ describe("accounts routes", () => {
 		expect(await expectJson(unknown, 404)).toEqual({ error: "not_found" });
 	});
 
-	it("AC-05 joining twice with the same invite is fine; joining another agency answers 409 already_in_agency", async () => {
+	test("joining twice with the same invite is fine; joining another agency answers 409 already_in_agency", async () => {
 		const { app } = createTestGateway();
 		const first = await registerAgency(app, WALLETS.agency);
 		const other = await registerAgency(app, testWallet(40));
@@ -133,7 +133,7 @@ describe("accounts routes", () => {
 	});
 });
 
-describe("AC-06T account body parsing", () => {
+describe("account body parsing", () => {
 	const linguist = async () => {
 		const gateway = createTestGateway();
 		const agency = await registerAgency(gateway.app, WALLETS.agency);
@@ -148,17 +148,17 @@ describe("AC-06T account body parsing", () => {
 		return { ...gateway, cookie, put };
 	};
 
-	it.each([
+	test.each([
 		["1 pair", pairs(1), 1],
 		["10 pairs", pairs(10), 10],
-	])("AC-06 accepts %s", async (_, list, count) => {
+	])("accepts %s", async (_, list, count) => {
 		const { put } = await linguist();
 		const body = await expectJson(await put({ pairs: list }), 200);
 		expect(body.pairs).toEqual(list);
 		expect(list).toHaveLength(count);
 	});
 
-	it.each([
+	test.each([
 		["11 pairs", pairs(11)],
 		["11 raw duplicates", Array.from({ length: 11 }, () => pairs(1)[0])],
 		["no pairs", []],
@@ -166,14 +166,14 @@ describe("AC-06T account body parsing", () => {
 		["three letters", [{ source: "eng", target: "es" }]],
 		["source = target", [{ source: "en", target: "en" }]],
 		["not an object", ["en-es"]],
-	])("AC-06 refuses %s with 422", async (_, list) => {
+	])("refuses %s with 422", async (_, list) => {
 		const { put } = await linguist();
 		expect(await expectJson(await put({ pairs: list }), 422)).toEqual({
 			error: "invalid_body",
 		});
 	});
 
-	it("AC-06 drops valid duplicates and replaces the pairs as a whole", async () => {
+	test("drops valid duplicates and replaces the pairs as a whole", async () => {
 		const { put } = await linguist();
 		const es = { source: "en", target: "es" };
 		const body = await expectJson(
@@ -183,7 +183,7 @@ describe("AC-06T account body parsing", () => {
 		expect(body.pairs).toEqual([es, { source: "en", target: "it" }]);
 	});
 
-	it("AC-06 non-JSON is 400 and a non-linguist is 403", async () => {
+	test("non-JSON is 400 and a non-linguist is 403", async () => {
 		const { app, cookie } = await linguist();
 		const raw = await app.request("/api/linguist/languages", {
 			method: "PUT",
@@ -201,10 +201,10 @@ describe("AC-06T account body parsing", () => {
 		expect(await expectJson(res, 403)).toEqual({ error: "forbidden" });
 	});
 
-	it.each([
+	test.each([
 		["/api/firm", "firm"],
 		["/api/agency", "agency"],
-	])("AC-07 %s names are trimmed and 1..100 chars", async (path, key) => {
+	])("%s names are trimmed and 1..100 chars", async (path, key) => {
 		const { app } = createTestGateway();
 		const register = async (wallet: number, name: unknown) =>
 			send(app, "POST", path, {

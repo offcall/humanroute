@@ -1,6 +1,6 @@
 // Order money path on real processes (reproduces scripts/e2e-flow.ts): payment, payout split,
 // rejection refund, payment replay. Every case builds its own fixture.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { ataExists, txFacts, usdcOf } from "./support/chain.js";
 import { e2eEnv } from "./support/env.js";
 import { FirmSlot } from "./support/firms.js";
@@ -18,7 +18,7 @@ const PRICE = 500_000n;
 const ATA_PROGRAM = "spl-associated-token-account";
 
 describe("order flow", () => {
-	it("EE-11 three roles register and a draft for es, fr and de is paid with one x402 payment", async () => {
+	test("three roles register and a draft for es, fr and de is paid with one x402 payment", async () => {
 		const env = e2eEnv();
 		const firm = await firmAt(FirmSlot.OrderPaid);
 		await team();
@@ -40,7 +40,7 @@ describe("order flow", () => {
 		expect(order.tasks.every((task) => task.state === "open")).toBe(true);
 	});
 
-	it("EE-13 approving a claimed and submitted task sends one transaction with the split and creates missing ATAs", async () => {
+	test("approving a claimed and submitted task sends one transaction with the split and creates missing ATAs", async () => {
 		const env = e2eEnv();
 		const firm = await firmAt(FirmSlot.OrderDecisions);
 		const { agency, linguist } = await team();
@@ -71,7 +71,7 @@ describe("order flow", () => {
 		expect(await ataExists(agencyWallet)).toBe(true);
 	});
 
-	it("EE-14 rejecting refunds 0.50 to the firm wallet with memo :rejected", async () => {
+	test("rejecting refunds 0.50 to the firm wallet with memo :rejected", async () => {
 		const firm = await firmAt(FirmSlot.OrderDecisions);
 		const { linguist } = await team();
 		const order = await paidOrder(firm, ["fr"]);
@@ -89,7 +89,7 @@ describe("order flow", () => {
 		expect(facts.memos).toContain(`hr:${taskId}:rejected`);
 	});
 
-	it("EE-18 the same payment again returns the same order and a second payment for the paid draft is refused without a charge", async () => {
+	test("the same payment again returns the same order and a second payment for the paid draft is refused without a charge", async () => {
 		const firm = await firmAt(FirmSlot.OrderReplay);
 		const wallet = firm.key.publicKey.toBase58();
 		const draft = await createDraft(firm.mcpToken, ["es", "de"]);

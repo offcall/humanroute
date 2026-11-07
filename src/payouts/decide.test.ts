@@ -1,5 +1,5 @@
 import type { Hono } from "hono";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { TransferStatus } from "../store/index.js";
 import { taskById } from "../tasks/index.js";
 import {
@@ -98,7 +98,7 @@ const signing = (gateway: TestGateway) =>
 	);
 
 describe("payout decisions", () => {
-	it("PO-10 approving writes one pending payout to the wallets snapshotted at claim and FEE_WALLET with memo hr:<taskId>", async () => {
+	test("approving writes one pending payout to the wallets snapshotted at claim and FEE_WALLET with memo hr:<taskId>", async () => {
 		const gateway = createTestGateway();
 		const { app, database } = gateway;
 		const { firm, linguist } = await people(app);
@@ -143,7 +143,7 @@ describe("payout decisions", () => {
 		expect(signing(gateway)).toEqual([]);
 	});
 
-	it("PO-11 rejecting writes one pending refund of the full price to the firm's login wallet with memo :rejected", async () => {
+	test("rejecting writes one pending refund of the full price to the firm's login wallet with memo :rejected", async () => {
 		const gateway = createTestGateway();
 		const { app, database } = gateway;
 		payAsAgent(gateway);
@@ -168,7 +168,7 @@ describe("payout decisions", () => {
 		expect(signing(gateway)).toEqual([]);
 	});
 
-	it("PO-13 the decision rolls back when its transfer cannot be written", async () => {
+	test("the decision rolls back when its transfer cannot be written", async () => {
 		const gateway = createTestGateway();
 		const { app, database } = gateway;
 		const { firm, linguist } = await people(app);
@@ -192,7 +192,7 @@ describe("payout decisions", () => {
 		expect(all).toEqual([{ id: "pre-1" }]);
 	});
 
-	it("PO-14 an open task is refunded as :unclaimed at its claim deadline and a later claim answers 409 claim_closed", async () => {
+	test("an open task is refunded as :unclaimed at its claim deadline and a later claim answers 409 claim_closed", async () => {
 		const gateway = createTestGateway();
 		const { app, database, clock, worker } = gateway;
 		payAsAgent(gateway);
@@ -228,7 +228,7 @@ describe("payout decisions", () => {
 		);
 	});
 
-	it("PO-16 expiry refunds are recorded even while the preflight fails", async () => {
+	test("expiry refunds are recorded even while the preflight fails", async () => {
 		const gateway = createTestGateway();
 		const { app, database, clock, worker } = gateway;
 		const { firm, linguist } = await people(app);
@@ -251,7 +251,7 @@ describe("payout decisions", () => {
 		expect(signing(gateway)).toEqual([]);
 	});
 
-	describe("PO-17 publicState stays paying_out or refunding until the transfer is confirmed", () => {
+	describe("publicState stays paying_out or refunding until the transfer is confirmed", () => {
 		const decided = async () => {
 			const gateway = createTestGateway();
 			const { app, clock, worker } = gateway;
@@ -284,7 +284,7 @@ describe("payout decisions", () => {
 		};
 
 		const rows = ["null", "pending", "sent", "failed", "confirmed"];
-		it.each(rows)("transfer %s", async (status) => {
+		test.each(rows)("transfer %s", async (status) => {
 			const { gateway, firm, tasks } = await decided();
 			for (const [state, taskId] of Object.entries(tasks)) {
 				const { database } = gateway;

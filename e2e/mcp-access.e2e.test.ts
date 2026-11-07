@@ -1,5 +1,5 @@
-// EE-24: the MCP server needs a Bearer token and the gateway, not MCP, decides what it may do.
-import { describe, expect, it } from "vitest";
+// The MCP server needs a Bearer token and the gateway, not MCP, decides what it may do.
+import { describe, expect, test } from "vitest";
 import { e2eEnv } from "./support/env.js";
 import { FirmSlot } from "./support/firms.js";
 import { firmAt, team } from "./support/fixture.js";
@@ -19,7 +19,7 @@ const SEVEN_TOOLS = [
 ];
 
 describe("MCP token", () => {
-	it("EE-24 MCP needs a Bearer token and the gateway checks it", async () => {
+	test("MCP needs a Bearer token and the gateway checks it", async () => {
 		const res = await fetch(e2eEnv().mcpUrl, {
 			method: "POST",
 			headers: {

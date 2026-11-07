@@ -3,7 +3,7 @@ import { chmodSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Keypair } from "@solana/web3.js";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import { readKeypair } from "./keypair.js";
 
 const seeded = Keypair.fromSeed(new Uint8Array(32).fill(9));
@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 describe("readKeypair", () => {
-	it("CF-08 refuses an unsafe or invalid key file and never echoes the secret", () => {
+	test("refuses an unsafe or invalid key file and never echoes the secret", () => {
 		const mismatched = [...SECRET.slice(0, 32), ...new Array(32).fill(1)];
 		const refused: [string, string][] = [
 			["group-readable", keyFile(JSON.stringify(SECRET), 0o640)],

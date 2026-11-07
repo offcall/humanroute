@@ -1,5 +1,5 @@
 import { VersionedTransaction } from "@solana/web3.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { AGENT, offerFor, signMessage, unsignedFor } from "./fakePayment.js";
 import { nth } from "./fakes.js";
 import type { Prepared } from "./payTypes.js";
@@ -13,7 +13,7 @@ const preparedOf = (extra: Partial<Prepared> = {}): Prepared => ({
 });
 
 describe("signedTransaction", () => {
-	it("puts a valid signature into the agent's slot", () => {
+	test("puts a valid signature into the agent's slot", () => {
 		const prepared = preparedOf();
 		const signature = signMessage(prepared.message);
 
@@ -34,7 +34,7 @@ describe("signedTransaction", () => {
 		);
 	});
 
-	it("NEW-13 a signature over one message cannot be attached to a different prepared transaction", () => {
+	test("a signature over one message cannot be attached to a different prepared transaction", () => {
 		const signedMessage = unsignedFor("2000000").message;
 		const otherTransaction = unsignedFor("9000000").transaction;
 		const prepared = preparedOf({
@@ -50,7 +50,7 @@ describe("signedTransaction", () => {
 		});
 	});
 
-	it.each([
+	test.each([
 		["a malformed signer key", { signer: "not-a-key" }],
 		["a malformed transaction", { transaction: "AAAA" }],
 		[
@@ -62,7 +62,7 @@ describe("signedTransaction", () => {
 				),
 			},
 		],
-	])("NEW-13 %s gives a typed refusal, not an exception", (_name, extra) => {
+	])("%s gives a typed refusal, not an exception", (_name, extra) => {
 		const prepared = preparedOf(extra);
 
 		const signed = signedTransaction(prepared, signMessage(prepared.message));

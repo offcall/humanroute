@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { ErrorKind, type SignatureStatus } from "../chain/index.js";
 import { TransferStatus } from "../store/index.js";
 import {
@@ -73,7 +73,7 @@ const setup = (broadcast = true, attempts = 0) => {
 const refused = (reason: string) => ({ outcome: "refused", reason });
 
 describe("operator requeue", () => {
-	it("PO-40 refuses an unknown id and a transfer that is not failed", async () => {
+	test("refuses an unknown id and a transfer that is not failed", async () => {
 		const gateway = setup();
 		expect(await gateway.requeue("nope")).toEqual(
 			refused("no transfer with id or task id nope"),
@@ -110,7 +110,7 @@ describe("operator requeue", () => {
 		expect(fresh.chain.calls).toEqual([]);
 	});
 
-	it("PO-41 requeues a failed transfer that was never broadcast", async () => {
+	test("requeues a failed transfer that was never broadcast", async () => {
 		const gateway = setup(false);
 		const result = await gateway.requeue();
 
@@ -128,8 +128,8 @@ describe("operator requeue", () => {
 		["confirmed", { state: "confirmed" }],
 		["failed on chain", { state: "failed", error: "{}" }],
 	];
-	it.each(known)(
-		"PO-42 refuses while the chain knows the old signature (%s)",
+	test.each(known)(
+		"refuses while the chain knows the old signature (%s)",
 		async (_name, status) => {
 			const gateway = setup();
 			gateway.chain.answer.signatureStatus = async () => chainOk(status);
@@ -142,8 +142,8 @@ describe("operator requeue", () => {
 		},
 	);
 
-	it.each([LAST_VALID, LAST_VALID - 1])(
-		"PO-43 refuses while the old blockhash can still land (height %i)",
+	test.each([LAST_VALID, LAST_VALID - 1])(
+		"refuses while the old blockhash can still land (height %i)",
 		async (at) => {
 			const gateway = setup();
 			gateway.chain.answer.blockHeight = async () => chainOk(at);
@@ -158,7 +158,7 @@ describe("operator requeue", () => {
 		},
 	);
 
-	it("PO-44 refuses when a hold transaction already carries the memo", async () => {
+	test("refuses when a hold transaction already carries the memo", async () => {
 		const gateway = setup();
 		gateway.chain.answer.findMemo = async () =>
 			chainOk({ state: "found", signature: "memo-sig" });
@@ -169,7 +169,7 @@ describe("operator requeue", () => {
 		expect(gateway.row()).toEqual(gateway.before);
 	});
 
-	it("PO-45 requeues when the signature is unknown, the blockhash expired and no memo exists", async () => {
+	test("requeues when the signature is unknown, the blockhash expired and no memo exists", async () => {
 		const gateway = setup(true, 3);
 		gateway.clock.advance(100_000);
 		const result = await gateway.requeue();
@@ -196,7 +196,7 @@ describe("operator requeue", () => {
 		expect(gateway.count("signPayout")).toBe(1);
 	});
 
-	it("PO-46 finds the transfer by task id as well as by transfer id", async () => {
+	test("finds the transfer by task id as well as by transfer id", async () => {
 		const gateway = setup(false);
 		const result = await gateway.requeue(TASK_ID);
 
@@ -206,8 +206,8 @@ describe("operator requeue", () => {
 		});
 	});
 
-	it.each(["signatureStatus", "blockHeight", "findMemo"])(
-		"PO-47 reports an RPC failure as an error and changes nothing (%s)",
+	test.each(["signatureStatus", "blockHeight", "findMemo"])(
+		"reports an RPC failure as an error and changes nothing (%s)",
 		async (method) => {
 			const gateway = setup();
 			const down = chainFail(ErrorKind.Retryable, "fetch failed");
@@ -227,7 +227,7 @@ describe("operator requeue", () => {
 		},
 	);
 
-	it("NEW-15 requeue refuses incomplete metadata and a row changed during investigation", async () => {
+	test("requeue refuses incomplete metadata and a row changed during investigation", async () => {
 		const gateway = setup();
 		gateway.database
 			.prepare(
@@ -250,7 +250,7 @@ describe("operator requeue", () => {
 		expect(raced.count("signPayout")).toBe(0);
 	});
 
-	it("NEW-03 memo lookup distinguishes a successful exact memo from misleading or incomplete history (requeue refuses an uncovered history)", async () => {
+	test("memo lookup distinguishes a successful exact memo from misleading or incomplete history (requeue refuses an uncovered history)", async () => {
 		const gateway = setup();
 		gateway.chain.answer.findMemo = async () => chainOk({ state: "uncovered" });
 

@@ -1,5 +1,5 @@
 // POST /api/tasks/:id/submit (ADR 0023): failure table rows 20 (late) and the result bounds.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -77,7 +77,7 @@ const transfers = (scene: Scene) =>
 		.all(scene.taskId);
 
 describe("submit", () => {
-	it("TK-20 the claimer submits a result before the work deadline", async () => {
+	test("the claimer submits a result before the work deadline", async () => {
 		const scene = await claimedTask();
 		scene.clock.advance(WORK_WINDOW_MS - 1);
 		const result = "  Tome un comprimido.\n";
@@ -87,7 +87,7 @@ describe("submit", () => {
 		expect(transfers(scene)).toEqual([]);
 	});
 
-	it("TK-21 a submit at or after the work deadline answers 409 late and the task is refunded as :late", async () => {
+	test("a submit at or after the work deadline answers 409 late and the task is refunded as :late", async () => {
 		const scene = await claimedTask();
 		scene.clock.advance(WORK_WINDOW_MS);
 		const late = { error: "late" };
@@ -121,7 +121,7 @@ describe("submit", () => {
 		]);
 	});
 
-	it("TK-22 a submit by another linguist answers 403", async () => {
+	test("a submit by another linguist answers 403", async () => {
 		const scene = await claimedTask();
 		const agency = await registerAgency(scene.app, testWallet(31));
 		const other = await joinLinguist(
@@ -135,17 +135,17 @@ describe("submit", () => {
 		expect(await expectJson(res, 403)).toEqual({ error: "forbidden" });
 	});
 
-	it.each([
+	test.each([
 		["empty", ""],
 		["whitespace-only", " \n\t "],
 		["over 20000 characters", "x".repeat(20_001)],
-	])("TK-23 a %s result answers 422 invalid_body", async (_name, result) => {
+	])("a %s result answers 422 invalid_body", async (_name, result) => {
 		const scene = await claimedTask();
 		const res = await submit(scene, { result });
 		expect(await expectJson(res, 422)).toEqual({ error: "invalid_body" });
 	});
 
-	it("TK-24 a second submit answers 409 bad_state", async () => {
+	test("a second submit answers 409 bad_state", async () => {
 		const scene = await claimedTask();
 		await expectJson(await submit(scene, { result: "Hola" }), 200);
 		const again = await submit(scene, { result: "Hola de nuevo" });

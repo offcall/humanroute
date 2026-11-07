@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE_DIRS = [
@@ -152,7 +152,7 @@ const show = (edges: Edge[]): string[] =>
 	edges.map((edge) => `${edge.from} -> ${edge.to}`);
 
 describe("architecture (ADR 0019, ADR 0037)", () => {
-	it("AR-00 the walk sees the gateway, clients and tests", () => {
+	test("the walk sees the gateway, clients and tests", () => {
 		const froms = new Set(EDGES.map((edge) => edge.from.split("/")[0]));
 		expect([...froms].sort()).toEqual(
 			expect.arrayContaining(["contracts", "mcp", "src", "web"]),
@@ -160,7 +160,7 @@ describe("architecture (ADR 0019, ADR 0037)", () => {
 		expect(EDGES.length).toBeGreaterThan(300);
 	});
 
-	it("AR-01 slices import each other only through index.ts", () => {
+	test("slices import each other only through index.ts", () => {
 		const crossing = EDGES.filter((edge) => {
 			const from = under(edge.from, "src") ? sliceOf(edge.from) : null;
 			const to = sliceOf(edge.to);
@@ -172,7 +172,7 @@ describe("architecture (ADR 0019, ADR 0037)", () => {
 		expect(show(crossing)).toEqual([]);
 	});
 
-	it("AR-02 only the import edges listed in ADR 0019 exist between slices", () => {
+	test("only the import edges listed in ADR 0019 exist between slices", () => {
 		const forbidden = EDGES.filter((edge) => {
 			const from = sliceOf(edge.from);
 			const to = sliceOf(edge.to);
@@ -200,7 +200,7 @@ describe("architecture (ADR 0019, ADR 0037)", () => {
 		).toBe(true);
 	});
 
-	it("AR-03 src never imports clients or tests, and clients import only types from src/<slice>/index.ts", () => {
+	test("src never imports clients or tests, and clients import only types from src/<slice>/index.ts", () => {
 		const outward = EDGES.filter(
 			(edge) =>
 				under(edge.from, "src") &&
@@ -221,7 +221,7 @@ describe("architecture (ADR 0019, ADR 0037)", () => {
 		expect(show(clientIn)).toEqual([]);
 	});
 
-	it("AR-04 production code never imports src/testing or test files", () => {
+	test("production code never imports src/testing or test files", () => {
 		const leaks = EDGES.filter(
 			(edge) =>
 				isProduction(edge.from) &&

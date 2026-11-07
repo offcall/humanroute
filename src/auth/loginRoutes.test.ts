@@ -1,6 +1,6 @@
 // Sign-in via approve in Phantom (ADR 0034): create, approve, reject, claim.
 import { createHash } from "node:crypto";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { openStore } from "../store/index.js";
 import {
 	expectJson,
@@ -81,8 +81,8 @@ const nonceUsed = (ctx: Ctx, nonce: string): unknown =>
 		.pluck()
 		.get(nonce);
 
-describe("AU-20T sign-in via approve in Phantom (ADR 0034)", () => {
-	it("AU-20 the login request sets a 120 s HttpOnly Lax cookie on the login path and stores only the hash", async () => {
+describe("sign-in via approve in Phantom (ADR 0034)", () => {
+	test("the login request sets a 120 s HttpOnly Lax cookie on the login path and stores only the hash", async () => {
 		const ctx = login();
 		const { id, secret, res, body } = await create(ctx);
 		const line = cookieLine(res, "hr_login") ?? "";
@@ -103,7 +103,7 @@ describe("AU-20T sign-in via approve in Phantom (ADR 0034)", () => {
 		expect(cookieLine(https.res, "hr_login")).toContain("Secure");
 	});
 
-	it("AU-21 AU-22 claim waits until approve, then signs in once and is gone", async () => {
+	test("claim waits until approve, then signs in once and is gone", async () => {
 		const ctx = login();
 		const { id, cookie } = await create(ctx);
 		const waiting = await claim(ctx, id, cookie);
@@ -124,7 +124,7 @@ describe("AU-20T sign-in via approve in Phantom (ADR 0034)", () => {
 		expect((await claim(ctx, id, cookie)).status).toBe(410);
 	});
 
-	it("AU-23 claim with another browser's secret or none answers 410", async () => {
+	test("claim with another browser's secret or none answers 410", async () => {
 		const ctx = login();
 		const mine = await create(ctx);
 		const other = await create(ctx);
@@ -135,7 +135,7 @@ describe("AU-20T sign-in via approve in Phantom (ADR 0034)", () => {
 		expect((await claim(ctx, mine.id, mine.cookie)).status).toBe(200);
 	});
 
-	it("AU-24 approve with a bad SIWS proof answers 401 and the request stays pending", async () => {
+	test("approve with a bad SIWS proof answers 401 and the request stays pending", async () => {
 		const ctx = login();
 		const { id, cookie } = await create(ctx);
 		const signed = await proof(ctx);
@@ -148,7 +148,7 @@ describe("AU-20T sign-in via approve in Phantom (ADR 0034)", () => {
 		expect((await claim(ctx, id, cookie)).status).toBe(202);
 	});
 
-	it("AU-25 AU-27 approve again or after reject answers 409, a replayed proof 401, and expiry 410", async () => {
+	test("approve again or after reject answers 409, a replayed proof 401, and expiry 410", async () => {
 		const ctx = login();
 		const first = await create(ctx);
 		const signed = await proof(ctx);
@@ -170,7 +170,7 @@ describe("AU-20T sign-in via approve in Phantom (ADR 0034)", () => {
 		expect((await claim(ctx, expiring.id, expiring.cookie)).status).toBe(410);
 	});
 
-	it("AU-26 reject makes the waiting claim answer 410", async () => {
+	test("reject makes the waiting claim answer 410", async () => {
 		const ctx = login();
 		const { id, cookie } = await create(ctx);
 		expect((await claim(ctx, id, cookie)).status).toBe(202);
@@ -180,7 +180,7 @@ describe("AU-20T sign-in via approve in Phantom (ADR 0034)", () => {
 		});
 	});
 
-	it("AU-28 an id that is not 32 hex characters answers 410 before the nonce is consumed", async () => {
+	test("an id that is not 32 hex characters answers 410 before the nonce is consumed", async () => {
 		const ctx = login();
 		const { id, cookie } = await create(ctx);
 		const signed = await proof(ctx);

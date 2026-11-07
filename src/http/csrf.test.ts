@@ -1,7 +1,7 @@
 // CSRF guard for cookie callers (api.md): a state change needs content-type application/json,
 // which a cross-site form or no-cors fetch cannot send without a preflight.
 import type { Hono } from "hono";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -91,7 +91,7 @@ const stateOf = (
 	database.prepare("SELECT state FROM tasks WHERE id = ?").pluck().get(taskId);
 
 describe("CSRF content type", () => {
-	it("AU-11 cookie JSON routes require the media type essence application/json", async () => {
+	test("cookie JSON routes require the media type essence application/json", async () => {
 		const ctx = await scene();
 		const { app, tasks } = ctx;
 		const loginId = textField(
@@ -167,7 +167,7 @@ describe("CSRF content type", () => {
 		}
 	});
 
-	it("AU-12 cookie approve and claim require content-type application/json; Bearer calls do not", async () => {
+	test("cookie approve and claim require content-type application/json; Bearer calls do not", async () => {
 		const ctx = await scene();
 		const { app, tasks } = ctx;
 		await expectJson(

@@ -1,6 +1,6 @@
 // SIWS sign-in, sessions and logout (ADR 0020).
 import { createHash } from "node:crypto";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { openStore } from "../store/index.js";
 import {
 	createTestGateway,
@@ -60,7 +60,7 @@ const me = (gateway: TestGateway, cookie?: string) =>
 	send(gateway.app, "GET", "/api/me", cookie === undefined ? {} : { cookie });
 
 describe("SIWS sign-in", () => {
-	it("AU-01 the nonce returns the server-built SIWS text bound to the wallet with the PUBLIC_BASE_URL domain and no Chain ID line", async () => {
+	test("the nonce returns the server-built SIWS text bound to the wallet with the PUBLIC_BASE_URL domain and no Chain ID line", async () => {
 		const gateway = createTestGateway();
 		const { nonce, message } = await nonceFor(gateway, WALLETS.firm);
 		const lines = message.split("\n");
@@ -75,7 +75,7 @@ describe("SIWS sign-in", () => {
 		expect(message).not.toContain("Chain ID");
 	});
 
-	it("AU-02 verify starts a session cookie and /api/me returns the wallet", async () => {
+	test("verify starts a session cookie and /api/me returns the wallet", async () => {
 		const gateway = createTestGateway();
 		expect(gateway.config.sessionTtlSeconds).toBe(7 * 86_400);
 		const res = await verify(gateway, await signedProof(gateway, WALLETS.firm));
@@ -119,7 +119,7 @@ describe("SIWS sign-in", () => {
 		expect(sessionCookie(secure)).toContain("Secure");
 	});
 
-	it("AU-03 a nonce works once", async () => {
+	test("a nonce works once", async () => {
 		const gateway = createTestGateway();
 		const proof = await signedProof(gateway, WALLETS.firm);
 		await expectJson(await verify(gateway, proof), 200);
@@ -133,7 +133,7 @@ describe("SIWS sign-in", () => {
 		expect((await verify(gateway, fresh)).status).toBe(401);
 	});
 
-	it("AU-04 a nonce issued to another wallet fails", async () => {
+	test("a nonce issued to another wallet fails", async () => {
 		const gateway = createTestGateway();
 		const { nonce, message } = await nonceFor(gateway, WALLETS.firm);
 		const body = {
@@ -144,7 +144,7 @@ describe("SIWS sign-in", () => {
 		expect((await verify(gateway, body)).status).toBe(401);
 	});
 
-	it("AU-05 a nonce at its 300 s TTL fails", async () => {
+	test("a nonce at its 300 s TTL fails", async () => {
 		const gateway = createTestGateway();
 		const ttlMs = gateway.config.nonceTtlSeconds * 1000;
 		expect(ttlMs).toBe(300_000);
@@ -160,7 +160,7 @@ describe("SIWS sign-in", () => {
 		});
 	});
 
-	it("AU-06 a signature over other text or by another key fails", async () => {
+	test("a signature over other text or by another key fails", async () => {
 		const gateway = createTestGateway();
 		const { nonce, message } = await nonceFor(gateway, WALLETS.firm);
 		const otherText = WALLETS.firm.signText(`${message} `);
@@ -175,7 +175,7 @@ describe("SIWS sign-in", () => {
 		expect((await verify(gateway, body)).status).toBe(401);
 	});
 
-	it("AU-07 every verify failure is the same 401", async () => {
+	test("every verify failure is the same 401", async () => {
 		const gateway = createTestGateway();
 		const proof = await signedProof(gateway, WALLETS.firm);
 		const raw = await gateway.app.request("/api/auth/verify", {
@@ -199,7 +199,7 @@ describe("SIWS sign-in", () => {
 });
 
 describe("sessions", () => {
-	it("AU-08 a session ends after 7 days", async () => {
+	test("a session ends after 7 days", async () => {
 		const gateway = createTestGateway();
 		const cookie = await signIn(gateway);
 		gateway.clock.advance(7 * DAY_MS - 1);
@@ -208,7 +208,7 @@ describe("sessions", () => {
 		expect((await me(gateway, cookie)).status).toBe(401);
 	});
 
-	it("AU-09 logout deletes the session and clears the cookie; a second logout is fine", async () => {
+	test("logout deletes the session and clears the cookie; a second logout is fine", async () => {
 		const gateway = createTestGateway();
 		const cookie = await signIn(gateway);
 		const logout = () =>
@@ -221,7 +221,7 @@ describe("sessions", () => {
 		expect((await logout()).status).toBe(204);
 	});
 
-	it("AU-10 the session token is stored only as a sha256 hash", async () => {
+	test("the session token is stored only as a sha256 hash", async () => {
 		const gateway = createTestGateway();
 		const token = (await signIn(gateway)).slice("hr_session=".length);
 		const rows = gateway.database.prepare("SELECT * FROM sessions").all();

@@ -1,5 +1,5 @@
 // Agent auto-pay (ADR 0036) on chain: allowance, delegate payment, refusals, refunds.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { revokeAllowance } from "./support/agent.js";
 import {
 	autopayFirm,
@@ -27,7 +27,7 @@ const orderIdOf = (text: string): string =>
 	/orderId ([0-9a-f-]{36})/.exec(text)?.[1] ?? "";
 
 describe("agent auto-pay", () => {
-	it("EE-30 the firm approves an allowance for the agent key and GET /api/firm/autopay shows delegate and allowance", async () => {
+	test("the firm approves an allowance for the agent key and GET /api/firm/autopay shows delegate and allowance", async () => {
 		const fixture = await autopayFirm(FirmSlot.AutopayPay, 3_000_000n);
 		try {
 			const view = await call(e2eEnv().gatewayUrl, "GET", "/api/firm/autopay", {
@@ -43,7 +43,7 @@ describe("agent auto-pay", () => {
 		}
 	});
 
-	it("EE-31 prepare_payment → sign.mjs → pay_task pays from the firm's account", async () => {
+	test("prepare_payment → sign.mjs → pay_task pays from the firm's account", async () => {
 		const env = e2eEnv();
 		const fixture = await autopayFirm(FirmSlot.AutopayPay, 3_000_000n);
 		try {
@@ -75,7 +75,7 @@ describe("agent auto-pay", () => {
 		}
 	});
 
-	it("EE-35 refunds of an auto-paid order go to the firm wallet, not the delegate", async () => {
+	test("refunds of an auto-paid order go to the firm wallet, not the delegate", async () => {
 		const fixture = await autopayFirm(FirmSlot.AutopayPay, 3_000_000n);
 		try {
 			const { linguist } = await team();
@@ -106,7 +106,7 @@ describe("agent auto-pay", () => {
 		}
 	});
 
-	it("EE-32 a payment above the remaining allowance is refused before signing", async () => {
+	test("a payment above the remaining allowance is refused before signing", async () => {
 		const fixture = await autopayFirm(FirmSlot.AutopayRefusals, 700_000n);
 		try {
 			const wallet = fixture.firm.key.publicKey.toBase58();
@@ -136,7 +136,7 @@ describe("agent auto-pay", () => {
 		}
 	});
 
-	it("EE-33 after Revoke prepare_payment answers auto-pay is off", async () => {
+	test("after Revoke prepare_payment answers auto-pay is off", async () => {
 		const fixture = await autopayFirm(FirmSlot.AutopayRefusals, 2_000_000n);
 		try {
 			await revokeAllowance(fixture.firm.key);

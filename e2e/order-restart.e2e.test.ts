@@ -1,9 +1,9 @@
-// EE-19 (flow.md row 30): the gateway dies while a payout row is sent; a restart on the same
+// (flow.md row 30) The gateway dies while a payout row is sent; a restart on the same
 // file DB never pays twice. Its own gateway process, behind a JSON-RPC gate. Localnet only.
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import { startGateway } from "./env/apps.js";
 import { freePort, killProcess } from "./env/process.js";
 import { E2eMode } from "./env/types.js";
@@ -73,7 +73,7 @@ const successes = async (wallet: string) =>
 		(entry) => entry.err === null,
 	);
 
-describe.runIf(localnet)("EE-19 restart with a sent payout", () => {
+describe.runIf(localnet)("restart with a sent payout", () => {
 	afterEach(async () => {
 		useGateway(null);
 		for (const step of cleanups.splice(0).reverse()) {
@@ -81,8 +81,8 @@ describe.runIf(localnet)("EE-19 restart with a sent payout", () => {
 		}
 	});
 
-	it(
-		"EE-19 a gateway restart with a sent row does not pay twice (landed, reply lost)",
+	test(
+		"a gateway restart with a sent row does not pay twice (landed, reply lost)",
 		async () => {
 			const { firm, order, taskId, wallet, landed } = await crashDuringSend(
 				GateMode.LandNoReply,
@@ -109,8 +109,8 @@ describe.runIf(localnet)("EE-19 restart with a sent payout", () => {
 	// with a hold signature older than the row minus 600 s. A localnet hold wallet is minutes old,
 	// so the restart stops for the operator instead of resending; the resend path needs an older
 	// hold wallet (devnet). Either way nothing is paid twice.
-	it(
-		"EE-19 a gateway restart with a sent row does not pay twice (dropped before the chain)",
+	test(
+		"a gateway restart with a sent row does not pay twice (dropped before the chain)",
 		async () => {
 			const { firm, order, taskId, wallet } = await crashDuringSend(
 				GateMode.DropBeforeChain,

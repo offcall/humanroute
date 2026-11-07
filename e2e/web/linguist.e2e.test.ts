@@ -2,7 +2,7 @@
 // linguist's pairs, so these cases use a pair no other e2e case orders (en -> nl).
 
 import { Keypair } from "@solana/web3.js";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { e2eEnv } from "../support/env.js";
 import { FirmSlot } from "../support/firms.js";
 import { firmAt, paidOrder, team } from "../support/fixture.js";
@@ -25,7 +25,7 @@ describe("linguist board", () => {
 	});
 	captureFailures(() => session);
 
-	it("BR-11 a new job appears behind the new jobs banner and Claim opens the task with a countdown", async () => {
+	test("a new job appears behind the new jobs banner and Claim opens the task with a countdown", async () => {
 		const gateway = e2eEnv().gatewayUrl;
 		const firm = await firmAt(FirmSlot.BrowserLinguist);
 		const agency = await registerAgency(gateway);
@@ -78,7 +78,7 @@ describe("linguist board", () => {
 		expect(session.blocked).toEqual([]);
 	});
 
-	it("BR-10 joins by invite: preview shows the agency, sign in, join and set pairs on the Wallet tab", async () => {
+	test("joins by invite: preview shows the agency, sign in, join and set pairs on the Wallet tab", async () => {
 		const gateway = e2eEnv().gatewayUrl;
 		const agency = await registerAgency(gateway);
 		const { page } = await session.role(Keypair.generate());
@@ -104,7 +104,7 @@ describe("linguist board", () => {
 		expect(session.blocked).toEqual([]);
 	});
 
-	it("BR-13 My tasks shows PAID with the linguist's share after the payout confirms", async () => {
+	test("My tasks shows PAID with the linguist's share after the payout confirms", async () => {
 		const firm = await firmAt(FirmSlot.BrowserLinguist);
 		const { linguist } = await team();
 		const order = await paidOrder(firm, ["es"]);

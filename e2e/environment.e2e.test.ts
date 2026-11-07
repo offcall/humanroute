@@ -1,8 +1,8 @@
-// EE-01: the localnet environment is a real offline payment network (ADR 0038, findings 7, 17).
+// The localnet environment is a real offline payment network (ADR 0038, findings 7, 17).
 import { readFileSync } from "node:fs";
 import { getMint } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { E2eMode } from "./env/types.js";
 import { approveAllowance, setupAgent } from "./support/agent.js";
 import { txFacts } from "./support/chain.js";
@@ -16,7 +16,7 @@ import { type Firm, registerFirm } from "./support/people.js";
 const SOLANA_DEVNET = "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1";
 const localnet = e2eEnv().mode === E2eMode.Localnet;
 
-describe.runIf(localnet)("EE-01 localnet environment", () => {
+describe.runIf(localnet)("localnet environment", () => {
 	let firm: Firm;
 	let mcp: Mcp;
 
@@ -31,7 +31,7 @@ describe.runIf(localnet)("EE-01 localnet environment", () => {
 		await mcp?.close();
 	});
 
-	it("EE-01 the local environment is a working offline payment network", async () => {
+	test("the local environment is a working offline payment network", async () => {
 		const env = e2eEnv();
 		expect(env.network).toBe(SOLANA_DEVNET);
 		expect(new URL(env.rpcUrl).hostname).toBe("127.0.0.1");

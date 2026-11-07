@@ -1,7 +1,7 @@
 // GET /api/firm/autopay (ADR 0036): what the cabinet shows to set up and turn on auto-pay.
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	chainFail,
 	chainOk,
@@ -30,7 +30,7 @@ const readAutopay = (gateway: TestGateway, cookie?: string) =>
 	);
 
 describe("firm auto-pay read", () => {
-	it("AP-28 GET /api/firm/autopay shows balance, delegate, allowance, SOL and a fresh blockhash", async () => {
+	test("GET /api/firm/autopay shows balance, delegate, allowance, SOL and a fresh blockhash", async () => {
 		const gateway = createTestGateway();
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
 		const account = ataOf(gateway, WALLETS.firm.address);
@@ -77,7 +77,7 @@ describe("firm auto-pay read", () => {
 		);
 	});
 
-	it("AP-28 no USDC account → exists false and the account address, no balance, delegate or allowance", async () => {
+	test("no USDC account → exists false and the account address, no balance, delegate or allowance", async () => {
 		const gateway = createTestGateway();
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
 		const account = ataOf(gateway, WALLETS.firm.address);
@@ -91,7 +91,7 @@ describe("firm auto-pay read", () => {
 		expect(body).not.toHaveProperty("allowanceUnits");
 	});
 
-	it("AP-28 401 without session, 403 for a non-firm session, 502 on a chain read failure", async () => {
+	test("401 without session, 403 for a non-firm session, 502 on a chain read failure", async () => {
 		const gateway = createTestGateway();
 		const stranger = await signIn(gateway.app, WALLETS.linguist);
 

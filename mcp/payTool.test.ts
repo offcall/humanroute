@@ -1,6 +1,6 @@
 import { VersionedTransaction } from "@solana/web3.js";
 import { parsePaymentPayload } from "@x402/core/schemas";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import {
 	AMOUNT,
 	FEE_PAYER,
@@ -57,7 +57,7 @@ const paid = async (client: PayClient, now = 0, at = token) =>
 	replyOf(await pay(client, at, DRAFT, SIGNATURE, now));
 
 describe("prepare_payment", () => {
-	it("MC-40 prepare_payment returns the sign command with the message and stores expiry from the call's start + 2 min", async () => {
+	test("prepare_payment returns the sign command with the message and stores expiry from the call's start + 2 min", async () => {
 		let clock = 1000;
 		const { client } = payClient({
 			offer: async () => {
@@ -85,11 +85,11 @@ describe("prepare_payment", () => {
 		);
 	});
 
-	it.each([
+	test.each([
 		["amount", { amountUnits: "2000001" }],
 		["payTo", { payTo: FEE_PAYER.toBase58() }],
 	])(
-		"MC-41 prepare_payment refuses when %s differs from the 402 offer",
+		"prepare_payment refuses when %s differs from the 402 offer",
 		async (_field, change) => {
 			const { client, calls } = payClient({
 				unsigned: async () => ({ ok: true, value: { ...unsigned, ...change } }),
@@ -104,7 +104,7 @@ describe("prepare_payment", () => {
 		},
 	);
 
-	it("MC-42 prepare_payment refuses an offer without a fee payer", async () => {
+	test("prepare_payment refuses an offer without a fee payer", async () => {
 		const { client, calls } = payClient({
 			offer: async () => ({ ok: true, value: offerFor(AMOUNT, {}) }),
 		});
@@ -120,7 +120,7 @@ describe("prepare_payment", () => {
 });
 
 describe("pay_task", () => {
-	it("MC-43 pay_task refuses without a prepared payment or at expiry", async () => {
+	test("pay_task refuses without a prepared payment or at expiry", async () => {
 		const { client, calls } = payClient();
 
 		expect((await paid(client)).isError).toBe(true);
@@ -132,7 +132,7 @@ describe("pay_task", () => {
 		expect(calls.filter((call) => call.method === "pay")).toHaveLength(1);
 	});
 
-	it("MC-45 pay_task sends PAYMENT-SIGNATURE echoing the gateway's accepted requirement and resource", async () => {
+	test("pay_task sends PAYMENT-SIGNATURE echoing the gateway's accepted requirement and resource", async () => {
 		const { client, calls } = payClient();
 		await prepared(client);
 
@@ -171,7 +171,7 @@ describe("pay_task", () => {
 		);
 	});
 
-	it("MC-46 pay_task tells Claude to prepare again only after a definitive simulation failure", async () => {
+	test("pay_task tells Claude to prepare again only after a definitive simulation failure", async () => {
 		const reason = Buffer.from(
 			JSON.stringify({
 				success: false,
@@ -199,7 +199,7 @@ describe("pay_task", () => {
 		expect((await paid(client)).text).toContain("payTx tx1");
 	});
 
-	it.each([
+	test.each([
 		["a 5xx", payUnknown("gateway answered HTTP 502: simulation")],
 		["a timeout", payUnknown("gateway did not answer in time (simulation)")],
 		[
@@ -207,7 +207,7 @@ describe("pay_task", () => {
 			payUnknown("gateway is unreachable during simulation"),
 		],
 	])(
-		"NEW-08 an unknown payment outcome containing simulation never invites prepare again (%s)",
+		"an unknown payment outcome containing simulation never invites prepare again (%s)",
 		async (_name, error) => {
 			const { client } = payClient({ pay: async () => ({ ok: false, error }) });
 			await prepared(client);
@@ -222,7 +222,7 @@ describe("pay_task", () => {
 		},
 	);
 
-	it("NEW-08 a real 5xx with a simulation error code is an unknown outcome", async () => {
+	test("a real 5xx with a simulation error code is an unknown outcome", async () => {
 		stubFetch(async () =>
 			jsonResponse(500, { error: "transaction_simulation_failed" }),
 		);
@@ -236,7 +236,7 @@ describe("pay_task", () => {
 		expect(reply.text).not.toContain("call prepare_payment again");
 	});
 
-	it.each([
+	test.each([
 		["success", PAID, "no prepared payment"],
 		[
 			"already-paid",
@@ -244,7 +244,7 @@ describe("pay_task", () => {
 			"no prepared payment",
 		],
 	] as const)(
-		"MC-47 pay_task drops the prepared payment after %s",
+		"pay_task drops the prepared payment after %s",
 		async (_name, answer, after) => {
 			const { client } = payClient({ pay: async () => answer });
 			await prepared(client);
@@ -254,7 +254,7 @@ describe("pay_task", () => {
 		},
 	);
 
-	it("MC-47 pay_task keeps the prepared payment after a refusal", async () => {
+	test("pay_task keeps the prepared payment after a refusal", async () => {
 		let answer: Awaited<ReturnType<PayClient["pay"]>> = {
 			ok: false,
 			error: "payment refused: bad_payment",
@@ -267,7 +267,7 @@ describe("pay_task", () => {
 		expect((await paid(client)).text).toContain("orderId ord_1");
 	});
 
-	it("MC-48 prepared payments are keyed by token and draft, so another firm's token cannot use them", async () => {
+	test("prepared payments are keyed by token and draft, so another firm's token cannot use them", async () => {
 		const { client, calls } = payClient();
 		await prepared(client);
 

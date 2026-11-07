@@ -1,5 +1,5 @@
 // Public rating routes (ADR 0025): counts from tasks, money from confirmed payouts only.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -18,7 +18,7 @@ import {
 const UNKNOWN = "00000000-0000-4000-8000-00000000abcd";
 
 describe("rating routes", () => {
-	it("RT-03 rating routes answer zeros and null for unknown ids and 422 for non-UUID ids", async () => {
+	test("rating routes answer zeros and null for unknown ids and 422 for non-UUID ids", async () => {
 		const { app } = createTestGateway();
 
 		const agency = await send(app, "GET", `/api/rating/agency/${UNKNOWN}`);
@@ -48,7 +48,7 @@ describe("rating routes", () => {
 		}
 	});
 
-	it("RT-04 money fields count only confirmed transfers and are decimal strings", async () => {
+	test("money fields count only confirmed transfers and are decimal strings", async () => {
 		const gateway = createTestGateway();
 		const { app, chain } = gateway;
 		const firm = await registerFirm(app, WALLETS.firm);

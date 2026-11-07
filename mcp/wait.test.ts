@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { fakeWaitClock, nth, orderTask, paidWith, unpaid } from "./fakes.js";
 import { fingerprint } from "./status.js";
 import {
@@ -56,7 +56,7 @@ const failed = (error: string, permanent?: true): Parsed<Snapshot> =>
 	permanent ? { ok: false, error, permanent } : { ok: false, error };
 
 describe("waitForChange", () => {
-	it("MC-10 returns at once when every language is settled", async () => {
+	test("returns at once when every language is settled", async () => {
 		const settled = paidWith(
 			orderTask("de", PaidOut),
 			orderTask("fr", Refunded),
@@ -72,7 +72,7 @@ describe("waitForChange", () => {
 		expect(run.reports).toEqual([]);
 	});
 
-	it("MC-11 returns on the first change from the given seen with a changes line and the new seen", async () => {
+	test("returns on the first change from the given seen with a changes line and the new seen", async () => {
 		const before = paidWith(orderTask("de", Open), orderTask("fr", Open));
 		const after = paidWith(orderTask("de", Claimed), orderTask("fr", Open));
 
@@ -88,7 +88,7 @@ describe("waitForChange", () => {
 		expect(run.reads()).toBe(3);
 	});
 
-	it("MC-12 uses the first read as the baseline when no seen is given", async () => {
+	test("uses the first read as the baseline when no seen is given", async () => {
 		const paid = paidWith(orderTask("de", Open));
 
 		const run = await runWait([unpaid(), paid], undefined);
@@ -102,7 +102,7 @@ describe("waitForChange", () => {
 		);
 	});
 
-	it("MC-13 does not wake for a change only to paying_out or refunding", async () => {
+	test("does not wake for a change only to paying_out or refunding", async () => {
 		const submitted = paidWith(
 			orderTask("de", Submitted),
 			orderTask("fr", Submitted),
@@ -142,7 +142,7 @@ describe("waitForChange", () => {
 		});
 	});
 
-	it("MC-14 sends a progress line at once and then every 30 s, with the pay link while unpaid", async () => {
+	test("sends a progress line at once and then every 30 s, with the pay link while unpaid", async () => {
 		const controller = new AbortController();
 		const clock = fakeWaitClock();
 		const reports: [number, string][] = [];
@@ -175,7 +175,7 @@ describe("waitForChange", () => {
 		]);
 	});
 
-	it("MC-15 returns nothing changed after 60 minutes", async () => {
+	test("returns nothing changed after 60 minutes", async () => {
 		const run = await runWait([unpaid()], "draft");
 
 		expect(run.outcome).toMatchObject({ kind: WaitKind.Cap, seen: "draft" });
@@ -195,7 +195,7 @@ describe("waitForChange", () => {
 		});
 	});
 
-	it("MC-16 keeps polling through failed reads and returns an error with the last seen after 30 s of consecutive failures", async () => {
+	test("keeps polling through failed reads and returns an error with the last seen after 30 s of consecutive failures", async () => {
 		const down = failed("gateway is unreachable");
 		// Reads take 1 s and sleeps 2 s: reads start at 0, 3000, ... 30000.
 		const run = await runWait(Array(11).fill(down), "draft", { readMs: 1000 });
@@ -224,7 +224,7 @@ describe("waitForChange", () => {
 		expect(reset.now).toBe(64_000);
 	});
 
-	it("MC-17 a permanent read failure ends the wait at once", async () => {
+	test("a permanent read failure ends the wait at once", async () => {
 		const run = await runWait(
 			[failed("gateway returned HTTP 404: not_found", true)],
 			undefined,
@@ -240,7 +240,7 @@ describe("waitForChange", () => {
 		expect(run.sleeps).toEqual([]);
 	});
 
-	it("MC-18 stops when the call is aborted", async () => {
+	test("stops when the call is aborted", async () => {
 		const controller = new AbortController();
 		const clock = fakeWaitClock();
 		let reads = 0;

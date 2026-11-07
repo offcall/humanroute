@@ -1,6 +1,6 @@
 // Browser: the firm from the landing to Jobs, and Review with real payouts on the local chain.
 import { Keypair } from "@solana/web3.js";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { firmKey } from "../support/env.js";
 import { FirmSlot } from "../support/firms.js";
 import { firmAt, paidOrder, team } from "../support/fixture.js";
@@ -19,7 +19,7 @@ describe("firm cabinet", () => {
 	});
 	captureFailures(() => session);
 
-	it("BR-01 registers a firm from the landing and lands on Jobs with the Connect Claude block", async () => {
+	test("registers a firm from the landing and lands on Jobs with the Connect Claude block", async () => {
 		const { page } = await session.role(Keypair.generate());
 		await page.goto("/");
 		await page.getByLabel("Firm name").fill("Browser Pharma");
@@ -36,7 +36,7 @@ describe("firm cabinet", () => {
 		expect(session.blocked).toEqual([]);
 	});
 
-	it("BR-03 Review approves one translation and rejects another with a reason", async () => {
+	test("Review approves one translation and rejects another with a reason", async () => {
 		const firm = await firmAt(FirmSlot.BrowserFirm);
 		const { linguist } = await team();
 		const order = await paidOrder(firm, ["es", "fr"]);

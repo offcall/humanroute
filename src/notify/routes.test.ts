@@ -1,5 +1,5 @@
 // Push subscribe and unsubscribe routes (ADR 0029).
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createTestGateway,
 	expectJson,
@@ -20,7 +20,7 @@ const BODY = {
 };
 
 describe("push routes", () => {
-	it("NEW-19 push subscription endpoints enforce roles and validate bodies while unsubscribe stays idempotent", async () => {
+	test("push subscription endpoints enforce roles and validate bodies while unsubscribe stays idempotent", async () => {
 		const { app, database } = createTestGateway();
 		const firm = await registerFirm(app, WALLETS.firm);
 		const agency = await registerAgency(app, WALLETS.agency);

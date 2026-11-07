@@ -10,7 +10,7 @@ import {
 	TransactionInstruction,
 	VersionedTransaction,
 } from "@solana/web3.js";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -24,7 +24,7 @@ import {
 import { paymentId } from "./paymentId.js";
 import { buildUnsignedTx, type UnsignedInput } from "./unsignedTx.js";
 
-// AP-27 replaces the memo randomness with fixed bytes; every other caller gets real bytes.
+// One test replaces the memo randomness with fixed bytes; every other caller gets real bytes.
 const memoBytes = vi.hoisted((): Buffer[] => []);
 vi.mock("node:crypto", async (importOriginal) => {
 	const real = await importOriginal<typeof import("node:crypto")>();
@@ -69,7 +69,7 @@ const decompile = (transaction: VersionedTransaction) => {
 };
 
 describe("unsigned delegate payment", () => {
-	it("AP-20 builds an unsigned v0 x402 payment", async () => {
+	test("builds an unsigned v0 x402 payment", async () => {
 		const unsigned = buildUnsignedTx(INPUT);
 		const transaction = VersionedTransaction.deserialize(
 			Buffer.from(unsigned.transaction, "base64"),
@@ -114,7 +114,7 @@ describe("unsigned delegate payment", () => {
 		expect(memo?.data.toString("utf8")).toMatch(/^[0-9a-f]{32}$/);
 	});
 
-	it("AP-20 the route answers the builder's payment with signer = delegate", async () => {
+	test("the route answers the builder's payment with signer = delegate", async () => {
 		const gateway = createTestGateway();
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
 		const delegate = WALLETS.agent.address;
@@ -157,7 +157,7 @@ describe("unsigned delegate payment", () => {
 		expect(keys.slice(0, 2)).toEqual([feePayer, delegate]);
 	});
 
-	it("AP-27 two unsigned payments for the same draft differ, so each has its own payment id", () => {
+	test("two unsigned payments for the same draft differ, so each has its own payment id", () => {
 		memoBytes.push(Buffer.alloc(16, 0xaa), Buffer.alloc(16, 0xbb));
 		const first = buildUnsignedTx(INPUT);
 		const second = buildUnsignedTx(INPUT);

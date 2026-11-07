@@ -8,7 +8,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, test } from "vitest";
 import { webRoutes } from "./web.js";
 
 const SENTINEL = "SENTINEL-outside-dist-7f3a";
@@ -48,7 +48,7 @@ const web = webRoutes(dist);
 const get = (path: string) => web.request(path);
 
 describe("web app", () => {
-	it("HT-01 serves index.html for client routes", async () => {
+	test("serves index.html for client routes", async () => {
 		for (const path of ["/", "/join/abc123", "/firm/jobs", "/approve/0123"]) {
 			const res = await get(path);
 			expect(res.status).toBe(200);
@@ -57,7 +57,7 @@ describe("web app", () => {
 		}
 	});
 
-	it.each([
+	test.each([
 		["/assets/app-1a2b.js", "text/javascript; charset=utf-8"],
 		["/assets/app-1a2b.css", "text/css; charset=utf-8"],
 		["/manifest.webmanifest", "application/manifest+json"],
@@ -67,14 +67,14 @@ describe("web app", () => {
 		["/favicon.ico", "image/x-icon"],
 		["/agent/sign.mjs", "text/javascript; charset=utf-8"],
 		["/blob.xyz", "application/octet-stream"],
-	])("HT-02 serves %s as %s", async (path, type) => {
+	])("serves %s as %s", async (path, type) => {
 		const res = await get(path);
 		expect(res.status).toBe(200);
 		expect(res.headers.get("content-type")).toBe(type);
 		expect(await res.text()).toBe(FILES[path.slice(1)]);
 	});
 
-	it("HT-03 never serves files outside the dist folder", async () => {
+	test("never serves files outside the dist folder", async () => {
 		const paths = [
 			"/../secret.txt",
 			"/%2e%2e/secret.txt",
@@ -90,7 +90,7 @@ describe("web app", () => {
 		}
 	});
 
-	it("NEW-16 a dist symlink cannot expose a file outside the distribution root", async () => {
+	test("a dist symlink cannot expose a file outside the distribution root", async () => {
 		for (const path of [
 			"/leak.txt",
 			"/outside/secret.txt",
@@ -102,7 +102,7 @@ describe("web app", () => {
 		expect((await get("/assets/leak.js")).status).toBe(404);
 	});
 
-	it("HT-04 GET /api/<name>, /x/<name> and /health paths never fall back to the SPA", async () => {
+	test("GET /api/<name>, /x/<name> and /health paths never fall back to the SPA", async () => {
 		for (const path of ["/api/x", "/x/y", "/health"]) {
 			const res = await get(path);
 			expect(res.status).toBe(404);
@@ -114,7 +114,7 @@ describe("web app", () => {
 		expect((await web.request("/", { method: "POST" })).status).toBe(404);
 	});
 
-	it("HT-05 answers 503 web app not built when index.html is missing", async () => {
+	test("answers 503 web app not built when index.html is missing", async () => {
 		const unbuilt = webRoutes(empty);
 		for (const path of ["/", "/assets/app.js"]) {
 			const res = await unbuilt.request(path);
@@ -123,7 +123,7 @@ describe("web app", () => {
 		}
 	});
 
-	it("HT-06 a missing file under /assets/ answers 404, not index.html", async () => {
+	test("a missing file under /assets/ answers 404, not index.html", async () => {
 		const res = await get("/assets/app-old9.js");
 		expect(res.status).toBe(404);
 		expect(res.headers.get("content-type")).not.toContain("text/html");

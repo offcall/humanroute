@@ -1,5 +1,5 @@
-// env -> Config: defaults, presets and refusals reported together (ADR 0023, 0024, 0029).
-import { describe, expect, it } from "vitest";
+// Env -> Config: defaults, presets and refusals reported together (ADR 0023, 0024, 0029).
+import { describe, expect, test } from "vitest";
 import { parseConfig } from "./parse.js";
 import { type Env, TimerMode } from "./types.js";
 
@@ -41,7 +41,7 @@ const parsedValue = (env: Env) => {
 };
 
 describe("parseConfig", () => {
-	it("CF-01 a minimal env yields the defaults", () => {
+	test("a minimal env yields the defaults", () => {
 		const config = parsedValue(BASE);
 		expect(config).toMatchObject({
 			rpcUrl: "https://api.devnet.solana.com",
@@ -59,7 +59,7 @@ describe("parseConfig", () => {
 		});
 	});
 
-	it("CF-06 timer presets are video 60/180 and public 1800/3600 and explicit windows override them", () => {
+	test("timer presets are video 60/180 and public 1800/3600 and explicit windows override them", () => {
 		const windows = (env: Env) => {
 			const config = parsedValue({ ...BASE, ...env });
 			return [config.claimWindowSeconds, config.workWindowSeconds];
@@ -76,8 +76,8 @@ describe("parseConfig", () => {
 	});
 });
 
-describe("CF-02T config refusals, all reported in one error", () => {
-	it("CF-02 several problems are reported together", () => {
+describe("config refusals, all reported in one error", () => {
+	test("several problems are reported together", () => {
 		const error = errorOf({
 			...BASE,
 			PORT: "0",
@@ -90,7 +90,7 @@ describe("CF-02T config refusals, all reported in one error", () => {
 		expect(error).toContain("RPC_URL");
 	});
 
-	it("CF-03 shares must sum to 10000", () => {
+	test("shares must sum to 10000", () => {
 		expect(errorOf({ ...BASE, FEE_SHARE_BPS: "201" })).toContain(
 			"must sum to 10000",
 		);
@@ -100,22 +100,19 @@ describe("CF-02T config refusals, all reported in one error", () => {
 		).toBe(201n);
 	});
 
-	it.each(["0", "-1", "0.0000001", "abc"])(
-		"CF-04 refuses price %s",
-		(price) => {
-			expect(errorOf({ ...BASE, TASK_PRICE_USDC: price })).toContain(
-				"TASK_PRICE_USDC",
-			);
-		},
-	);
+	test.each(["0", "-1", "0.0000001", "abc"])("refuses price %s", (price) => {
+		expect(errorOf({ ...BASE, TASK_PRICE_USDC: price })).toContain(
+			"TASK_PRICE_USDC",
+		);
+	});
 
-	it("CF-04 accepts the smallest price 0.000001", () => {
+	test("accepts the smallest price 0.000001", () => {
 		expect(
 			parsedValue({ ...BASE, TASK_PRICE_USDC: "0.000001" }).taskPriceUnits,
 		).toBe(1n);
 	});
 
-	it("CF-05 accepts all three VAPID values", () => {
+	test("accepts all three VAPID values", () => {
 		expect(parsedValue({ ...BASE, ...VAPID }).vapid).toEqual({
 			publicKey: VAPID_PUBLIC,
 			privateKey: VAPID_PRIVATE,
@@ -127,14 +124,14 @@ describe("CF-02T config refusals, all reported in one error", () => {
 		);
 	});
 
-	it.each([
+	test.each([
 		["public only", ["VAPID_PUBLIC_KEY"]],
 		["private only", ["VAPID_PRIVATE_KEY"]],
 		["subject only", ["VAPID_SUBJECT"]],
 		["public + private", ["VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY"]],
 		["public + subject", ["VAPID_PUBLIC_KEY", "VAPID_SUBJECT"]],
 		["private + subject", ["VAPID_PRIVATE_KEY", "VAPID_SUBJECT"]],
-	])("CF-05 refuses a partial VAPID set: %s", (_, names) => {
+	])("refuses a partial VAPID set: %s", (_, names) => {
 		const partial = Object.fromEntries(
 			names.map((name) => [name, VAPID[name]]),
 		);
@@ -144,7 +141,7 @@ describe("CF-02T config refusals, all reported in one error", () => {
 	});
 
 	const badPrivate = Buffer.alloc(31, 3).toString("base64url");
-	it.each([
+	test.each([
 		[
 			"public 64 bytes",
 			{ VAPID_PUBLIC_KEY: Buffer.alloc(64, 4).toString("base64url") },
@@ -177,7 +174,7 @@ describe("CF-02T config refusals, all reported in one error", () => {
 		],
 		["subject plain text", { VAPID_SUBJECT: "ops" }, "VAPID_SUBJECT"],
 	])(
-		"CF-05 refuses VAPID %s without echoing private material",
+		"refuses VAPID %s without echoing private material",
 		(_, override, name) => {
 			const env: Env = { ...BASE, ...VAPID, ...override };
 			const error = errorOf(env);
@@ -187,8 +184,8 @@ describe("CF-02T config refusals, all reported in one error", () => {
 		},
 	);
 
-	it.each(["FEE_WALLET", "PUBLIC_BASE_URL", "MCP_PUBLIC_URL"])(
-		"CF-07 %s is required",
+	test.each(["FEE_WALLET", "PUBLIC_BASE_URL", "MCP_PUBLIC_URL"])(
+		"%s is required",
 		(name) => {
 			expect(errorOf({ ...BASE, [name]: "" })).toContain(`${name} is required`);
 			expect(errorOf({ ...BASE, [name]: "   " })).toContain(

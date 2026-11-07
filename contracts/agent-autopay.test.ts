@@ -10,7 +10,7 @@ import {
 	TransactionMessage,
 	VersionedTransaction,
 } from "@solana/web3.js";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { createPayClient } from "../mcp/payGateway.js";
 import { pay } from "../mcp/payTool.js";
 import type { PayClient, Prepared } from "../mcp/payTypes.js";
@@ -158,7 +158,7 @@ const replyText = (reply: Awaited<ReturnType<typeof pay>>) =>
 	reply.content.map((part) => (part.type === "text" ? part.text : "")).join("");
 
 describe("auto-pay contract: gateway, sign.mjs and MCP", () => {
-	it("CT-01 sign.mjs accepts the transaction the gateway builds and returns its amount", async () => {
+	test("sign.mjs accepts the transaction the gateway builds and returns its amount", async () => {
 		const { gateway, firm, config, draftId } = await autopayGateway();
 		const message = await unsignedMessage(gateway, firm.mcpToken, draftId);
 		const bytes = Buffer.from(message, "base64");
@@ -194,7 +194,7 @@ console.log(typeof units, String(units));`,
 		}
 	});
 
-	it("CT-06 MCP accepts the delegate's signature and puts it in the delegate's signature slot", async () => {
+	test("MCP accepts the delegate's signature and puts it in the delegate's signature slot", async () => {
 		const { gateway, firm, config, draftId, delegate } = await autopayGateway();
 		const home = tempHome();
 		try {
@@ -237,7 +237,7 @@ console.log(typeof units, String(units));`,
 		}
 	});
 
-	it("CT-07 MCP refuses a signature from another key and one that is not 64 bytes, without calling the gateway", async () => {
+	test("MCP refuses a signature from another key and one that is not 64 bytes, without calling the gateway", async () => {
 		const { gateway, firm, draftId } = await autopayGateway();
 		const { client, headers } = mcpClient(gateway);
 		const payment = await prepared(client, firm.mcpToken, draftId);
@@ -279,7 +279,7 @@ console.log(typeof units, String(units));`,
 		expect(gateway.facilitator.calls.settle).toBe(1);
 	});
 
-	it("CT-08 signing does not change the message, so the payment id stays the same", async () => {
+	test("signing does not change the message, so the payment id stays the same", async () => {
 		const { gateway, firm, draftId } = await autopayGateway();
 		const { client, headers } = mcpClient(gateway);
 		const payment = await prepared(client, firm.mcpToken, draftId);
@@ -313,7 +313,7 @@ const legacyOf = (bytes: Buffer) =>
 			.serialize(),
 	);
 
-describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", () => {
+describe("sign.mjs refuses a message that is not a HumanRoute payment", () => {
 	const valid = gatewayMessage();
 	const memoData = (bytes: number[] | Buffer) =>
 		recompile(valid, withInstruction(MEMO, dataOf(bytes)));
@@ -324,7 +324,7 @@ describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", (
 
 	const rows: [string, Buffer, string][] = [
 		[
-			"CT-02 an extra instruction",
+			"an extra instruction",
 			recompile(valid, (parts) => ({
 				...parts,
 				instructions: [...parts.instructions, ...parts.instructions.slice(3)],
@@ -332,7 +332,7 @@ describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", (
 			NOT_OURS,
 		],
 		[
-			"CT-02 a missing memo",
+			"a missing memo",
 			recompile(valid, (parts) => ({
 				...parts,
 				instructions: parts.instructions.slice(0, 3),
@@ -340,7 +340,7 @@ describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", (
 			NOT_OURS,
 		],
 		[
-			"CT-02 a missing transfer",
+			"a missing transfer",
 			recompile(valid, (parts) => ({
 				...parts,
 				instructions: parts.instructions.filter((_, at) => at !== TRANSFER),
@@ -348,7 +348,7 @@ describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", (
 			NOT_OURS,
 		],
 		[
-			"CT-02 swapped compute instructions",
+			"swapped compute instructions",
 			recompile(valid, (parts) => {
 				const [limit, price, ...rest] = parts.instructions;
 				return limit && price
@@ -358,27 +358,27 @@ describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", (
 			NOT_OURS,
 		],
 		[
-			"CT-03 another source",
+			"another source",
 			gatewayMessage({ firmWallet: WALLETS.agency.address }),
 			NOT_OURS,
 		],
 		[
-			"CT-03 another mint",
+			"another mint",
 			gatewayMessage({ mint: WALLETS.linguist.address }),
 			NOT_OURS,
 		],
 		[
-			"CT-03 another destination",
+			"another destination",
 			gatewayMessage({ payTo: WALLETS.agency.address }),
 			NOT_OURS,
 		],
 		[
-			"CT-03 another authority",
+			"another authority",
 			gatewayMessage({ delegate: WALLETS.linguist.address }),
 			NOT_OURS,
 		],
 		[
-			"CT-03 the fee payer as authority",
+			"the fee payer as authority",
 			recompile(
 				valid,
 				withInstruction(TRANSFER, (ix) => ({
@@ -388,14 +388,10 @@ describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", (
 			),
 			NOT_OURS,
 		],
+		["wrong decimals", transferData(checked(12, 1_000_000n, 9)), NOT_OURS],
+		["a zero amount", transferData(checked(12, 0n, 6)), NOT_OURS],
 		[
-			"CT-04 wrong decimals",
-			transferData(checked(12, 1_000_000n, 9)),
-			NOT_OURS,
-		],
-		["CT-04 a zero amount", transferData(checked(12, 0n, 6)), NOT_OURS],
-		[
-			"CT-04 an address lookup table",
+			"an address lookup table",
 			recompile(valid, (parts) => ({
 				...parts,
 				lookups: [
@@ -409,40 +405,40 @@ describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", (
 			"malformed message: address lookup tables are not allowed",
 		],
 		[
-			"CT-04 a legacy message",
+			"a legacy message",
 			legacyOf(valid),
 			"malformed message: not a v0 transaction message",
 		],
 		[
-			"CT-04b Transfer instead of TransferChecked",
+			"Transfer instead of TransferChecked",
 			transferData(u64Data(3, 1_000_000n)),
 			NOT_OURS,
 		],
 		[
-			"CT-04b BurnChecked instead of TransferChecked",
+			"BurnChecked instead of TransferChecked",
 			transferData(checked(15, 1_000_000n, 6)),
 			NOT_OURS,
 		],
 		[
-			"CT-04b Approve instead of TransferChecked",
+			"Approve instead of TransferChecked",
 			transferData(u64Data(4, 1_000_000n)),
 			NOT_OURS,
 		],
 		[
-			"CT-04b a wrong compute limit discriminator",
+			"a wrong compute limit discriminator",
 			recompile(valid, withInstruction(LIMIT, dataOf(u32Data(3, 20_000)))),
 			NOT_OURS,
 		],
 		[
-			"CT-04b a wrong compute price discriminator",
+			"a wrong compute price discriminator",
 			recompile(valid, withInstruction(PRICE, dataOf(u64Data(2, 1n)))),
 			NOT_OURS,
 		],
-		["CT-04 an empty memo", memoData([]), NOT_OURS],
-		["CT-04 a 65-byte memo", memoData(Buffer.alloc(65, 0x61)), NOT_OURS],
-		["CT-04 a memo that is not UTF-8", memoData([0xff, 0xfe]), NOT_OURS],
+		["an empty memo", memoData([]), NOT_OURS],
+		["a 65-byte memo", memoData(Buffer.alloc(65, 0x61)), NOT_OURS],
+		["a memo that is not UTF-8", memoData([0xff, 0xfe]), NOT_OURS],
 		[
-			"CT-05 the agent key not a required signer",
+			"the agent key not a required signer",
 			recompile(valid, (parts) => ({
 				...parts,
 				header: { ...parts.header, numRequiredSignatures: 1 },
@@ -451,7 +447,7 @@ describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", (
 		],
 	];
 
-	it.each(rows)(
+	test.each(rows)(
 		"%s → refusal and no signature output",
 		(_name, bytes, reason) => {
 			const home = agentHome();
@@ -463,7 +459,7 @@ describe("CT-02T sign.mjs refuses a message that is not a HumanRoute payment", (
 		},
 	);
 
-	it("CT-05 a message for another agent key → refusal and no signature output", () => {
+	test("a message for another agent key → refusal and no signature output", () => {
 		const home = agentHome({ agent: WALLETS.linguist });
 		try {
 			expectRefused(home.sign(valid.toString("base64")), NOT_OURS);

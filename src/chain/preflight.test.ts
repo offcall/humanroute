@@ -10,7 +10,7 @@ import {
 	Keypair,
 	PublicKey,
 } from "@solana/web3.js";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { Commitment } from "../config/index.js";
 import { preflight } from "./preflight.js";
 import type { SolanaOptions } from "./types.js";
@@ -62,19 +62,19 @@ const stub = (chain: Chain) => {
 const reasons = async (conn: Connection) =>
 	(await preflight(conn, opts)).map((problem) => problem.reason);
 
-describe("NEW-04 preflight reports low hold SOL, wrong mint decimals, missing hold ATA and RPC failure", () => {
-	it("is ready at exactly 50000000 lamports, a 6-decimal mint and a hold ATA", async () => {
+describe("preflight reports low hold SOL, wrong mint decimals, missing hold ATA and RPC failure", () => {
+	test("is ready at exactly 50000000 lamports, a 6-decimal mint and a hold ATA", async () => {
 		expect(await reasons(stub(healthy))).toEqual([]);
 	});
 
-	it("reports 49999999 lamports as too little SOL", async () => {
+	test("reports 49999999 lamports as too little SOL", async () => {
 		const conn = stub({ ...healthy, lamports: 49_999_999 });
 		expect(await reasons(conn)).toEqual([
 			"hold wallet needs at least 0.05 SOL for fees",
 		]);
 	});
 
-	it("aggregates distinct problems", async () => {
+	test("aggregates distinct problems", async () => {
 		const conn = stub({ lamports: 0, decimals: 9, holdAta: false });
 		expect(await reasons(conn)).toEqual([
 			"hold wallet needs at least 0.05 SOL for fees",
@@ -83,7 +83,7 @@ describe("NEW-04 preflight reports low hold SOL, wrong mint decimals, missing ho
 		]);
 	});
 
-	it("reports an RPC failure", async () => {
+	test("reports an RPC failure", async () => {
 		const conn = new Connection(opts.rpcUrl);
 		vi.spyOn(conn, "getBalance").mockRejectedValue(new Error("fetch failed"));
 

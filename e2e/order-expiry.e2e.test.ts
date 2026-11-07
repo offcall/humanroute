@@ -1,6 +1,6 @@
 // Timer refunds on real processes (flow.md rows 20, 23) and the cabinets' money and ratings.
 // Deadlines are read from the server; waits are bounded polls, never fixed sleeps.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { txFacts } from "./support/chain.js";
 import { e2eEnv, pollUntil } from "./support/env.js";
 import { FirmSlot } from "./support/firms.js";
@@ -21,7 +21,7 @@ const msUntil = (iso: string): number =>
 	Math.max(0, Date.parse(iso) - Date.now());
 
 describe("order timers and cabinets", () => {
-	it("EE-15 an unclaimed task is refunded as :unclaimed after its claim window", async () => {
+	test("an unclaimed task is refunded as :unclaimed after its claim window", async () => {
 		const firm = await firmAt(FirmSlot.OrderExpiry);
 		const order = await paidOrder(firm, ["de"]);
 		const task = order.task("de");
@@ -42,7 +42,7 @@ describe("order timers and cabinets", () => {
 		expect(facts.memos).toContain(`hr:${task.taskId}:unclaimed`);
 	});
 
-	it("EE-16 a claimed task not submitted in time is refunded as :late", async () => {
+	test("a claimed task not submitted in time is refunded as :late", async () => {
 		const gateway = e2eEnv().gatewayUrl;
 		const firm = await firmAt(FirmSlot.OrderExpiry);
 		const { agency } = await team();
@@ -79,7 +79,7 @@ describe("order timers and cabinets", () => {
 		expect(rating.late).toBe(1);
 	});
 
-	it("EE-17 cabinets show confirmed money and ratings", async () => {
+	test("cabinets show confirmed money and ratings", async () => {
 		const gateway = e2eEnv().gatewayUrl;
 		const firm = await firmAt(FirmSlot.OrderRatings);
 		const { agency, linguist } = await team();

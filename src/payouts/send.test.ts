@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { ErrorKind } from "../chain/index.js";
 import { TransferStatus } from "../store/index.js";
 import {
@@ -57,7 +57,7 @@ const setup = () => {
 };
 
 describe("payouts send", () => {
-	it("PO-20 stores the signature and blockhash as sent before broadcasting", async () => {
+	test("stores the signature and blockhash as sent before broadcasting", async () => {
 		const gateway = setup();
 		const seen: PayoutTransfer[] = [];
 		gateway.chain.answer.broadcast = async () => {
@@ -76,7 +76,7 @@ describe("payouts send", () => {
 		});
 	});
 
-	it("PO-21 a retryable broadcast error puts the transfer back to pending with attempts + 1 and clears the old signature", async () => {
+	test("a retryable broadcast error puts the transfer back to pending with attempts + 1 and clears the old signature", async () => {
 		const gateway = setup();
 		gateway.chain.answer.broadcast = async () =>
 			chainFail(ErrorKind.Retryable, "429 Too Many Requests");
@@ -93,12 +93,12 @@ describe("payouts send", () => {
 		});
 	});
 
-	it.each([
+	test.each([
 		[1, 4_000],
 		[5, 60_000],
 		[7, 60_000],
 	])(
-		"PO-22 does not retry before the backoff (attempts %i, wait %i ms)",
+		"does not retry before the backoff (attempts %i, wait %i ms)",
 		async (attempts, wait) => {
 			const gateway = setup();
 			gateway.chain.answer.signatureStatus = async () =>
@@ -118,7 +118,7 @@ describe("payouts send", () => {
 		},
 	);
 
-	it("PO-23 a final signing error marks the transfer failed and logs OPERATOR ACTION REQUIRED once", async () => {
+	test("a final signing error marks the transfer failed and logs OPERATOR ACTION REQUIRED once", async () => {
 		const gateway = setup();
 		gateway.chain.answer.signPayout = async () =>
 			chainFail(ErrorKind.Final, "payout leg has an invalid wallet address");
@@ -138,7 +138,7 @@ describe("payouts send", () => {
 		expect(gateway.operatorLogs()[0]).toContain(`transfer ${TRANSFER_ID}`);
 	});
 
-	it("PO-24 a final broadcast error marks the transfer failed and keeps its signature", async () => {
+	test("a final broadcast error marks the transfer failed and keeps its signature", async () => {
 		const gateway = setup();
 		gateway.chain.answer.broadcast = async () =>
 			chainFail(ErrorKind.Final, "insufficient funds");
@@ -155,7 +155,7 @@ describe("payouts send", () => {
 		expect(gateway.operatorLogs()).toHaveLength(1);
 	});
 
-	it("PO-25 an ambiguous broadcast error keeps the transfer sent and signs nothing new (CH-06)", async () => {
+	test("an ambiguous broadcast error keeps the transfer sent and signs nothing new", async () => {
 		const gateway = setup();
 		gateway.chain.answer.broadcast = async () =>
 			chainFail(ErrorKind.Ambiguous, "request timed out");
@@ -184,7 +184,7 @@ describe("payouts send", () => {
 		expect(gateway.count("signPayout")).toBe(1);
 	});
 
-	it("PO-26 gives up after 10 attempts and marks the transfer failed", async () => {
+	test("gives up after 10 attempts and marks the transfer failed", async () => {
 		const gateway = setup();
 		gateway.chain.answer.broadcast = async () =>
 			chainFail(ErrorKind.Retryable, "Blockhash not found");
@@ -204,7 +204,7 @@ describe("payouts send", () => {
 		expect(gateway.operatorLogs()).toHaveLength(1);
 	});
 
-	it("PO-27 two overlapping ticks of one worker sign and send each transfer once", async () => {
+	test("two overlapping ticks of one worker sign and send each transfer once", async () => {
 		const gateway = setup();
 		const original = gateway.chain.answer.signPayout;
 		let release = () => {};
@@ -232,7 +232,7 @@ describe("payouts send", () => {
 		expect(gateway.row().status).toBe(TransferStatus.Confirmed);
 	});
 
-	it("NEW-25 a failed pending-to-sent guarded write prevents broadcast", async () => {
+	test("a failed pending-to-sent guarded write prevents broadcast", async () => {
 		const gateway = setup();
 		const deps = {
 			...gateway.deps,

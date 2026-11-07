@@ -1,5 +1,5 @@
 import type { Hono } from "hono";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { taskById } from "../tasks/index.js";
 import {
 	createDraft,
@@ -75,7 +75,7 @@ const approve = async (
 };
 
 describe("payout totals", () => {
-	it("PO-61 role totals count only confirmed transfers and the right legs", async () => {
+	test("role totals count only confirmed transfers and the right legs", async () => {
 		const gateway = createTestGateway();
 		const { app, database } = gateway;
 		const firmB = testWallet(11);

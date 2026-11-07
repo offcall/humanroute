@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { TransferStatus } from "../store/index.js";
 import {
 	createTestGateway,
@@ -49,7 +49,7 @@ afterEach(() => {
 });
 
 describe("payouts loop and preflight", () => {
-	it("PO-50 sends nothing and counts no attempt while the preflight fails", async () => {
+	test("sends nothing and counts no attempt while the preflight fails", async () => {
 		vi.useFakeTimers();
 		const gateway = setup();
 		gateway.problems.push("hold wallet needs at least 0.05 SOL for fees");
@@ -72,7 +72,7 @@ describe("payouts loop and preflight", () => {
 		});
 	});
 
-	it("PO-51 logs payouts paused and resumed once per transition and resumes sending", async () => {
+	test("logs payouts paused and resumed once per transition and resumes sending", async () => {
 		const gateway = setup();
 		gateway.problems.push("rpc check failed");
 

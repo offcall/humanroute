@@ -6,7 +6,7 @@ import {
 	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { MEMO_PROGRAM_ID, signPayout } from "./payout.js";
 import type { PayoutLeg, TransferParams } from "./types.js";
 
@@ -49,7 +49,7 @@ const ataOf = (owner: string | PublicKey) =>
 	getAssociatedTokenAddressSync(mint, new PublicKey(owner));
 
 describe("payout transaction", () => {
-	it("CH-10 builds idempotent ATA creation for every recipient, then one TransferChecked per leg, then the memo last", () => {
+	test("builds idempotent ATA creation for every recipient, then one TransferChecked per leg, then the memo last", () => {
 		const memo = "hr:task-1 — ünïcödé ✓";
 		const txn = decode(sign(legsOf([400000n, 90000n, 10000n]), memo).bytes);
 		const kinds = txn.instructions.map((ix) => {
@@ -81,7 +81,7 @@ describe("payout transaction", () => {
 		]);
 	});
 
-	it("CH-11 transfers each leg's exact amount from the hold ATA with the hold as authority", () => {
+	test("transfers each leg's exact amount from the hold ATA with the hold as authority", () => {
 		const units = [400001n, 89999n, 10000n];
 		const transfers = transfersOf(decode(sign(legsOf(units)).bytes));
 
@@ -99,7 +99,7 @@ describe("payout transaction", () => {
 		]);
 	});
 
-	it("CH-12 makes the hold the fee payer and only signer and returns its base58 signature, blockhash and last valid height", () => {
+	test("makes the hold the fee payer and only signer and returns its base58 signature, blockhash and last valid height", () => {
 		const signed = sign(legsOf([500000n]));
 		const txn = decode(signed.bytes);
 
@@ -116,7 +116,7 @@ describe("payout transaction", () => {
 		expect(signed.lastValidBlockHeight).toBe(4242);
 	});
 
-	it("CH-13 skips zero legs and throws on a negative leg or when every leg is zero", () => {
+	test("skips zero legs and throws on a negative leg or when every leg is zero", () => {
 		const txn = decode(sign(legsOf([500000n, 0n, 0n])).bytes);
 		expect(transfersOf(txn).map((ix) => ix.data.amount)).toEqual([500000n]);
 		expect(txn.instructions).toHaveLength(3);
@@ -125,12 +125,12 @@ describe("payout transaction", () => {
 		expect(() => sign(legsOf([0n, 0n]))).toThrow(/non-zero/);
 	});
 
-	it.each([
+	test.each([
 		["linguist = agency", [linguist, linguist, fee]],
 		["every recipient the same wallet", [fee, fee, fee]],
 		["recipient = hold", [hold.publicKey.toBase58(), agency, fee]],
 	])(
-		"NEW-21 coincident recipient wallets conserve the entire split in one signed transaction (%s)",
+		"coincident recipient wallets conserve the entire split in one signed transaction (%s)",
 		(_name, wallets) => {
 			const units = [400000n, 90000n, 10000n];
 			const txn = decode(sign(legsOf(units, wallets)).bytes);

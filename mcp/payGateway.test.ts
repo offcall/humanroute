@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { offerFor, unsignedFor } from "./fakePayment.js";
 import { jsonResponse, nth, stubFetch } from "./fakes.js";
 import { createPayClient } from "./payGateway.js";
@@ -23,8 +23,8 @@ afterEach(() => {
 	vi.restoreAllMocks();
 });
 
-describe("MC-30T pay gateway client outcomes", () => {
-	it("MC-30 offer reads the exact requirement and resource from the 402", async () => {
+describe("pay gateway client outcomes", () => {
+	test("offer reads the exact requirement and resource from the 402", async () => {
 		const calls = answer(() =>
 			jsonResponse(402, {}, { "PAYMENT-REQUIRED": paymentRequired() }),
 		);
@@ -37,7 +37,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 		expect(nth(calls, 0).init?.method).toBe("POST");
 	});
 
-	it("MC-31 offer refuses a non-402 answer", async () => {
+	test("offer refuses a non-402 answer", async () => {
 		answer(() => jsonResponse(404, { error: "not_found" }));
 
 		expect(await client.offer("drf_1")).toEqual({
@@ -46,7 +46,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 		});
 	});
 
-	it.each([
+	test.each([
 		["autopay_off", {}, "auto-pay is off for this firm"],
 		[
 			"autopay_limit",
@@ -61,28 +61,23 @@ describe("MC-30T pay gateway client outcomes", () => {
 		["no_usdc_account", {}, "has no USDC account yet"],
 		["draft_paid", {}, "this draft is already paid: call get_task"],
 		["not_found", {}, "do not wait again or create a new draft automatically"],
-	])(
-		"MC-32 unsigned maps %s to a user instruction",
-		async (code, extra, text) => {
-			const calls = answer(() => jsonResponse(409, { error: code, ...extra }));
+	])("unsigned maps %s to a user instruction", async (code, extra, text) => {
+		const calls = answer(() => jsonResponse(409, { error: code, ...extra }));
 
-			const unsigned = await client.unsigned("tok_1", "drf_1", "FEE");
+		const unsigned = await client.unsigned("tok_1", "drf_1", "FEE");
 
-			expect(unsigned).toEqual({
-				ok: false,
-				error: expect.stringContaining(text),
-			});
-			expect(nth(calls, 0).url).toBe(`${BASE}/api/orders/draft/drf_1/unsigned`);
-			expect(
-				new Headers(nth(calls, 0).init?.headers).get("authorization"),
-			).toBe("Bearer tok_1");
-			expect(nth(calls, 0).init?.body).toBe(
-				JSON.stringify({ feePayer: "FEE" }),
-			);
-		},
-	);
+		expect(unsigned).toEqual({
+			ok: false,
+			error: expect.stringContaining(text),
+		});
+		expect(nth(calls, 0).url).toBe(`${BASE}/api/orders/draft/drf_1/unsigned`);
+		expect(new Headers(nth(calls, 0).init?.headers).get("authorization")).toBe(
+			"Bearer tok_1",
+		);
+		expect(nth(calls, 0).init?.body).toBe(JSON.stringify({ feePayer: "FEE" }));
+	});
 
-	it("MC-32 unsigned returns the gateway's unsigned payment", async () => {
+	test("unsigned returns the gateway's unsigned payment", async () => {
 		answer(() => jsonResponse(200, unsignedFor()));
 
 		expect(await client.unsigned("tok_1", "drf_1", "FEE")).toEqual({
@@ -91,7 +86,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 		});
 	});
 
-	it("MC-33 a 201 is the paid order", async () => {
+	test("a 201 is the paid order", async () => {
 		const calls = answer(() =>
 			jsonResponse(201, { orderId: "ord_1", payTx: "tx1" }),
 		);
@@ -108,7 +103,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 		).toBe("HDR");
 	});
 
-	it("MC-34 a 409 draft_paid is already paid, not an error", async () => {
+	test("a 409 draft_paid is already paid, not an error", async () => {
 		answer(() => jsonResponse(409, { error: "draft_paid" }));
 
 		expect(await client.pay("drf_1", "HDR")).toEqual({
@@ -117,7 +112,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 		});
 	});
 
-	it("MC-35 a 409 payment_in_progress says still settling and forbids a new prepare_payment", async () => {
+	test("a 409 payment_in_progress says still settling and forbids a new prepare_payment", async () => {
 		answer(() => jsonResponse(409, { error: "payment_in_progress" }));
 
 		const paid = await client.pay("drf_1", "HDR");
@@ -129,7 +124,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 		expect(paid.ok ? "" : paid.error).toContain("do not call prepare_payment");
 	});
 
-	it("MC-36 a 502 orphan_payment says the money was taken, with payTx, and forbids paying again", async () => {
+	test("a 502 orphan_payment says the money was taken, with payTx, and forbids paying again", async () => {
 		answer(() =>
 			jsonResponse(502, { error: "orphan_payment", payTx: "txOrphan" }),
 		);
@@ -143,13 +138,13 @@ describe("MC-30T pay gateway client outcomes", () => {
 		expect(error).not.toContain("prepare_payment again");
 	});
 
-	it.each([
+	test.each([
 		["HTTP 500", () => jsonResponse(500, { error: "internal_error" })],
 		["HTTP 502", () => jsonResponse(502, { error: "bad_gateway" })],
 		["HTTP 503", () => jsonResponse(503, {})],
 		["invalid JSON", () => new Response("<html>oops</html>", { status: 502 })],
 	])(
-		"MC-37 %s may have settled: get_task, ask before paying again",
+		"%s may have settled: get_task, ask before paying again",
 		async (_name, response) => {
 			answer(response);
 
@@ -165,7 +160,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 		},
 	);
 
-	it.each([
+	test.each([
 		[
 			"a connection error",
 			new TypeError("fetch failed"),
@@ -177,7 +172,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 			"gateway did not answer in time",
 		],
 	])(
-		"MC-37 %s may have settled: get_task, ask before paying again",
+		"%s may have settled: get_task, ask before paying again",
 		async (_name, thrown, reason) => {
 			const timeout = vi.spyOn(AbortSignal, "timeout");
 			stubFetch(async () => {
@@ -195,7 +190,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 		},
 	);
 
-	it("MC-38 a 402 reason comes from PAYMENT-RESPONSE, else PAYMENT-REQUIRED", async () => {
+	test("a 402 reason comes from PAYMENT-RESPONSE, else PAYMENT-REQUIRED", async () => {
 		answer(() =>
 			jsonResponse(
 				402,
@@ -230,7 +225,7 @@ describe("MC-30T pay gateway client outcomes", () => {
 		});
 	});
 
-	it("MC-39 a 201 with an unreadable body is settled: check get_task, never failed", async () => {
+	test("a 201 with an unreadable body is settled: check get_task, never failed", async () => {
 		answer(() => new Response("not json", { status: 201 }));
 
 		const paid = await client.pay("drf_1", "HDR");

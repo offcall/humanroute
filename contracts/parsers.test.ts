@@ -1,6 +1,6 @@
 // Real gateway responses (createTestGateway) through the MCP and web parsers: every parsed value
 // equals the gateway's field, bigint amounts equal their decimal strings, extra fields are ignored.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	parseDraft,
 	parseDraftStatus,
@@ -117,7 +117,7 @@ const scene = async () => {
 };
 
 describe("cross-process parsers", () => {
-	it("CT-10 real gateway responses parse in the MCP parsers with equal values", async () => {
+	test("real gateway responses parse in the MCP parsers with equal values", async () => {
 		const { app, firm, linguist, read, post, worker } = await scene();
 		const bearer = { bearer: firm.mcpToken };
 		const draft = await createDraft(app, firm.mcpToken);
@@ -197,7 +197,7 @@ describe("cross-process parsers", () => {
 		);
 	});
 
-	it("CT-11 real gateway responses parse in the web parsers with equal values", async () => {
+	test("real gateway responses parse in the web parsers with equal values", async () => {
 		const { app, chain, firm, agency, linguist, read, post, worker } =
 			await scene();
 		const asFirm = { cookie: firm.cookie };

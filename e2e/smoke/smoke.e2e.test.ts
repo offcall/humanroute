@@ -1,7 +1,7 @@
 // Read-only smoke of a running target (ADR 0038), no setup: SMOKE_GATEWAY_URL (required),
 // SMOKE_MCP_URL and SMOKE_MCP_TOKEN (operator-supplied, for the tool list). GET only on the
 // gateway; nothing is created, paid or changed. Skipped when SMOKE_GATEWAY_URL is not set.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 
 const gateway = (process.env.SMOKE_GATEWAY_URL ?? "").replace(/\/$/, "");
 const mcpUrl = process.env.SMOKE_MCP_URL ?? "";
@@ -28,14 +28,14 @@ const mcpPost = (body: unknown, token?: string) =>
 	});
 
 describe.runIf(gateway !== "")("smoke", () => {
-	it("EE-40 /health answers ready true", async () => {
+	test("/health answers ready true", async () => {
 		const res = await fetch(`${gateway}/health`);
 		expect(res.status).toBe(200);
 		expect(await json(res)).toEqual({ ok: true, ready: true });
 	});
 
-	it.runIf(mcpUrl !== "")(
-		"EE-41 /mcp answers 401 to POST without a token, 405 to GET, 404 on other paths, and lists seven tools with a token",
+	test.runIf(mcpUrl !== "")(
+		"/mcp answers 401 to POST without a token, 405 to GET, 404 on other paths, and lists seven tools with a token",
 		async () => {
 			const list = { jsonrpc: "2.0", id: 1, method: "tools/list" };
 			expect((await mcpPost(list)).status).toBe(401);
@@ -63,7 +63,7 @@ describe.runIf(gateway !== "")("smoke", () => {
 		},
 	);
 
-	it("EE-42 the SPA is served for / and client routes and discovered assets load with their MIME types", async () => {
+	test("the SPA is served for / and client routes and discovered assets load with their MIME types", async () => {
 		const index = await fetch(`${gateway}/`);
 		expect(index.status).toBe(200);
 		expect(index.headers.get("content-type")).toContain("text/html");
@@ -91,7 +91,7 @@ describe.runIf(gateway !== "")("smoke", () => {
 		expect(missing.status).toBe(404);
 	});
 
-	it("EE-43 unknown GET /api and /x paths answer 404 JSON and an unknown draft answers 404 not_found", async () => {
+	test("unknown GET /api and /x paths answer 404 JSON and an unknown draft answers 404 not_found", async () => {
 		for (const path of ["/api/smoke-unknown", "/x/smoke-unknown"]) {
 			const res = await fetch(`${gateway}${path}`);
 			expect(res.status, path).toBe(404);

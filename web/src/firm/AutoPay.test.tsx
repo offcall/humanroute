@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import { AutoPayForm } from "./AutoPayForm";
 import { AutoPayOn } from "./AutoPayOn";
 
@@ -33,8 +33,8 @@ const faucetShown = (): boolean =>
 
 afterEach(cleanup);
 
-describe("WEB-02 Allow and Turn off are disabled without fee SOL (below 10000 lamports)", () => {
-	it.each([
+describe("Allow and Turn off are disabled without fee SOL (below 10000 lamports)", () => {
+	test.each([
 		[9_999, true],
 		[10_000, false],
 	])(

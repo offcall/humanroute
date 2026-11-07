@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import {
 	type ChainResult,
 	ErrorKind,
@@ -78,7 +78,7 @@ afterEach(() => {
 });
 
 describe("payouts recovery of sent transfers", () => {
-	it("PO-30 a sent transfer becomes confirmed when its signature is confirmed", async () => {
+	test("a sent transfer becomes confirmed when its signature is confirmed", async () => {
 		const gateway = setup();
 		await gateway.worker.tick();
 
@@ -89,7 +89,7 @@ describe("payouts recovery of sent transfers", () => {
 		expect(gateway.count("signPayout")).toBe(0);
 	});
 
-	it("PO-31 a sent transfer stays sent while its signature is pending", async () => {
+	test("a sent transfer stays sent while its signature is pending", async () => {
 		const gateway = setup();
 		gateway.statuses({ [OLD_SIG]: { state: "pending" } });
 		gateway.height(LAST_VALID + 50);
@@ -101,7 +101,7 @@ describe("payouts recovery of sent transfers", () => {
 		expect(gateway.count("signPayout")).toBe(0);
 	});
 
-	it("PO-32 a sent transfer becomes failed when the chain reports an on-chain error", async () => {
+	test("a sent transfer becomes failed when the chain reports an on-chain error", async () => {
 		const gateway = setup();
 		gateway.statuses({ [OLD_SIG]: { state: "failed", error: '{"Custom":1}' } });
 
@@ -115,8 +115,8 @@ describe("payouts recovery of sent transfers", () => {
 		expect(gateway.count("signPayout")).toBe(0);
 	});
 
-	it.each([LAST_VALID, LAST_VALID - 1])(
-		"PO-33 nothing happens while the signature is unknown and the blockhash can still land (height %i)",
+	test.each([LAST_VALID, LAST_VALID - 1])(
+		"nothing happens while the signature is unknown and the blockhash can still land (height %i)",
 		async (at) => {
 			const gateway = setup();
 			gateway.statuses({});
@@ -130,7 +130,7 @@ describe("payouts recovery of sent transfers", () => {
 		},
 	);
 
-	it("PO-34 an unknown signature with an expired blockhash and a confirmed hold transaction carrying the memo is confirmed with that transaction", async () => {
+	test("an unknown signature with an expired blockhash and a confirmed hold transaction carrying the memo is confirmed with that transaction", async () => {
 		const gateway = setup();
 		gateway.statuses({ "memo-sig": { state: "confirmed" } });
 		gateway.height(LAST_VALID + 1);
@@ -153,8 +153,8 @@ describe("payouts recovery of sent transfers", () => {
 		["unknown", chainOk({ state: "unknown" })],
 		["unavailable", chainFail(ErrorKind.Retryable, "fetch failed")],
 	];
-	it.each(unresolved)(
-		"NEW-02 a discovered memo never permits resend while its signature is unresolved (%s)",
+	test.each(unresolved)(
+		"a discovered memo never permits resend while its signature is unresolved (%s)",
 		async (_name, memoStatus) => {
 			const gateway = setup();
 			gateway.height(LAST_VALID + 1);
@@ -173,7 +173,7 @@ describe("payouts recovery of sent transfers", () => {
 		},
 	);
 
-	it("PO-35 an unknown signature with an expired blockhash and no memo goes back to pending and is re-signed after the backoff", async () => {
+	test("an unknown signature with an expired blockhash and no memo goes back to pending and is re-signed after the backoff", async () => {
 		const gateway = setup();
 		gateway.statuses({});
 		gateway.height(LAST_VALID + 1);
@@ -203,12 +203,12 @@ describe("payouts recovery of sent transfers", () => {
 		});
 	});
 
-	it.each([
+	test.each([
 		["status", "signatureStatus"],
 		["height", "blockHeight"],
 		["memo", "findMemo"],
 	])(
-		"PO-36 no decision while the RPC is unavailable (%s read fails)",
+		"no decision while the RPC is unavailable (%s read fails)",
 		async (_name, method) => {
 			const gateway = setup();
 			gateway.statuses({});
@@ -231,8 +231,8 @@ describe("payouts recovery of sent transfers", () => {
 		},
 	);
 
-	describe("PO-37 worker start recovers sent transfers left by a crash", () => {
-		it("landed but unobserved: confirmed on start", async () => {
+	describe("worker start recovers sent transfers left by a crash", () => {
+		test("landed but unobserved: confirmed on start", async () => {
 			vi.useFakeTimers();
 			const gateway = setup();
 			const restarted = createTaskWorker(gateway.payouts);
@@ -247,7 +247,7 @@ describe("payouts recovery of sent transfers", () => {
 			expect(gateway.count("signPayout")).toBe(0);
 		});
 
-		it("crashed before broadcast: not re-signed while live, re-signed once after expiry with no memo", async () => {
+		test("crashed before broadcast: not re-signed while live, re-signed once after expiry with no memo", async () => {
 			vi.useFakeTimers();
 			const gateway = setup();
 			gateway.statuses({});
@@ -280,7 +280,7 @@ describe("payouts recovery of sent transfers", () => {
 		});
 	});
 
-	it("PO-38 a sent row without signature or last valid block height goes back to pending with attempts + 1", async () => {
+	test("a sent row without signature or last valid block height goes back to pending with attempts + 1", async () => {
 		const gateway = setup();
 		const clear = (column: string) =>
 			gateway.database
@@ -308,8 +308,8 @@ describe("payouts recovery of sent transfers", () => {
 		});
 	});
 
-	describe("NEW-03 memo lookup distinguishes a successful exact memo from misleading or incomplete history (worker)", () => {
-		it("searches back to the transfer's creation and fails an uncovered history without signing", async () => {
+	describe("memo lookup distinguishes a successful exact memo from misleading or incomplete history (worker)", () => {
+		test("searches back to the transfer's creation and fails an uncovered history without signing", async () => {
 			const gateway = setup();
 			gateway.statuses({});
 			gateway.height(LAST_VALID + 1);

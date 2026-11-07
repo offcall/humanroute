@@ -1,5 +1,5 @@
 // Order recording is atomic (ADR 0022): a failure part-way leaves no rows, only an orphan.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -47,7 +47,7 @@ const expectNothingRecorded = (gateway: TestGateway) => {
 };
 
 describe("recordOrder atomicity", () => {
-	it("NEW-07 a later task-insert failure rolls back the complete order", async () => {
+	test("a later task-insert failure rolls back the complete order", async () => {
 		const gateway = createTestGateway();
 		const { res, draft } = await payWithFailingTasks(gateway);
 
@@ -64,7 +64,7 @@ describe("recordOrder atomicity", () => {
 		);
 	});
 
-	it("NEW-07 still reports an orphan if orphan storage fails", async () => {
+	test("still reports an orphan if orphan storage fails", async () => {
 		const gateway = createTestGateway();
 		gateway.database.exec(FAIL_ORPHAN);
 		const { res, draft } = await payWithFailingTasks(gateway);

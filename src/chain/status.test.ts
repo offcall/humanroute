@@ -3,7 +3,7 @@ import {
 	type SignatureStatus as RawStatus,
 	type TransactionConfirmationStatus,
 } from "@solana/web3.js";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { Commitment } from "../config/index.js";
 import { blockHeight, signatureStatus } from "./status.js";
 import { ErrorKind } from "./types.js";
@@ -21,8 +21,8 @@ const stub = (value: RawStatus | null) => {
 	return { conn, lookup };
 };
 
-describe("NEW-01 uses transaction history and maps raw RPC status at the configured commitment", () => {
-	it.each([
+describe("uses transaction history and maps raw RPC status at the configured commitment", () => {
+	test.each([
 		["null", null, Commitment.Confirmed, { state: "unknown" }],
 		[
 			"an on-chain error",
@@ -67,7 +67,7 @@ describe("NEW-01 uses transaction history and maps raw RPC status at the configu
 		});
 	});
 
-	it("classifies lookup errors in the Prepare phase", async () => {
+	test("classifies lookup errors in the Prepare phase", async () => {
 		const conn = new Connection("http://rpc.invalid");
 		vi.spyOn(conn, "getSignatureStatuses").mockRejectedValue(
 			new Error("request timed out"),

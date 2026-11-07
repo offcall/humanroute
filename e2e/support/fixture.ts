@@ -1,5 +1,5 @@
 // Per-test fixtures: a registered firm on a funded wallet, an agency with one linguist for
-// en->es/fr/de, and a paid order. Every e2e case builds its own (no dependency on another `it`).
+// en->es/fr/de, and a paid order. Every e2e case builds its own (no dependency on another `test`).
 import { firmKey, gatewayUrl } from "./env.js";
 import { createDraft, type Draft, type Paid, payDraft } from "./orders.js";
 import {

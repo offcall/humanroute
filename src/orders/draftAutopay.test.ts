@@ -1,6 +1,6 @@
 // Advisory auto-pay snapshot at draft creation (ADR 0036): available only when every check
 // passes, unknown when the chain cannot tell within 2 s; never builds or sends a payment.
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import {
 	chainFail,
 	createDraft,
@@ -21,7 +21,7 @@ import {
 	type OrdersDeps,
 } from "./types.js";
 
-// Draft creation through the wired gateway sleeps with node:timers/promises; AP-14 makes it instant.
+// Draft creation through the wired gateway sleeps with node:timers/promises; this test makes it instant.
 const timers = vi.hoisted(() => ({ instant: false }));
 vi.mock("node:timers/promises", async (importOriginal) => {
 	const real = await importOriginal<typeof import("node:timers/promises")>();
@@ -103,14 +103,14 @@ describe("draft auto-pay snapshot", () => {
 		["balance short", held(TOTAL - 1n, TOTAL), AutopayStatus.Unavailable],
 	];
 
-	it.each(rows)(
-		"AP-10 the draft snapshot is available only when every check passes: %s",
+	test.each(rows)(
+		"the draft snapshot is available only when every check passes: %s",
 		async (_name, account, expected) => {
 			expect(await draftAutopay(answering(account), DRAFT)).toBe(expected);
 		},
 	);
 
-	it("AP-12 unknown when the firm has no wallet or the chain read fails or throws", async () => {
+	test("unknown when the firm has no wallet or the chain read fails or throws", async () => {
 		const read = vi.fn(async () => ({
 			ok: true as const,
 			value: held(TOTAL, TOTAL),
@@ -128,7 +128,7 @@ describe("draft auto-pay snapshot", () => {
 		expect(await draftAutopay(thrown, DRAFT)).toBe(AutopayStatus.Unknown);
 	});
 
-	it("AP-13 unknown when the chain does not answer within 2 s", async () => {
+	test("unknown when the chain does not answer within 2 s", async () => {
 		const read = deferred<ChainRead<FirmTokenAccount>>();
 		const deadline = deferred<undefined>();
 		const sleeps: { millis: number; signal: AbortSignal }[] = [];
@@ -158,8 +158,8 @@ describe("draft creation with an unknown snapshot", () => {
 		["the chain does not answer within 2 s", "hang"],
 	];
 
-	it.each(rows)(
-		"AP-14 draft creation still answers 201 when the snapshot is unknown: %s",
+	test.each(rows)(
+		"draft creation still answers 201 when the snapshot is unknown: %s",
 		async (_name, mode) => {
 			const gateway = createTestGateway();
 			const firm = await registerFirm(gateway.app, WALLETS.firm);

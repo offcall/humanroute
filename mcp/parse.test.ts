@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	parseDraft,
 	parseDraftStatus,
@@ -33,8 +33,8 @@ const task = {
 	workDeadline: "2026-11-08T12:00:00.000Z",
 };
 
-describe("MC-20T gateway response parsers", () => {
-	it("MC-20 parseDraft accepts the gateway draft; missing autopay is unknown", () => {
+describe("gateway response parsers", () => {
+	test("parseDraft accepts the gateway draft; missing autopay is unknown", () => {
 		expect(parseDraft(draft)).toEqual({
 			ok: true,
 			value: { ...draft, autopay: AutopayStatus.Available },
@@ -46,20 +46,20 @@ describe("MC-20T gateway response parsers", () => {
 		});
 	});
 
-	it.each([
+	test.each([
 		["an invalid autopay value", { autopay: "maybe" }],
 		["a null autopay", { autopay: null }],
 		["a decimal price", { priceUnits: "1.5" }],
 		["a negative total", { totalUnits: "-1" }],
 		["a numeric price", { priceUnits: 1000000 }],
-	])("MC-21 parseDraft rejects %s", (_name, change) => {
+	])("parseDraft rejects %s", (_name, change) => {
 		expect(parseDraft({ ...draft, ...change })).toEqual({
 			ok: false,
 			error: "gateway draft has an unexpected shape",
 		});
 	});
 
-	it("MC-22 parseDraftStatus keeps orderId and payUrl only when present", () => {
+	test("parseDraftStatus keeps orderId and payUrl only when present", () => {
 		const bare = parseDraftStatus(status);
 		expect(bare).toEqual({
 			ok: true,
@@ -82,7 +82,7 @@ describe("MC-20T gateway response parsers", () => {
 		expect(parseDraftStatus({ ...status, state: "expired" }).ok).toBe(false);
 	});
 
-	it("MC-23 parseOrder fails the whole order on an unknown public state", () => {
+	test("parseOrder fails the whole order on an unknown public state", () => {
 		expect(parseOrder({ orderId: "ord_1", tasks: [task] })).toEqual({
 			ok: true,
 			value: {
@@ -98,7 +98,7 @@ describe("MC-20T gateway response parsers", () => {
 		).toEqual({ ok: false, error: "gateway order has an unexpected shape" });
 	});
 
-	it("MC-24 parseTask requires claimDeadline and accepts null result, reason and workDeadline", () => {
+	test("parseTask requires claimDeadline and accepts null result, reason and workDeadline", () => {
 		const nulls = { ...task, result: null, reason: null, workDeadline: null };
 		expect(parseTask(nulls)).toEqual({
 			ok: true,

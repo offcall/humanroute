@@ -1,6 +1,6 @@
 // The settled()/PAYMENT-RESPONSE seam: order or orphan (failure table row 8, ADR 0016, ADR 0022).
 import { Hono } from "hono";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { openStore } from "../store/index.js";
 import { tasksSlice } from "../tasks/index.js";
 import {
@@ -114,7 +114,7 @@ const expectOrphan = async (
 };
 
 describe("settled", () => {
-	it("OR-30 a settlement on another network becomes an orphan", async () => {
+	test("a settlement on another network becomes an orphan", async () => {
 		const world = seam();
 		const target = world.draft();
 		const header = settleHeader({ network: "solana:mainnet" });
@@ -127,12 +127,12 @@ describe("settled", () => {
 		expect(world.count("orders")).toBe(0);
 	});
 
-	it.each([
+	test.each([
 		["missing", { payer: undefined }],
 		["malformed", { payer: "not-a-key!" }],
 		["wrong-length", { payer: "1111" }],
 	])(
-		"OR-31 a settlement with a %s payer becomes an orphan (invalid_payer)",
+		"a settlement with a %s payer becomes an orphan (invalid_payer)",
 		async (_name, overrides) => {
 			const world = seam();
 			const target = world.draft();
@@ -151,7 +151,7 @@ describe("settled", () => {
 		},
 	);
 
-	it.each([
+	test.each([
 		["malformed base64", "%%%", null],
 		["malformed JSON", Buffer.from("{oops").toString("base64"), null],
 		["a non-object", encoded([1, 2]), null],
@@ -159,7 +159,7 @@ describe("settled", () => {
 		["no network", settleHeader({ network: undefined }), "pay-tx-1"],
 		["success false", settleHeader({ success: false }), "pay-tx-1"],
 	])(
-		"OR-32 an unreadable settlement (%s) becomes an orphan (unparsable_settle)",
+		"an unreadable settlement (%s) becomes an orphan (unparsable_settle)",
 		async (_name, header, payTx) => {
 			const world = seam();
 			const target = world.draft();
@@ -177,7 +177,7 @@ describe("settled", () => {
 		},
 	);
 
-	it.each([
+	test.each([
 		[
 			"the pay_tx of an existing order",
 			(world: Seam) =>
@@ -191,7 +191,7 @@ describe("settled", () => {
   WHEN NEW.target_lang = 'fr' BEGIN SELECT RAISE(ABORT, 'disk full'); END`),
 		],
 	])(
-		"OR-33 a settlement whose order cannot be recorded becomes an orphan (record_failed): %s",
+		"a settlement whose order cannot be recorded becomes an orphan (record_failed): %s",
 		async (_name, arrange) => {
 			const world = seam();
 			arrange(world);
@@ -212,7 +212,7 @@ describe("settled", () => {
 		},
 	);
 
-	it("OR-34 logs best-effort payment identity before validation and recording", async () => {
+	test("logs best-effort payment identity before validation and recording", async () => {
 		const world = seam();
 		const target = world.draft();
 		await world.post(settleHeader({ network: "solana:mainnet" }), target);
@@ -228,7 +228,7 @@ describe("settled", () => {
 		expect(world.logs[0]).toBe(firstLines[0]);
 	});
 
-	it("OR-35 counts unresolved orphans", () => {
+	test("counts unresolved orphans", () => {
 		const world = seam();
 		const insert = world.database.prepare(
 			"INSERT INTO orphans (pay_tx, raw_header, reason, created_at, resolved_at) VALUES (?, 'h', 'record_failed', 0, ?)",
@@ -246,7 +246,7 @@ const flushImmediate = () =>
 	new Promise<void>((resolve) => setImmediate(resolve));
 
 describe("new-task hook", () => {
-	it("NT-17 a paid order triggers the new-task hook after the 201 and a failing hook never changes the 201", async () => {
+	test("a paid order triggers the new-task hook after the 201 and a failing hook never changes the 201", async () => {
 		const seen: CreatedTask[][] = [];
 		const world = seam(async (tasks) => {
 			seen.push(tasks);

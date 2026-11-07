@@ -1,6 +1,6 @@
-// Browser BR-05: auto-pay setup in the firm cabinet. Phantom signs and sends the v0 Approve and
+// Auto-pay setup in the firm cabinet. Phantom signs and sends the v0 Approve and
 // Revoke built by the page; the bridge sends them to the local RPC and returns {signature}.
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { setupAgent } from "../support/agent.js";
 import { tokenAccount } from "../support/autopay.js";
 import { ataOf } from "../support/chain.js";
@@ -23,7 +23,7 @@ describe("firm auto-pay", () => {
 	});
 	captureFailures(() => session);
 
-	it("BR-05 auto-pay setup shows the command, approves the limit in Phantom, shows the allowance and Turn off revokes it", async () => {
+	test("auto-pay setup shows the command, approves the limit in Phantom, shows the allowance and Turn off revokes it", async () => {
 		const env = e2eEnv();
 		const firm = await firmAt(FirmSlot.BrowserAutopay);
 		const wallet = firm.key.publicKey.toBase58();

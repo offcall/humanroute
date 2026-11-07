@@ -1,6 +1,6 @@
 // Slice migrations and the v1 refusal (ADR 0019, 0022).
 import SqliteDriver from "better-sqlite3";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { assertNotLegacy } from "./legacy.js";
 import { migrateSlices, type SliceDefinition } from "./slices.js";
 import type { Database } from "./types.js";
@@ -22,7 +22,7 @@ const recorded = (database: Database): unknown[] =>
 		.all();
 
 describe("migrateSlices", () => {
-	it("ST-01 applies each slice's migrations once and records slice:version", () => {
+	test("applies each slice's migrations once and records slice:version", () => {
 		const database = new SqliteDriver(":memory:");
 		const slices: SliceDefinition[] = [
 			{
@@ -54,7 +54,7 @@ describe("migrateSlices", () => {
 		expect(recorded(database)).toHaveLength(3);
 	});
 
-	it("ST-04 a failing migration rolls back only itself", () => {
+	test("a failing migration rolls back only itself", () => {
 		const database = new SqliteDriver(":memory:");
 		const broken = {
 			version: "0002",
@@ -83,7 +83,7 @@ describe("migrateSlices", () => {
 });
 
 describe("assertNotLegacy", () => {
-	it("ST-03 refuses a v1 database", () => {
+	test("refuses a v1 database", () => {
 		const noLedger = new SqliteDriver(":memory:");
 		noLedger.exec("CREATE TABLE jobs (id TEXT)");
 		expect(() => assertNotLegacy(noLedger)).toThrow(/legacy v1 database/);

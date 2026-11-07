@@ -1,5 +1,5 @@
 // Approve and reject by the owner firm (ADR 0030): failure table rows 21 and 22.
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -100,7 +100,7 @@ const transferCount = (scene: Scene): unknown =>
 	scene.database.prepare("SELECT COUNT(*) FROM transfers").pluck().get();
 
 describe("approve and reject", () => {
-	it("TK-30 the owner firm approves a submitted task by cookie and by MCP token", async () => {
+	test("the owner firm approves a submitted task by cookie and by MCP token", async () => {
 		const scene = await submitted();
 		const byCookie = await approve(scene, scene.es, {
 			cookie: scene.firm.cookie,
@@ -116,7 +116,7 @@ describe("approve and reject", () => {
 		expect(await expectJson(byToken, 200)).toMatchObject({ state: "approved" });
 	});
 
-	it("TK-31 another firm's cookie or token gets 403 and no credentials 401", async () => {
+	test("another firm's cookie or token gets 403 and no credentials 401", async () => {
 		const scene = await submitted();
 		const other = await registerFirm(scene.app, testWallet(41));
 		const owner = scene.firm.cookie;
@@ -178,8 +178,8 @@ describe("approve and reject", () => {
 		],
 	];
 
-	it.each(STATES)(
-		"TK-32 approve or reject of a task that is not submitted answers 409 bad_state (%s)",
+	test.each(STATES)(
+		"approve or reject of a task that is not submitted answers 409 bad_state (%s)",
 		async (state, reach) => {
 			const scene = await paidOrder();
 			await reach(scene);
@@ -198,31 +198,28 @@ describe("approve and reject", () => {
 		},
 	);
 
-	it.each([
+	test.each([
 		["missing", {}, 422],
 		["blank", { reason: "   " }, 422],
 		["1001 characters", { reason: "x".repeat(1001) }, 422],
 		["1000 characters", { reason: "x".repeat(1000) }, 200],
 		["1000 characters padded", { reason: ` ${"x".repeat(1000)}  ` }, 200],
-	])(
-		"TK-33 reject with a %s reason answers %i",
-		async (_name, body, status) => {
-			const scene = await submitted();
-			const res = await reject(
-				scene,
-				scene.es,
-				{ cookie: scene.firm.cookie },
-				body,
-			);
-			expect(res.status).toBe(status);
-			if (status === 422) {
-				expect(await res.json()).toEqual({ error: "reason_required" });
-				expect(stateOf(scene, scene.es)).toBe("submitted");
-			}
-		},
-	);
+	])("reject with a %s reason answers %i", async (_name, body, status) => {
+		const scene = await submitted();
+		const res = await reject(
+			scene,
+			scene.es,
+			{ cookie: scene.firm.cookie },
+			body,
+		);
+		expect(res.status).toBe(status);
+		if (status === 422) {
+			expect(await res.json()).toEqual({ error: "reason_required" });
+			expect(stateOf(scene, scene.es)).toBe("submitted");
+		}
+	});
 
-	it("TK-34 reject stores the trimmed reason on the task", async () => {
+	test("reject stores the trimmed reason on the task", async () => {
 		const scene = await submitted();
 		const body = { reason: "  Wrong dosage term.\n" };
 		const res = await reject(
@@ -237,7 +234,7 @@ describe("approve and reject", () => {
 		});
 	});
 
-	it("TK-35 reject with malformed JSON answers 400 invalid_json", async () => {
+	test("reject with malformed JSON answers 400 invalid_json", async () => {
 		const scene = await submitted();
 		const res = await scene.app.request(`/api/tasks/${scene.es}/reject`, {
 			method: "POST",

@@ -2,7 +2,7 @@
 // Bearer, existence, ownership, paid, body, allowance, chain; nothing is signed or sent.
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	chainFail,
 	chainOk,
@@ -78,8 +78,8 @@ const unsigned = (
 const chainMethods = (gateway: TestGateway) =>
 	gateway.chain.calls.map((call) => call.method);
 
-describe("AP-21T unsigned payment route refusals", () => {
-	it("AP-21 no token 401, unknown draft 404, expired unpaid draft 404, another firm's draft 403, in that order", async () => {
+describe("unsigned payment route refusals", () => {
+	test("no token 401, unknown draft 404, expired unpaid draft 404, another firm's draft 403, in that order", async () => {
 		const { gateway, firm, draftId } = await setup();
 		const other = await registerFirm(gateway.app, WALLETS.agency);
 
@@ -98,7 +98,7 @@ describe("AP-21T unsigned payment route refusals", () => {
 		expect(chainMethods(gateway)).toEqual([]);
 	});
 
-	it("AP-22 paid draft → 409 draft_paid with orderId", async () => {
+	test("paid draft → 409 draft_paid with orderId", async () => {
 		const { gateway, firm, draftId } = await setup();
 		const header = await paymentFor(gateway.app, draftId, WALLETS.firm, "a");
 		const paid = await expectJson(
@@ -141,8 +141,8 @@ describe("AP-21T unsigned payment route refusals", () => {
 		],
 	];
 
-	it.each(refusals)(
-		"AP-23 409 %s with zero blockhash, sign or broadcast",
+	test.each(refusals)(
+		"409 %s with zero blockhash, sign or broadcast",
 		async (_name, held, expected) => {
 			const { gateway, firm, draftId } = await setup(held);
 			const res = await unsigned(gateway, draftId, firm.mcpToken);
@@ -157,14 +157,14 @@ describe("AP-21T unsigned payment route refusals", () => {
 		["fee payer not a string", { feePayer: 42 }],
 	];
 
-	it.each(badBodies)("AP-24 %s → 422", async (_name, body) => {
+	test.each(badBodies)("%s → 422", async (_name, body) => {
 		const { gateway, firm, draftId } = await setup();
 		const res = await unsigned(gateway, draftId, firm.mcpToken, body);
 		expect(await expectJson(res, 422)).toEqual({ error: "invalid_body" });
 		expect(chainMethods(gateway)).toEqual([]);
 	});
 
-	it("AP-24 malformed JSON → 422", async () => {
+	test("malformed JSON → 422", async () => {
 		const { gateway, firm, draftId } = await setup();
 		const res = await gateway.app.request(
 			`/api/orders/draft/${draftId}/unsigned`,
@@ -181,7 +181,7 @@ describe("AP-21T unsigned payment route refusals", () => {
 		expect(chainMethods(gateway)).toEqual([]);
 	});
 
-	it("AP-25 ok=false token-account or blockhash read → 502 chain_unavailable, no signing", async () => {
+	test("ok=false token-account or blockhash read → 502 chain_unavailable, no signing", async () => {
 		const { gateway, firm, draftId } = await setup();
 		gateway.chain.answer.tokenAccount = async () =>
 			chainFail(ErrorKind.Retryable, "rpc down");
@@ -202,7 +202,7 @@ describe("AP-21T unsigned payment route refusals", () => {
 		expect(chainMethods(gateway)).toEqual(["tokenAccount", "latestBlockhash"]);
 	});
 
-	it("AP-25 a thrown chain read answers 500 without a blockhash read or signing (characterization)", async () => {
+	test("a thrown chain read answers 500 without a blockhash read or signing (characterization)", async () => {
 		const { gateway, firm, draftId } = await setup();
 		gateway.chain.answer.tokenAccount = async () => {
 			throw new Error("socket hang up");
@@ -213,7 +213,7 @@ describe("AP-21T unsigned payment route refusals", () => {
 		expect(chainMethods(gateway)).toEqual(["tokenAccount"]);
 	});
 
-	it("AP-26 preflight failing → 503 not_ready", async () => {
+	test("preflight failing → 503 not_ready", async () => {
 		const { gateway, firm, draftId } = await setup();
 		gateway.problems.push("hold wallet needs at least 0.05 SOL for fees");
 		const res = await unsigned(gateway, draftId, firm.mcpToken);

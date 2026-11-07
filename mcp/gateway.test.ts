@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { jsonResponse, nth, stubFetch } from "./fakes.js";
 import { createGatewayClient } from "./gateway.js";
 
@@ -30,7 +30,7 @@ afterEach(() => {
 });
 
 describe("gateway client", () => {
-	it.each([
+	test.each([
 		[
 			"a JSON 404 not_found",
 			() => jsonResponse(404, { error: "not_found" }),
@@ -61,7 +61,7 @@ describe("gateway client", () => {
 			{ ok: false, error: "gateway returned a body that is not JSON" },
 		],
 	])(
-		"NEW-20 distinguishes transient transport from permanent draft absence: %s",
+		"distinguishes transient transport from permanent draft absence: %s",
 		async (_name, response, expected) => {
 			stubFetch(async () => response());
 
@@ -69,7 +69,7 @@ describe("gateway client", () => {
 		},
 	);
 
-	it.each([
+	test.each([
 		[
 			"a timeout",
 			new DOMException("timed out", "TimeoutError"),
@@ -80,20 +80,17 @@ describe("gateway client", () => {
 			new TypeError("fetch failed"),
 			"gateway is unreachable",
 		],
-	])(
-		"NEW-20 reports %s as a transient failure",
-		async (_name, thrown, error) => {
-			const timeout = vi.spyOn(AbortSignal, "timeout");
-			stubFetch(async () => {
-				throw thrown;
-			});
+	])("reports %s as a transient failure", async (_name, thrown, error) => {
+		const timeout = vi.spyOn(AbortSignal, "timeout");
+		stubFetch(async () => {
+			throw thrown;
+		});
 
-			expect(await client.getDraft("drf_1")).toEqual({ ok: false, error });
-			expect(timeout).toHaveBeenCalledWith(10_000);
-		},
-	);
+		expect(await client.getDraft("drf_1")).toEqual({ ok: false, error });
+		expect(timeout).toHaveBeenCalledWith(10_000);
+	});
 
-	it("NEW-20 forwards the exact token on createDraft, getOrder, approve and reject, and none on getDraft", async () => {
+	test("forwards the exact token on createDraft, getOrder, approve and reject, and none on getDraft", async () => {
 		const token = "tok_Abc-123.xyz";
 		const calls = stubFetch(async (url) => {
 			if (url.endsWith("/api/orders/draft")) {

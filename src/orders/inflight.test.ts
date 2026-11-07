@@ -1,6 +1,6 @@
 // The in-flight lock while a settlement is pending (failure table row 17, ADR 0022).
 import type { SettleResponse } from "@x402/core/types";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -42,7 +42,7 @@ const twoDrafts = async (gateway: TestGateway): Promise<[string, string]> => {
 const inProgress = { error: "payment_in_progress" };
 
 describe("in-flight settlement", () => {
-	it("OR-23 a second request for a draft that is still settling answers 409 payment_in_progress", async () => {
+	test("a second request for a draft that is still settling answers 409 payment_in_progress", async () => {
 		const gateway = createTestGateway();
 		const [draftId] = await twoDrafts(gateway);
 		const header = await paymentFor(gateway.app, draftId, WALLETS.firm, "a");
@@ -60,7 +60,7 @@ describe("in-flight settlement", () => {
 		expect(gateway.facilitator.calls.settle).toBe(1);
 	});
 
-	it("NEW-06 one payment cannot settle against two different unpaid drafts concurrently", async () => {
+	test("one payment cannot settle against two different unpaid drafts concurrently", async () => {
 		const gateway = createTestGateway();
 		const [draftA, draftB] = await twoDrafts(gateway);
 		const header = await paymentFor(gateway.app, draftA, WALLETS.firm, "a");
@@ -97,8 +97,8 @@ describe("in-flight settlement", () => {
 		],
 	];
 
-	it.each(failures)(
-		"OR-25 after a failed settlement (%s) the draft can be paid again",
+	test.each(failures)(
+		"after a failed settlement (%s) the draft can be paid again",
 		async (_name, failing) => {
 			vi.spyOn(console, "error").mockImplementation(() => {});
 			const gateway = createTestGateway();

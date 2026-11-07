@@ -3,7 +3,7 @@ import {
 	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { Commitment } from "../config/index.js";
 import { preparePayout } from "./prepare-payout.js";
 import { ErrorKind, type PayoutLeg, type SolanaOptions } from "./types.js";
@@ -43,8 +43,8 @@ const stubConnection = (answer: () => Promise<unknown>) => {
 const prepare = (conn: Connection, legs: PayoutLeg[]) =>
 	preparePayout(conn, opts, mint, { legs, memo: "hr:task-1" });
 
-describe("CH-15 preparePayout returns Final before any RPC for a PDA, malformed, negative or all-zero leg, and Retryable when the blockhash read fails", () => {
-	it.each([
+describe("preparePayout returns Final before any RPC for a PDA, malformed, negative or all-zero leg, and Retryable when the blockhash read fails", () => {
+	test.each([
 		["a PDA owner", [{ ownerWallet: pda, amountUnits: 1n }]],
 		[
 			"a non-base58 owner",
@@ -67,7 +67,7 @@ describe("CH-15 preparePayout returns Final before any RPC for a PDA, malformed,
 		expect(latest).not.toHaveBeenCalled();
 	});
 
-	it("Retryable when the blockhash read fails", async () => {
+	test("Retryable when the blockhash read fails", async () => {
 		const { conn } = stubConnection(async () => {
 			throw new Error("fetch failed");
 		});
@@ -81,7 +81,7 @@ describe("CH-15 preparePayout returns Final before any RPC for a PDA, malformed,
 		});
 	});
 
-	it("CH-11 binds the production 6 decimals and the fetched blockhash", async () => {
+	test("binds the production 6 decimals and the fetched blockhash", async () => {
 		const { conn, latest } = stubConnection(async () => undefined);
 		const result = await prepare(conn, [
 			{ ownerWallet: wallet, amountUnits: 500000n },

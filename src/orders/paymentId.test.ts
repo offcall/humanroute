@@ -1,6 +1,6 @@
 // Payment identity (ADR 0004): the hash of the transaction message, nothing else.
 import { VersionedTransaction } from "@solana/web3.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -45,7 +45,7 @@ const resigned = (header: string): string => {
 };
 
 describe("payment id", () => {
-	it("NEW-26 malformed payment headers fail closed and legacy header normalization preserves message identity", async () => {
+	test("malformed payment headers fail closed and legacy header normalization preserves message identity", async () => {
 		const header = await genuineHeader("a");
 		const raw = decoded(header);
 		const malformed = [

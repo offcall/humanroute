@@ -1,8 +1,8 @@
-// Browser NEW-23 (finding 1): the payment really settles on the local chain, then the page loses
+// (finding 1) The payment really settles on the local chain, then the page loses
 // the answer. A forwarding gate (page.route) passes the paid POST to the gateway and drops the
 // response, or replaces it with the gateway's orphan answer. The page must never offer a second
 // payment. The orphan variant's 500 body is written by the gate, in the gateway's orphanBody shape.
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { usdcOf } from "../support/chain.js";
 import { e2eEnv, firmKey } from "../support/env.js";
 import { FirmSlot } from "../support/firms.js";
@@ -35,8 +35,8 @@ describe("pay page, unknown outcome", () => {
 	});
 	captureFailures(() => session);
 
-	it.each([Lost.Dropped, Lost.Orphan])(
-		"NEW-23 a lost response after settlement never exposes a second payment action (%s)",
+	test.each([Lost.Dropped, Lost.Orphan])(
+		"a lost response after settlement never exposes a second payment action (%s)",
 		async (lost) => {
 			const firm = await firmAt(FirmSlot.BrowserUnknown);
 			const wallet = firm.key.publicKey.toBase58();

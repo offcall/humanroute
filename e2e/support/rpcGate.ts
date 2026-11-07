@@ -1,4 +1,4 @@
-// A controllable JSON-RPC forwarder between a gateway and the validator (EE-19). Every call is
+// A controllable JSON-RPC forwarder between a gateway and the validator (gateway restart test). Every call is
 // forwarded, except sendTransaction while the gate holds sends: then it is swallowed before the
 // chain (DropBeforeChain) or forwarded and landed but never answered (LandNoReply).
 import { createServer, type IncomingMessage, type Server } from "node:http";

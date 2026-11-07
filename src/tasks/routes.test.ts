@@ -1,5 +1,5 @@
 // Board, claim, GET /api/tasks/:id and the linguist cabinet (api.md, ADR 0023, ADR 0033).
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -102,7 +102,7 @@ const boardIds = async (gateway: TestGateway, cookie: string) =>
 	).map((item) => textField(item, "taskId"));
 
 describe("board and claim", () => {
-	it("TK-01 the board shows only open tasks in the linguist's pairs, soonest claim deadline first, with the firm name", async () => {
+	test("the board shows only open tasks in the linguist's pairs, soonest claim deadline first, with the firm name", async () => {
 		const gateway = await scene();
 		gateway.clock.advance(1_000);
 		const later = await payOrder(gateway, gateway.firm.mcpToken, "order-2");
@@ -129,7 +129,7 @@ describe("board and claim", () => {
 		});
 	});
 
-	it("TK-02 the board hides a task at its claim deadline", async () => {
+	test("the board hides a task at its claim deadline", async () => {
 		const gateway = await scene();
 		gateway.clock.advance(CLAIM_WINDOW_MS - 1);
 		expect(await boardIds(gateway, gateway.linguist)).toEqual([gateway.es]);
@@ -138,7 +138,7 @@ describe("board and claim", () => {
 		expect(await boardIds(gateway, gateway.linguist)).toEqual([]);
 	});
 
-	it("TK-03 board, claim and submit are for linguists only", async () => {
+	test("board, claim and submit are for linguists only", async () => {
 		const gateway = await scene();
 		const calls = [
 			["GET", "/api/board"],
@@ -161,7 +161,7 @@ describe("board and claim", () => {
 		}
 	});
 
-	it("TK-04 the first claim wins and a second linguist gets 409 claim_taken", async () => {
+	test("the first claim wins and a second linguist gets 409 claim_taken", async () => {
 		const gateway = await scene();
 		const rival = testWallet(22);
 		const second = await joinLinguist(
@@ -190,13 +190,13 @@ describe("board and claim", () => {
 		});
 	});
 
-	it("TK-06 a claim outside the linguist's pairs answers 404", async () => {
+	test("a claim outside the linguist's pairs answers 404", async () => {
 		const gateway = await scene();
 		const res = await claim(gateway, gateway.fr, gateway.linguist);
 		expect(await expectJson(res, 404)).toEqual({ error: "not_found" });
 	});
 
-	it("TK-14 an unknown task id answers 404 on GET, claim, submit, approve and reject", async () => {
+	test("an unknown task id answers 404 on GET, claim, submit, approve and reject", async () => {
 		const gateway = await scene();
 		const unknown = "00000000-0000-4000-8000-999999999999";
 		const { app, firm, linguist } = gateway;
@@ -221,7 +221,7 @@ describe("board and claim", () => {
 });
 
 describe("task visibility", () => {
-	it("TK-08 a task is visible to the owner firm, the claimer and the claimer's agency; others 403; no credentials 401", async () => {
+	test("a task is visible to the owner firm, the claimer and the claimer's agency; others 403; no credentials 401", async () => {
 		const gateway = await scene();
 		await expectJson(await claim(gateway, gateway.es, gateway.linguist), 200);
 		const otherFirm = await registerFirm(gateway.app, testWallet(23));
@@ -250,7 +250,7 @@ describe("task visibility", () => {
 		expect(await status()).toBe(401);
 	});
 
-	it("TK-09 the owner firm's MCP token reads the task; another firm's token 403; an unknown token 401", async () => {
+	test("the owner firm's MCP token reads the task; another firm's token 403; an unknown token 401", async () => {
 		const gateway = await scene();
 		const otherFirm = await registerFirm(gateway.app, testWallet(26));
 		const status = async (bearer: string) =>
@@ -263,7 +263,7 @@ describe("task visibility", () => {
 });
 
 describe("task views", () => {
-	it("TK-10 executorPairs is filled only for the owner firm after a claim", async () => {
+	test("executorPairs is filled only for the owner firm after a claim", async () => {
 		const gateway = await scene();
 		const open = await expectJson(
 			await getTask(gateway, gateway.es, { cookie: gateway.firm.cookie }),
@@ -305,7 +305,7 @@ describe("task views", () => {
 		expect(board.tasks).toEqual([]);
 	});
 
-	it("TK-11 earnedUnits is a string only for the claimer on a payout", async () => {
+	test("earnedUnits is a string only for the claimer on a payout", async () => {
 		const gateway = await scene();
 		const { config } = gateway;
 		const agency = (500_000n * config.agencyShareBps) / 10_000n;
@@ -359,7 +359,7 @@ describe("task views", () => {
 		expect(await earned(gateway.es, { cookie: gateway.linguist })).toBe(share);
 	});
 
-	it("TK-12 translatorNo is the 1-based join order inside the agency", async () => {
+	test("translatorNo is the 1-based join order inside the agency", async () => {
 		const gateway = await scene();
 		const second = await joinLinguist(
 			gateway.app,
@@ -385,7 +385,7 @@ describe("task views", () => {
 		expect(view.translatorNo).toBe(2);
 	});
 
-	it("TK-13 the linguist cabinet shows pairs, confirmed earnings and own tasks", async () => {
+	test("the linguist cabinet shows pairs, confirmed earnings and own tasks", async () => {
 		const gateway = await scene();
 		const cabinet = () =>
 			send(gateway.app, "GET", "/api/linguist", { cookie: gateway.linguist });

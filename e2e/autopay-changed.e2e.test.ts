@@ -1,11 +1,11 @@
-// NEW-09 (flow.md row 15): a signed delegate payment whose allowance or balance changed before
+// (flow.md row 15) A signed delegate payment whose allowance or balance changed before
 // settlement is refused by the real facilitator's simulation; nothing moves, no order.
 import {
 	createAssociatedTokenAccountIdempotent,
 	transfer,
 } from "@solana/spl-token";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { approveAllowance, revokeAllowance } from "./support/agent.js";
 import {
 	type AutopayFirm,
@@ -50,9 +50,9 @@ const CHANGES: [string, Change][] = [
 	["funds moved away", moveAllFunds],
 ];
 
-describe("NEW-09 changed allowance or balance", () => {
-	it.each(CHANGES)(
-		"NEW-09 a prepared payment fails safely if allowance or balance changes before settlement (%s)",
+describe("changed allowance or balance", () => {
+	test.each(CHANGES)(
+		"a prepared payment fails safely if allowance or balance changes before settlement (%s)",
 		async (_name, change) => {
 			const fixture = await autopayFirm(FirmSlot.AutopayChanged, 2_000_000n);
 			try {
