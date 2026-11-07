@@ -2,6 +2,7 @@
 // transaction (ADR 0022). Every task refunds to the firm's login wallet (ADR 0036).
 import { withTransaction } from "../store/index.js";
 import { insertTasks, type NewTask } from "../tasks/index.js";
+import { receiptOf } from "./orderRepo.js";
 import { ORDERS_SQL } from "./sql.js";
 import type { Draft, OrdersDeps, Receipt, Settlement } from "./types.js";
 
@@ -52,6 +53,10 @@ export const recordOrder = (
 				.prepare(ORDERS_SQL.insertPayment)
 				.run(paymentId, draft.id, orderId, now);
 		}
-		const taskIds = tasks.map((task) => task.id);
-		return { orderId, taskIds, payTx: settlement.transaction };
+		// The same read as a replay, so both 201 bodies list the tasks in one order (ADR 0022).
+		const receipt = receiptOf(database, orderId);
+		if (receipt === null) {
+			throw new Error(`order ${orderId} of draft ${draft.id} not readable`);
+		}
+		return receipt;
 	});
