@@ -72,6 +72,7 @@ Memos: `hr:<taskId>` (approved), `hr:<taskId>:rejected`, `:unclaimed`, `:late` (
 | Task never claimed | refund to the firm as `:unclaimed` | payouts |
 | Signing fails with a final, non-retryable error | transfer `failed`; log `OPERATOR ACTION REQUIRED` | payouts |
 | Broadcast or RPC error, retryable | back to `pending`, attempt + 1, backoff; after 10 attempts `failed` | payouts |
+| Broadcast error that may have reached a leader (timeout, reset, 5xx) | row stays `sent`, no attempt counted; resolved by status, blockhash expiry and the memo guard (ADR 0006, 0039, 0041) | payouts |
 | Signature unseen after its blockhash expired, memo not on chain | back to `pending` and sent again (ADR 0006) | payouts |
 | Signature landed under another send (found by memo) | marked `confirmed` | payouts |
 | Signature unseen after its blockhash expired, hold memo history not covered back to the transfer's creation | transfer `failed`; log `OPERATOR ACTION REQUIRED`; requeue refuses (ADR 0039) | payouts |
