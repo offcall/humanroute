@@ -3,65 +3,27 @@
 import type { Hono } from "hono";
 import { describe, expect, test } from "vitest";
 import {
-	createDraft,
-	createTestGateway,
+	claim,
+	EN_ES_FR,
 	expectJson,
-	joinLinguist,
-	listField,
-	payDraft,
-	paymentFor,
-	registerAgency,
-	registerFirm,
+	paidOrder,
+	payOrder,
 	send,
 	signIn,
+	stateOf,
 	testWallet,
 	textField,
-	WALLETS,
 } from "../testing/index.js";
-
-const PAIRS = [
-	{ source: "en", target: "es" },
-	{ source: "en", target: "fr" },
-];
 
 // A firm, an agency, its linguist of both pairs and one paid order (es, fr), both claimed.
 const scene = async () => {
-	const gateway = createTestGateway();
-	const { app } = gateway;
-	const firm = await registerFirm(app, WALLETS.firm);
-	const agency = await registerAgency(app, WALLETS.agency);
-	const linguist = await joinLinguist(
-		app,
-		WALLETS.linguist,
-		agency.inviteCode,
-		PAIRS,
-	);
-	const draftId = textField(await createDraft(app, firm.mcpToken), "draftId");
-	const header = await paymentFor(app, draftId, WALLETS.firm, "order-1");
-	const paid = await expectJson(await payDraft(app, draftId, header), 201);
-	const order = await expectJson(
-		await send(app, "GET", `/api/orders/${textField(paid, "orderId")}`, {
-			bearer: firm.mcpToken,
-		}),
-		200,
-	);
-	const idOf = (lang: string) =>
-		textField(
-			listField(order, "tasks").find((task) => task.targetLang === lang) ?? {},
-			"taskId",
-		);
-	const tasks = { es: idOf("es"), fr: idOf("fr") };
+	const gateway = await paidOrder();
+	const tasks = { es: gateway.es, fr: gateway.fr };
 	for (const taskId of [tasks.es, tasks.fr]) {
-		await expectJson(
-			await send(app, "POST", `/api/tasks/${taskId}/claim`, {
-				cookie: linguist,
-				body: {},
-			}),
-			200,
-		);
+		await expectJson(await claim(gateway, taskId), 200);
 	}
 
-	return { ...gateway, firm, agency, linguist, tasks };
+	return { ...gateway, tasks };
 };
 
 // A request with exactly this content type (none when undefined); a byte body gets no default type.
@@ -83,12 +45,6 @@ const raw = (
 	});
 
 const REFUSED = ["text/plain; x=application/json", "text/plain", undefined];
-
-const stateOf = (
-	database: ReturnType<typeof createTestGateway>["database"],
-	taskId: string,
-) =>
-	database.prepare("SELECT state FROM tasks WHERE id = ?").pluck().get(taskId);
 
 describe("CSRF content type", () => {
 	test("cookie JSON routes require the media type essence application/json", async () => {
@@ -120,7 +76,13 @@ describe("CSRF content type", () => {
 				{},
 				200,
 			],
-			["PUT", "/api/linguist/languages", ctx.linguist, { pairs: PAIRS }, 200],
+			[
+				"PUT",
+				"/api/linguist/languages",
+				ctx.linguist,
+				{ pairs: EN_ES_FR },
+				200,
+			],
 			[
 				"POST",
 				`/api/tasks/${tasks.es}/submit`,
@@ -152,7 +114,7 @@ describe("CSRF content type", () => {
 				expect([path, type, res.status]).toEqual([path, type, 400]);
 			}
 		}
-		expect(stateOf(ctx.database, tasks.es)).toBe("claimed");
+		expect(stateOf(ctx, tasks.es)).toBe("claimed");
 
 		for (const [method, path, cookie, body, status] of routes) {
 			const res = await raw(
@@ -184,19 +146,7 @@ describe("CSRF content type", () => {
 			}),
 			200,
 		);
-		const draftId = textField(
-			await createDraft(app, ctx.firm.mcpToken),
-			"draftId",
-		);
-		const header = await paymentFor(app, draftId, WALLETS.firm, "order-2");
-		const paid = await expectJson(await payDraft(app, draftId, header), 201);
-		const order = await expectJson(
-			await send(app, "GET", `/api/orders/${textField(paid, "orderId")}`, {
-				bearer: ctx.firm.mcpToken,
-			}),
-			200,
-		);
-		const open = textField(listField(order, "tasks")[0] ?? {}, "taskId");
+		const open = (await payOrder(ctx, ctx.firm, "order-2")).es;
 		const invalid = { error: "invalid_json" };
 
 		const approvePath = `/api/tasks/${tasks.es}/approve`;
@@ -214,8 +164,8 @@ describe("CSRF content type", () => {
 			const claim = await raw(app, "POST", claimPath, ctx.linguist, type, {});
 			expect(await expectJson(claim, 400)).toEqual(invalid);
 		}
-		expect(stateOf(ctx.database, tasks.es)).toBe("submitted");
-		expect(stateOf(ctx.database, open)).toBe("open");
+		expect(stateOf(ctx, tasks.es)).toBe("submitted");
+		expect(stateOf(ctx, open)).toBe("open");
 
 		const cookieApprove = await send(app, "POST", approvePath, {
 			cookie: ctx.firm.cookie,

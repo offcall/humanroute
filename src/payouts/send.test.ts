@@ -6,11 +6,10 @@ import {
 	chainOk,
 	createTestGateway,
 	FAKE_BLOCKHASH,
-	WALLETS,
+	seedTransfer,
 } from "../testing/index.js";
-import { taskLedger } from "./ledger.js";
 import { fail, sendPending } from "./send.js";
-import { LegRole, PayoutKind, type PayoutTransfer } from "./taskTypes.js";
+import type { PayoutTransfer } from "./taskTypes.js";
 import type { SendDeps } from "./types.js";
 
 const TRANSFER_ID = "transfer-1";
@@ -18,28 +17,7 @@ const TRANSFER_ID = "transfer-1";
 // A gateway with one pending payout row and no task: the worker only sends.
 const setup = () => {
 	const gateway = createTestGateway();
-	const ledger = taskLedger(gateway.database);
-	ledger.insert(
-		{
-			id: TRANSFER_ID,
-			taskId: "task-1",
-			kind: PayoutKind.Payout,
-			legs: [
-				{ role: LegRole.Linguist, wallet: WALLETS.linguist.address, units: 1n },
-			],
-			memo: "hr:task-1",
-		},
-		gateway.clock.now(),
-	);
-	const row = (): PayoutTransfer => {
-		const found = ledger.find(TRANSFER_ID);
-		if (!found) {
-			throw new Error("transfer row is missing");
-		}
-		return found;
-	};
-	const count = (method: string) =>
-		gateway.chain.calls.filter((call) => call.method === method).length;
+	const { ledger, row, count } = seedTransfer(gateway);
 	const operatorLogs = () =>
 		gateway.logs.filter((line) => line.includes("OPERATOR ACTION REQUIRED"));
 	const deps: SendDeps<PayoutTransfer> = {

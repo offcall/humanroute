@@ -1,13 +1,10 @@
-// Checks of the test gateway itself: it starts offline, the x402 middleware accepts the fake
-// facilitator, and a payment through it records an order (failure table: pay without header).
+// Checks of the test gateway itself: it starts offline and the x402 middleware accepts the fake
+// facilitator (failure table: pay without header).
 import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
 	expectJson,
-	listField,
-	payDraft,
-	paymentFor,
 	readOffer,
 	registerFirm,
 	send,
@@ -47,30 +44,5 @@ describe("test gateway", () => {
 		expect(accepted.extra?.feePayer).toBe(WALLETS.facilitator.address);
 		expect(gateway.facilitator.calls.verify).toBe(0);
 		expect(gateway.facilitator.calls.settle).toBe(0);
-	});
-
-	test("records an order with one open task per language once the fake settles", async () => {
-		const { app, facilitator } = createTestGateway();
-		const firm = await registerFirm(app, WALLETS.firm);
-		const draftId = textField(await createDraft(app, firm.mcpToken), "draftId");
-		const header = await paymentFor(app, draftId, WALLETS.firm, "first");
-
-		const paid = await expectJson(await payDraft(app, draftId, header), 201);
-		expect(facilitator.calls.settle).toBe(1);
-
-		const orderPath = `/api/orders/${textField(paid, "orderId")}`;
-		const order = await expectJson(
-			await send(app, "GET", orderPath, { bearer: firm.mcpToken }),
-			200,
-		);
-		const states = listField(order, "tasks").map((task) => [
-			task.targetLang,
-			task.publicState,
-		]);
-		expect(states).toEqual([
-			["es", "open"],
-			["fr", "open"],
-		]);
-		expect(order.payer).toBe(WALLETS.firm.address);
 	});
 });

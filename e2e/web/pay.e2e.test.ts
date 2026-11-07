@@ -1,7 +1,7 @@
 // Browser: the pay page with a fake Phantom over the real gateway and the local chain.
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { txFacts, usdcOf } from "../support/chain.js";
-import { e2eEnv, firmKey, pollUntil } from "../support/env.js";
+import { e2eEnv, firmKey } from "../support/env.js";
 import { FirmSlot } from "../support/firms.js";
 import { firmAt } from "../support/fixture.js";
 import { call, text } from "../support/http.js";
@@ -73,35 +73,45 @@ describe("pay page", () => {
 		expect(session.blocked).toEqual([]);
 	});
 
-	test("a rejected Phantom signature shows that nothing was paid and offers Pay again", async () => {
+	test("a response dropped after settlement never exposes a second payment action", async () => {
 		const { page, phantom } = await session.role(firmKey(FirmSlot.BrowserPay));
 		const draft = await createDraft(firm.mcpToken, ["es"]);
 		const wallet = firm.key.publicKey.toBase58();
+		let settled: number | null = null;
+		// Forwards the paid POST to the gateway, then drops its response.
+		await page.route(`**/x/orders/${draft.draftId}`, async (route) => {
+			if (route.request().headers()["payment-signature"] === undefined) {
+				await route.continue();
+				return;
+			}
+			settled = (await route.fetch()).status();
+			await route.abort("connectionreset");
+		});
 		const before = await usdcOf(wallet);
-		phantom?.rejectNext.add(PhantomCall.Transaction);
 
 		await page.goto(`/pay/${draft.draftId}`);
 		await page.getByRole("button", PAY_BUTTON).click();
-
 		await page
-			.getByText("You cancelled in Phantom. Nothing was paid.")
-			.waitFor();
-		expect(await page.getByRole("button", PAY_BUTTON).isEnabled()).toBe(true);
+			.getByText(
+				"We do not know if your payment went through. Do not pay again: check its status.",
+			)
+			.waitFor({ timeout: 60_000 });
+
+		expect(settled).toBe(201);
+		expect(await page.getByRole("button", PAY_BUTTON).count()).toBe(0);
+		await page.getByRole("button", { name: "Check status" }).click();
+		await page.getByRole("heading", { name: "Already paid" }).waitFor();
+		expect(await page.getByRole("button", PAY_BUTTON).count()).toBe(0);
 		expect(
-			phantom?.calls.filter((call) => call === PhantomCall.Transaction),
+			phantom?.calls.filter((item) => item === PhantomCall.Transaction),
 		).toHaveLength(1);
 		const status = await call(
 			e2eEnv().gatewayUrl,
 			"GET",
 			`/api/orders/draft/${draft.draftId}`,
 		);
-		expect(status.state).toBe("draft");
-		await pollUntil(
-			async () => usdcOf(wallet),
-			(units) => units === before,
-			2000,
-			"no delta",
-		);
+		expect(status.state).toBe("paid");
+		expect(await usdcOf(wallet)).toBe(before - draft.totalUnits);
 		expect(session.blocked).toEqual([]);
 	});
 });

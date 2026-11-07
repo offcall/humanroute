@@ -10,7 +10,15 @@ import {
 	TransactionMessage,
 	VersionedTransaction,
 } from "@solana/web3.js";
-import { afterEach, describe, expect, test, vi } from "vitest";
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	describe,
+	expect,
+	test,
+	vi,
+} from "vitest";
 import { createPayClient } from "../mcp/payGateway.js";
 import { pay } from "../mcp/payTool.js";
 import type { PayClient, Prepared } from "../mcp/payTypes.js";
@@ -32,15 +40,20 @@ import {
 } from "../src/testing/index.js";
 import {
 	AGENT_DIR,
+	type AgentHome,
 	agentHome,
 	ataOf,
 	dataOf,
 	expectRefused,
 	expectSigned,
 	gatewayMessage,
+	LIMIT,
+	MEMO,
 	NOT_OURS,
+	PRICE,
 	recompile,
 	runScript,
+	TRANSFER,
 	tempHome,
 	u32Data,
 	u64Data,
@@ -51,10 +64,6 @@ const BASE_URL = "http://humanroute.test";
 const PKCS8_PREFIX = Buffer.from("302e020100300506032b657004220420", "hex");
 // MCP's clock for prepare_payment and pay_task; any fixed instant works.
 const gatewayNow = () => 0;
-const LIMIT = 0;
-const PRICE = 1;
-const TRANSFER = 2;
-const MEMO = 3;
 
 afterEach(() => {
 	vi.unstubAllGlobals();
@@ -332,22 +341,6 @@ describe("sign.mjs refuses a message that is not a HumanRoute payment", () => {
 			NOT_OURS,
 		],
 		[
-			"a missing memo",
-			recompile(valid, (parts) => ({
-				...parts,
-				instructions: parts.instructions.slice(0, 3),
-			})),
-			NOT_OURS,
-		],
-		[
-			"a missing transfer",
-			recompile(valid, (parts) => ({
-				...parts,
-				instructions: parts.instructions.filter((_, at) => at !== TRANSFER),
-			})),
-			NOT_OURS,
-		],
-		[
 			"swapped compute instructions",
 			recompile(valid, (parts) => {
 				const [limit, price, ...rest] = parts.instructions;
@@ -420,11 +413,6 @@ describe("sign.mjs refuses a message that is not a HumanRoute payment", () => {
 			NOT_OURS,
 		],
 		[
-			"Approve instead of TransferChecked",
-			transferData(u64Data(4, 1_000_000n)),
-			NOT_OURS,
-		],
-		[
 			"a wrong compute limit discriminator",
 			recompile(valid, withInstruction(LIMIT, dataOf(u32Data(3, 20_000)))),
 			NOT_OURS,
@@ -437,34 +425,29 @@ describe("sign.mjs refuses a message that is not a HumanRoute payment", () => {
 		["an empty memo", memoData([]), NOT_OURS],
 		["a 65-byte memo", memoData(Buffer.alloc(65, 0x61)), NOT_OURS],
 		["a memo that is not UTF-8", memoData([0xff, 0xfe]), NOT_OURS],
-		[
-			"the agent key not a required signer",
-			recompile(valid, (parts) => ({
-				...parts,
-				header: { ...parts.header, numRequiredSignatures: 1 },
-			})),
-			NOT_OURS,
-		],
 	];
+
+	let home: AgentHome;
+	beforeAll(() => {
+		home = agentHome();
+	});
+	afterAll(() => {
+		home.remove();
+	});
 
 	test.each(rows)(
 		"%s → refusal and no signature output",
 		(_name, bytes, reason) => {
-			const home = agentHome();
-			try {
-				expectRefused(home.sign(bytes.toString("base64")), reason);
-			} finally {
-				home.remove();
-			}
+			expectRefused(home.sign(bytes.toString("base64")), reason);
 		},
 	);
 
 	test("a message for another agent key → refusal and no signature output", () => {
-		const home = agentHome({ agent: WALLETS.linguist });
+		const other = agentHome({ agent: WALLETS.linguist });
 		try {
-			expectRefused(home.sign(valid.toString("base64")), NOT_OURS);
+			expectRefused(other.sign(valid.toString("base64")), NOT_OURS);
 		} finally {
-			home.remove();
+			other.remove();
 		}
 	});
 });

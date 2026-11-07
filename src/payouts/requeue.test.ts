@@ -6,61 +6,31 @@ import {
 	chainOk,
 	createTestGateway,
 	FAKE_BLOCKHASH,
+	LAST_VALID,
+	OLD_SIG,
 	START,
-	WALLETS,
+	seedTransfer,
 } from "../testing/index.js";
 import { taskLedger } from "./ledger.js";
 import { requeueTransfer } from "./requeue.js";
-import { LegRole, PayoutKind, type PayoutTransfer } from "./taskTypes.js";
+import { PayoutKind } from "./taskTypes.js";
 
 const TRANSFER_ID = "transfer-1";
 const TASK_ID = "task-1";
 const MEMO = "hr:task-1";
-const OLD_SIG = "old-sig";
-const LAST_VALID = 1000;
 
 // A gateway with one failed payout row; `broadcast` says whether it was ever sent as OLD_SIG.
 const setup = (broadcast = true, attempts = 0) => {
 	const gateway = createTestGateway();
-	const ledger = taskLedger(gateway.database);
-	const now = gateway.clock.now();
-	ledger.insert(
-		{
-			id: TRANSFER_ID,
-			taskId: TASK_ID,
-			kind: PayoutKind.Payout,
-			legs: [
-				{ role: LegRole.Linguist, wallet: WALLETS.linguist.address, units: 1n },
-			],
-			memo: MEMO,
-		},
-		now,
-	);
-	for (let index = 0; index < attempts; index += 1) {
-		ledger.backToPending(TRANSFER_ID, "retry", now);
-	}
-	if (broadcast) {
-		const sent = {
-			txSig: OLD_SIG,
-			blockhash: FAKE_BLOCKHASH,
-			lastValidBlockHeight: LAST_VALID,
-		};
-		ledger.markSent(TRANSFER_ID, sent, now);
-	}
-	ledger.markFailed(TRANSFER_ID, "insufficient funds", now);
+	const { ledger, row, count } = seedTransfer(gateway, {
+		status: TransferStatus.Failed,
+		broadcast,
+		attempts,
+	});
 	gateway.chain.answer.signatureStatus = async () =>
 		chainOk({ state: "unknown" });
 	gateway.chain.answer.blockHeight = async () => chainOk(LAST_VALID + 1);
 
-	const row = (): PayoutTransfer => {
-		const found = ledger.find(TRANSFER_ID);
-		if (!found) {
-			throw new Error("transfer row is missing");
-		}
-		return found;
-	};
-	const count = (method: string) =>
-		gateway.chain.calls.filter((call) => call.method === method).length;
 	const requeue = (idOrTaskId = TRANSFER_ID, store = ledger) =>
 		requeueTransfer(
 			{ store, chain: gateway.chain, now: gateway.clock.now },

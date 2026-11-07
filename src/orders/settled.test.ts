@@ -212,6 +212,30 @@ describe("settled", () => {
 		},
 	);
 
+	test("an orphan whose storage also fails still answers 502 and logs for the operator", async () => {
+		const world = seam();
+		world.database.exec(`CREATE TRIGGER fail_fr BEFORE INSERT ON tasks
+  WHEN NEW.target_lang = 'fr' BEGIN SELECT RAISE(ABORT, 'disk full'); END`);
+		world.database.exec(`CREATE TRIGGER fail_orphan BEFORE INSERT ON orphans
+  BEGIN SELECT RAISE(ABORT, 'disk full'); END`);
+		const target = world.draft();
+
+		const res = await world.post(settleHeader(), target, "pay-id-1");
+
+		expect(await expectJson(res, 502)).toEqual({
+			error: "orphan_payment",
+			payTx: "pay-tx-1",
+		});
+		for (const table of ["orders", "tasks", "payments", "orphans"]) {
+			expect(world.count(table)).toBe(0);
+		}
+		expect(
+			world.logs.filter((line) => line.includes("OPERATOR ACTION REQUIRED")),
+		).toEqual([
+			`OPERATOR ACTION REQUIRED orphan payment transaction=pay-tx-1 payer=${WALLETS.firm.address} not stored: disk full`,
+		]);
+	});
+
 	test("logs best-effort payment identity before validation and recording", async () => {
 		const world = seam();
 		const target = world.draft();

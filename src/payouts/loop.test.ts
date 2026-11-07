@@ -1,42 +1,14 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { TransferStatus } from "../store/index.js";
-import {
-	createTestGateway,
-	FAKE_BLOCKHASH,
-	WALLETS,
-} from "../testing/index.js";
-import { taskLedger } from "./ledger.js";
-import { LegRole, PayoutKind } from "./taskTypes.js";
+import { createTestGateway, seedTransfer } from "../testing/index.js";
 
 // A gateway with a pending row "pending-1" and a sent row "sent-1".
 const setup = () => {
 	const gateway = createTestGateway();
-	const ledger = taskLedger(gateway.database);
-	const now = gateway.clock.now();
-	for (const id of ["pending-1", "sent-1"]) {
-		ledger.insert(
-			{
-				id,
-				taskId: `task-${id}`,
-				kind: PayoutKind.Payout,
-				legs: [
-					{
-						role: LegRole.Linguist,
-						wallet: WALLETS.linguist.address,
-						units: 1n,
-					},
-				],
-				memo: `hr:task-${id}`,
-			},
-			now,
-		);
-	}
-	const sent = {
-		txSig: "old-sig",
-		blockhash: FAKE_BLOCKHASH,
-		lastValidBlockHeight: 1000,
-	};
-	ledger.markSent("sent-1", sent, now);
+	const pending = { id: "pending-1", taskId: "task-pending-1" };
+	const { ledger } = seedTransfer(gateway, pending);
+	const sent = { id: "sent-1", taskId: "task-sent-1" };
+	seedTransfer(gateway, { ...sent, status: TransferStatus.Sent });
 	const statusOf = (id: string) => ledger.find(id)?.status;
 	const lines = (text: string) =>
 		gateway.logs.filter((line) => line === `[payouts] ${text}`);

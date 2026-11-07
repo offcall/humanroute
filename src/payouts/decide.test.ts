@@ -3,17 +3,13 @@ import { describe, expect, test } from "vitest";
 import { TransferStatus } from "../store/index.js";
 import { taskById } from "../tasks/index.js";
 import {
-	createDraft,
-	createTestGateway,
+	claim,
 	expectJson,
-	joinLinguist,
-	payDraft,
-	paymentFor,
-	registerAgency,
-	registerFirm,
+	paidOrder,
+	payOrder,
 	send,
+	submitted,
 	type TestGateway,
-	textField,
 	WALLETS,
 } from "../testing/index.js";
 import { taskLedger } from "./ledger.js";
@@ -21,76 +17,9 @@ import { LegRole, PayoutKind } from "./taskTypes.js";
 
 const CLAIM_MS = 60_000;
 const WORK_MS = 180_000;
-const PAIRS = [
-	{ source: "en", target: "es" },
-	{ source: "en", target: "fr" },
-];
-
-const people = async (app: Hono) => {
-	const firm = await registerFirm(app, WALLETS.firm);
-	const agency = await registerAgency(app, WALLETS.agency);
-	const linguist = await joinLinguist(
-		app,
-		WALLETS.linguist,
-		agency.inviteCode,
-		PAIRS,
-	);
-	return { firm, linguist };
-};
-
-// A paid two-language order; returns the task ids by target language.
-const paidOrder = async (
-	gateway: TestGateway,
-	mcpToken: string,
-	memo: string,
-) => {
-	const { app, database } = gateway;
-	const draftId = textField(await createDraft(app, mcpToken), "draftId");
-	const header = await paymentFor(app, draftId, WALLETS.firm, memo);
-	const paid = await expectJson(await payDraft(app, draftId, header), 201);
-	const ids = Array.isArray(paid.taskIds) ? paid.taskIds : [];
-	const byLang = new Map<string, string>();
-	for (const id of ids) {
-		const task = typeof id === "string" ? taskById(database, id) : null;
-		if (task) {
-			byLang.set(task.targetLang, task.id);
-		}
-	}
-	const es = byLang.get("es");
-	const fr = byLang.get("fr");
-	if (es === undefined || fr === undefined) {
-		throw new Error(`order has no es/fr tasks: ${JSON.stringify(paid)}`);
-	}
-	return { es, fr };
-};
 
 const post = (app: Hono, path: string, cookie: string, body: unknown = {}) =>
 	send(app, "POST", path, { cookie, body });
-
-const claim = (app: Hono, taskId: string, cookie: string) =>
-	post(app, `/api/tasks/${taskId}/claim`, cookie);
-
-const submitted = async (app: Hono, taskId: string, cookie: string) => {
-	await expectJson(await claim(app, taskId, cookie), 200);
-	const body = { result: "Tome un comprimido." };
-	await expectJson(
-		await post(app, `/api/tasks/${taskId}/submit`, cookie, body),
-		200,
-	);
-};
-
-// Pays as WALLETS.agent: the firm's login wallet must still receive refunds (ADR 0036).
-const payAsAgent = (gateway: TestGateway) => {
-	const payer = WALLETS.agent.address;
-	const { answer } = gateway.facilitator;
-	answer.verify = async () => ({ isValid: true, payer });
-	answer.settle = async () => ({
-		success: true,
-		transaction: "pay-tx-agent",
-		network: gateway.config.network,
-		payer,
-	});
-};
 
 const signing = (gateway: TestGateway) =>
 	gateway.chain.calls.filter(
@@ -99,11 +28,9 @@ const signing = (gateway: TestGateway) =>
 
 describe("payout decisions", () => {
 	test("approving writes one pending payout to the wallets snapshotted at claim and FEE_WALLET with memo hr:<taskId>", async () => {
-		const gateway = createTestGateway();
-		const { app, database } = gateway;
-		const { firm, linguist } = await people(app);
-		const { es } = await paidOrder(gateway, firm.mcpToken, "po-10");
-		await submitted(app, es, linguist);
+		const gateway = await paidOrder({ memo: "po-10" });
+		const { app, database, firm, es } = gateway;
+		await submitted(gateway, [es]);
 
 		database
 			.prepare("UPDATE linguists SET wallet = ?")
@@ -144,12 +71,9 @@ describe("payout decisions", () => {
 	});
 
 	test("rejecting writes one pending refund of the full price to the firm's login wallet with memo :rejected", async () => {
-		const gateway = createTestGateway();
-		const { app, database } = gateway;
-		payAsAgent(gateway);
-		const { firm, linguist } = await people(app);
-		const { es } = await paidOrder(gateway, firm.mcpToken, "po-11");
-		await submitted(app, es, linguist);
+		const gateway = await paidOrder({ memo: "po-11" });
+		const { app, database, firm, es } = gateway;
+		await submitted(gateway, [es]);
 
 		const body = { reason: "Wrong dosage terms" };
 		await expectJson(
@@ -169,11 +93,9 @@ describe("payout decisions", () => {
 	});
 
 	test("the decision rolls back when its transfer cannot be written", async () => {
-		const gateway = createTestGateway();
-		const { app, database } = gateway;
-		const { firm, linguist } = await people(app);
-		const { es } = await paidOrder(gateway, firm.mcpToken, "po-13");
-		await submitted(app, es, linguist);
+		const gateway = await paidOrder({ memo: "po-13" });
+		const { app, database, firm, es } = gateway;
+		await submitted(gateway, [es]);
 		const ledger = taskLedger(database);
 		const blocker = {
 			id: "pre-1",
@@ -193,24 +115,21 @@ describe("payout decisions", () => {
 	});
 
 	test("an open task is refunded as :unclaimed at its claim deadline and a later claim answers 409 claim_closed", async () => {
-		const gateway = createTestGateway();
-		const { app, database, clock, worker } = gateway;
-		payAsAgent(gateway);
-		const { firm, linguist } = await people(app);
-		const { es, fr } = await paidOrder(gateway, firm.mcpToken, "po-14");
+		const gateway = await paidOrder({ memo: "po-14" });
+		const { database, clock, worker, es, fr } = gateway;
 		const ledger = taskLedger(database);
 
 		clock.advance(CLAIM_MS - 1);
-		await expectJson(await claim(app, es, linguist), 200);
+		await expectJson(await claim(gateway, es), 200);
 		await worker.tick();
 		expect(ledger.byTaskId(fr)).toBeNull();
 
 		clock.advance(1);
-		expect(await expectJson(await claim(app, fr, linguist), 409)).toEqual({
+		expect(await expectJson(await claim(gateway, fr), 409)).toEqual({
 			error: "claim_closed",
 		});
 		await worker.tick();
-		expect(await expectJson(await claim(app, fr, linguist), 409)).toEqual({
+		expect(await expectJson(await claim(gateway, fr), 409)).toEqual({
 			error: "claim_closed",
 		});
 
@@ -229,11 +148,9 @@ describe("payout decisions", () => {
 	});
 
 	test("expiry refunds are recorded even while the preflight fails", async () => {
-		const gateway = createTestGateway();
-		const { app, database, clock, worker } = gateway;
-		const { firm, linguist } = await people(app);
-		const { es, fr } = await paidOrder(gateway, firm.mcpToken, "po-16");
-		await expectJson(await claim(app, es, linguist), 200);
+		const gateway = await paidOrder({ memo: "po-16" });
+		const { database, clock, worker, es, fr } = gateway;
+		await expectJson(await claim(gateway, es), 200);
 		gateway.problems.push("hold wallet needs at least 0.05 SOL for fees");
 
 		clock.advance(WORK_MS);
@@ -253,13 +170,12 @@ describe("payout decisions", () => {
 
 	describe("publicState stays paying_out or refunding until the transfer is confirmed", () => {
 		const decided = async () => {
-			const gateway = createTestGateway();
-			const { app, clock, worker } = gateway;
-			const { firm, linguist } = await people(app);
-			const first = await paidOrder(gateway, firm.mcpToken, "po-17-a");
-			const second = await paidOrder(gateway, firm.mcpToken, "po-17-b");
-			await submitted(app, first.es, linguist);
-			await submitted(app, first.fr, linguist);
+			const gateway = await paidOrder({ memo: "po-17-a" });
+			const { app, clock, worker, firm } = gateway;
+			const first = gateway;
+			const second = await payOrder(gateway, firm, "po-17-b");
+			await submitted(gateway, [first.es]);
+			await submitted(gateway, [first.fr]);
 			await expectJson(
 				await post(app, `/api/tasks/${first.es}/approve`, firm.cookie),
 				200,
@@ -269,7 +185,7 @@ describe("payout decisions", () => {
 				await post(app, `/api/tasks/${first.fr}/reject`, firm.cookie, reason),
 				200,
 			);
-			await expectJson(await claim(app, second.es, linguist), 200);
+			await expectJson(await claim(gateway, second.es), 200);
 			// Paused: the worker records the expiry refunds but leaves every row as the test sets it.
 			gateway.problems.push("rpc check failed");
 			clock.advance(WORK_MS);

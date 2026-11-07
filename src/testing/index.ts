@@ -31,5 +31,30 @@ export {
 	type TestAgency,
 	type TestFirm,
 } from "./people.js";
+export {
+	EN_ES_FR,
+	type PaidTasks,
+	paidOrder,
+	payOrder,
+	type Scene,
+	type SceneOptions,
+} from "./scene.js";
 export { signIn } from "./session.js";
+export { holdSettle, settleAs } from "./settle.js";
+export {
+	type Auth,
+	approve,
+	claim,
+	reject,
+	rowCount,
+	stateOf,
+	submit,
+	submitted,
+} from "./tasks.js";
+export {
+	LAST_VALID,
+	OLD_SIG,
+	type SeedOptions,
+	seedTransfer,
+} from "./transfer.js";
 export { type TestWallet, testWallet, WALLETS } from "./wallets.js";

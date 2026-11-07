@@ -1,68 +1,27 @@
 // POST /api/tasks/:id/submit (ADR 0023): failure table rows 20 (late) and the result bounds.
 import { describe, expect, test } from "vitest";
 import {
-	createDraft,
-	createTestGateway,
+	claim,
 	expectJson,
 	joinLinguist,
-	listField,
-	payDraft,
-	paymentFor,
+	type Scene as PaidScene,
+	paidOrder,
 	registerAgency,
-	registerFirm,
 	send,
-	type TestGateway,
 	testWallet,
-	textField,
 	WALLETS,
 } from "../testing/index.js";
 
 const WORK_WINDOW_MS = 180_000;
 
-type Scene = TestGateway & { linguist: string; taskId: string };
+type Scene = PaidScene & { taskId: string };
 
-// One paid order, the en→es task claimed by the agency's linguist; the payer is not the firm.
+// One paid order, the en→es task claimed by the agency's linguist.
 const claimedTask = async (): Promise<Scene> => {
-	const gateway = createTestGateway();
-	const { app, facilitator } = gateway;
-	const network = gateway.config.network;
-	const payer = WALLETS.agent.address;
-	facilitator.answer.verify = async () => ({ isValid: true, payer });
-	facilitator.answer.settle = async () => ({
-		success: true,
-		transaction: "pay-tx-agent",
-		network,
-		payer,
-	});
-	const firm = await registerFirm(app, WALLETS.firm);
-	const agency = await registerAgency(app, WALLETS.agency);
-	const pairs = [{ source: "en", target: "es" }];
-	const linguist = await joinLinguist(
-		app,
-		WALLETS.linguist,
-		agency.inviteCode,
-		pairs,
-	);
-	const draftId = textField(await createDraft(app, firm.mcpToken), "draftId");
-	const header = await paymentFor(app, draftId, WALLETS.agent, "order-1");
-	const paid = await expectJson(await payDraft(app, draftId, header), 201);
-	const order = await expectJson(
-		await send(app, "GET", `/api/orders/${textField(paid, "orderId")}`, {
-			bearer: firm.mcpToken,
-		}),
-		200,
-	);
-	const es = listField(order, "tasks").find((task) => task.targetLang === "es");
-	const taskId = textField(es ?? {}, "taskId");
-	await expectJson(
-		await send(app, "POST", `/api/tasks/${taskId}/claim`, {
-			cookie: linguist,
-			body: {},
-		}),
-		200,
-	);
+	const scene = await paidOrder({ pairs: [{ source: "en", target: "es" }] });
+	await expectJson(await claim(scene, scene.es), 200);
 
-	return { ...gateway, linguist, taskId };
+	return { ...scene, taskId: scene.es };
 };
 
 const submit = (scene: Scene, body: unknown, cookie = scene.linguist) =>

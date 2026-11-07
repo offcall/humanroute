@@ -202,4 +202,10 @@ export const expectRefused = (run: ScriptRun, reason: string) => {
 	expect(run.stderr).toContain(`sign.mjs refused: ${reason}`);
 };
 
+// Instruction positions in the gateway message: compute limit, compute price, transfer, memo.
+export const LIMIT = 0;
+export const PRICE = 1;
+export const TRANSFER = 2;
+export const MEMO = 3;
+
 export const NOT_OURS = "this is not a HumanRoute payment for this agent key";

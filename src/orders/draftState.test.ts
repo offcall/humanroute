@@ -4,6 +4,7 @@ import {
 	createDraft,
 	createTestGateway,
 	expectJson,
+	holdSettle,
 	payDraft,
 	paymentFor,
 	registerFirm,
@@ -83,27 +84,14 @@ describe("public draft state", () => {
 		const gateway = createTestGateway();
 		const draftId = await (await firmDrafts(gateway))();
 		const header = await paymentFor(gateway.app, draftId, WALLETS.firm, "a");
-		const settle = gateway.facilitator.answer.settle;
-		let release = () => {};
-		const released = new Promise<void>((resolve) => {
-			release = resolve;
-		});
-		let markStarted = () => {};
-		const started = new Promise<void>((resolve) => {
-			markStarted = resolve;
-		});
-		gateway.facilitator.answer.settle = async (payload, requirements) => {
-			markStarted();
-			await released;
-			return settle(payload, requirements);
-		};
+		const held = holdSettle(gateway);
 
 		const paying = payDraft(gateway.app, draftId, header);
-		await started;
+		await held.started;
 		expect(await readDraft(gateway, draftId)).toMatchObject({
 			state: "settling",
 		});
-		release();
+		held.release();
 		await expectJson(await paying, 201);
 		expect(await readDraft(gateway, draftId)).toMatchObject({ state: "paid" });
 	});

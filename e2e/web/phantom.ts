@@ -18,7 +18,6 @@ export type Phantom = {
 	key: Keypair;
 	// The wallet connect() reports; defaults to key (a different one simulates a wrong account).
 	connectAs: string | null;
-	rejectNext: Set<PhantomCall>;
 	calls: PhantomCall[];
 };
 
@@ -40,9 +39,6 @@ const answer = async (
 		return { error: `unknown call ${kind}`, code: -32603 };
 	}
 	phantom.calls.push(call);
-	if (phantom.rejectNext.delete(call)) {
-		return { error: "User rejected the request.", code: 4001 };
-	}
 	switch (call) {
 		case PhantomCall.Connect:
 			return { value: phantom.connectAs ?? phantom.key.publicKey.toBase58() };
@@ -128,7 +124,6 @@ export const installPhantom = async (
 	const phantom: Phantom = {
 		key,
 		connectAs: null,
-		rejectNext: new Set(),
 		calls: [],
 	};
 	await context.exposeBinding(

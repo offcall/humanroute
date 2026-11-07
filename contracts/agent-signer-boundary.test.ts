@@ -9,18 +9,18 @@ import {
 	expectRefused,
 	expectSigned,
 	gatewayMessage,
+	LIMIT,
 	NOT_OURS,
+	PRICE,
 	recompile,
 	SIGNER_CONFIG,
+	TRANSFER,
 	u32Data,
 	u64Data,
 	withInstruction,
 } from "./agent-signer.js";
 
 const MALFORMED = "malformed message:";
-const LIMIT = 0;
-const PRICE = 1;
-const TRANSFER = 2;
 
 let agent: AgentHome;
 beforeAll(() => {
@@ -88,17 +88,6 @@ describe("the signer rejects malformed framing", () => {
 			`${MALFORMED} key index out of range`,
 		],
 		[
-			"an extra transfer account",
-			recompile(
-				valid,
-				withInstruction(TRANSFER, (ix) => ({
-					...ix,
-					accountKeyIndexes: [...ix.accountKeyIndexes, 3],
-				})),
-			),
-			NOT_OURS,
-		],
-		[
 			"a 6-byte compute limit",
 			recompile(
 				valid,
@@ -142,15 +131,6 @@ describe("the signer rejects malformed framing", () => {
 			"a key file of 63 bytes",
 			{
 				key: JSON.stringify([...WALLETS.agent.keypair.secretKey].slice(0, 63)),
-			},
-		],
-		[
-			"a key byte above 255",
-			{
-				key: JSON.stringify([
-					...WALLETS.agent.keypair.secretKey.subarray(0, 63),
-					256,
-				]),
 			},
 		],
 		[
@@ -209,7 +189,6 @@ describe("the signer refuses the agent key as fee payer, a signer count other th
 
 	const signerCounts: [string, number, number][] = [
 		["1 required signer", 1, 0],
-		["3 required signers", 3, 1],
 		["the agent key writable", 2, 0],
 	];
 

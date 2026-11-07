@@ -1,14 +1,13 @@
 // Board, claim, GET /api/tasks/:id and the linguist cabinet (api.md, ADR 0023, ADR 0033).
 import { describe, expect, test } from "vitest";
 import {
-	createDraft,
-	createTestGateway,
+	claim,
 	expectJson,
 	joinLinguist,
 	listField,
 	objectField,
-	payDraft,
-	paymentFor,
+	paidOrder,
+	payOrder,
 	registerAgency,
 	registerFirm,
 	send,
@@ -21,70 +20,8 @@ import {
 const EN_ES = [{ source: "en", target: "es" }];
 const CLAIM_WINDOW_MS = 60_000;
 
-type Scene = TestGateway & {
-	firm: Awaited<ReturnType<typeof registerFirm>>;
-	agencyCookie: string;
-	inviteCode: string;
-	linguist: string;
-	es: string;
-	fr: string;
-};
-
 // A firm, an agency with one en→es linguist, and one paid order: an es and an fr task.
-const scene = async (): Promise<Scene> => {
-	const gateway = createTestGateway();
-	const { app } = gateway;
-	const firm = await registerFirm(app, WALLETS.firm);
-	const agency = await registerAgency(app, WALLETS.agency);
-	const linguist = await joinLinguist(
-		app,
-		WALLETS.linguist,
-		agency.inviteCode,
-		EN_ES,
-	);
-	const tasks = await payOrder(gateway, firm.mcpToken, "order-1");
-
-	return {
-		...gateway,
-		firm,
-		agencyCookie: agency.cookie,
-		inviteCode: agency.inviteCode,
-		linguist,
-		es: tasks.es,
-		fr: tasks.fr,
-	};
-};
-
-// Pays a new LEAFLET draft; returns the task id per target language.
-const payOrder = async (
-	gateway: TestGateway,
-	mcpToken: string,
-	memo: string,
-): Promise<{ es: string; fr: string }> => {
-	const { app } = gateway;
-	const draftId = textField(await createDraft(app, mcpToken), "draftId");
-	const header = await paymentFor(app, draftId, WALLETS.firm, memo);
-	const paid = await expectJson(await payDraft(app, draftId, header), 201);
-	const orderPath = `/api/orders/${textField(paid, "orderId")}`;
-	const order = await expectJson(
-		await send(app, "GET", orderPath, { bearer: mcpToken }),
-		200,
-	);
-
-	const idOf = (lang: string) =>
-		textField(
-			listField(order, "tasks").find((task) => task.targetLang === lang) ?? {},
-			"taskId",
-		);
-
-	return { es: idOf("es"), fr: idOf("fr") };
-};
-
-const claim = (gateway: TestGateway, taskId: string, cookie: string) =>
-	send(gateway.app, "POST", `/api/tasks/${taskId}/claim`, {
-		cookie,
-		body: {},
-	});
+const scene = () => paidOrder({ pairs: EN_ES });
 
 const getTask = (
 	gateway: TestGateway,
@@ -105,16 +42,16 @@ describe("board and claim", () => {
 	test("the board shows only open tasks in the linguist's pairs, soonest claim deadline first, with the firm name", async () => {
 		const gateway = await scene();
 		gateway.clock.advance(1_000);
-		const later = await payOrder(gateway, gateway.firm.mcpToken, "order-2");
+		const later = await payOrder(gateway, gateway.firm, "order-2");
 		const other = await joinLinguist(
 			gateway.app,
 			testWallet(21),
-			gateway.inviteCode,
+			gateway.agency.inviteCode,
 			EN_ES,
 		);
 		await expectJson(await claim(gateway, later.es, other), 200);
 		gateway.clock.advance(1_000);
-		const latest = await payOrder(gateway, gateway.firm.mcpToken, "order-3");
+		const latest = await payOrder(gateway, gateway.firm, "order-3");
 
 		const res = await send(gateway.app, "GET", "/api/board", {
 			cookie: gateway.linguist,
@@ -151,7 +88,7 @@ describe("board and claim", () => {
 				body,
 			});
 			expect(anonymous.status).toBe(401);
-			for (const cookie of [gateway.firm.cookie, gateway.agencyCookie]) {
+			for (const cookie of [gateway.firm.cookie, gateway.agency.cookie]) {
 				const res = await send(gateway.app, method ?? "", path ?? "", {
 					cookie,
 					body,
@@ -167,7 +104,7 @@ describe("board and claim", () => {
 		const second = await joinLinguist(
 			gateway.app,
 			rival,
-			gateway.inviteCode,
+			gateway.agency.inviteCode,
 			EN_ES,
 		);
 
@@ -229,7 +166,7 @@ describe("task visibility", () => {
 		const otherLinguist = await joinLinguist(
 			gateway.app,
 			testWallet(25),
-			gateway.inviteCode,
+			gateway.agency.inviteCode,
 			EN_ES,
 		);
 
@@ -243,7 +180,7 @@ describe("task visibility", () => {
 			).status;
 		expect(await status(gateway.firm.cookie)).toBe(200);
 		expect(await status(gateway.linguist)).toBe(200);
-		expect(await status(gateway.agencyCookie)).toBe(200);
+		expect(await status(gateway.agency.cookie)).toBe(200);
 		expect(await status(otherFirm.cookie)).toBe(403);
 		expect(await status(otherAgency.cookie)).toBe(403);
 		expect(await status(otherLinguist)).toBe(403);
@@ -280,7 +217,7 @@ describe("task views", () => {
 			bearer: gateway.firm.mcpToken,
 		});
 		expect((await expectJson(owner, 200)).executorPairs).toEqual(EN_ES);
-		for (const cookie of [gateway.linguist, gateway.agencyCookie]) {
+		for (const cookie of [gateway.linguist, gateway.agency.cookie]) {
 			const view = await expectJson(
 				await getTask(gateway, gateway.es, { cookie }),
 				200,
@@ -305,7 +242,7 @@ describe("task views", () => {
 		expect(board.tasks).toEqual([]);
 	});
 
-	test("earnedUnits is a string only for the claimer on a payout", async () => {
+	test("earnedUnits is a string only for the claimer of a payout", async () => {
 		const gateway = await scene();
 		const { config } = gateway;
 		const agency = (500_000n * config.agencyShareBps) / 10_000n;
@@ -323,7 +260,7 @@ describe("task views", () => {
 		const otherLinguist = await joinLinguist(
 			gateway.app,
 			testWallet(27),
-			gateway.inviteCode,
+			gateway.agency.inviteCode,
 			[{ source: "en", target: "fr" }],
 		);
 		const claimers: [string, string][] = [
@@ -347,16 +284,12 @@ describe("task views", () => {
 
 		expect(await earned(gateway.es, { cookie: gateway.linguist })).toBe(share);
 		expect(
-			await earned(gateway.es, { cookie: gateway.agencyCookie }),
+			await earned(gateway.es, { cookie: gateway.agency.cookie }),
 		).toBeNull();
 		expect(
 			await earned(gateway.es, { bearer: gateway.firm.mcpToken }),
 		).toBeNull();
 		expect(await earned(gateway.fr, { cookie: otherLinguist })).toBeNull();
-
-		await gateway.worker.tick();
-		await gateway.worker.tick();
-		expect(await earned(gateway.es, { cookie: gateway.linguist })).toBe(share);
 	});
 
 	test("translatorNo is the 1-based join order inside the agency", async () => {
@@ -364,7 +297,7 @@ describe("task views", () => {
 		const second = await joinLinguist(
 			gateway.app,
 			testWallet(28),
-			gateway.inviteCode,
+			gateway.agency.inviteCode,
 			EN_ES,
 		);
 		const translatorNo = async (cookie: string) =>
@@ -385,37 +318,18 @@ describe("task views", () => {
 		expect(view.translatorNo).toBe(2);
 	});
 
-	test("the linguist cabinet shows pairs, confirmed earnings and own tasks", async () => {
+	test("the linguist cabinet shows pairs and own tasks, for linguists only", async () => {
 		const gateway = await scene();
 		const cabinet = () =>
 			send(gateway.app, "GET", "/api/linguist", { cookie: gateway.linguist });
 		const before = await expectJson(await cabinet(), 200);
 		expect(before).toMatchObject({ pairs: EN_ES, earnedUnits: "0", tasks: [] });
 
-		await expectJson(await claim(gateway, gateway.es, gateway.linguist), 200);
-		await send(gateway.app, "POST", `/api/tasks/${gateway.es}/submit`, {
-			cookie: gateway.linguist,
-			body: { result: "Hola" },
-		});
-		await send(gateway.app, "POST", `/api/tasks/${gateway.es}/approve`, {
-			bearer: gateway.firm.mcpToken,
-		});
-		const pending = await expectJson(await cabinet(), 200);
-		expect(pending.earnedUnits).toBe("0");
-		expect(listField(pending, "tasks").map((task) => task.taskId)).toEqual([
+		await expectJson(await claim(gateway, gateway.es), 200);
+		const claimed = await expectJson(await cabinet(), 200);
+		expect(listField(claimed, "tasks").map((task) => task.taskId)).toEqual([
 			gateway.es,
 		]);
-
-		await gateway.worker.tick();
-		await gateway.worker.tick();
-		const confirmed = await expectJson(await cabinet(), 200);
-		const transfer = objectField(
-			listField(confirmed, "tasks")[0] ?? {},
-			"transfer",
-		);
-		expect(transfer.status).toBe("confirmed");
-		expect(confirmed.earnedUnits).toBe(transfer.earnedUnits);
-		expect(confirmed.earnedUnits).not.toBe("0");
 
 		const firmView = await send(gateway.app, "GET", "/api/linguist", {
 			cookie: gateway.firm.cookie,

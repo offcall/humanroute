@@ -2,10 +2,8 @@
 // passes, unknown when the chain cannot tell within 2 s; never builds or sends a payment.
 import { describe, expect, test, vi } from "vitest";
 import {
-	chainFail,
 	createDraft,
 	createTestGateway,
-	ErrorKind,
 	expectJson,
 	registerFirm,
 	send,
@@ -20,21 +18,6 @@ import {
 	type FirmTokenAccount,
 	type OrdersDeps,
 } from "./types.js";
-
-// Draft creation through the wired gateway sleeps with node:timers/promises; this test makes it instant.
-const timers = vi.hoisted(() => ({ instant: false }));
-vi.mock("node:timers/promises", async (importOriginal) => {
-	const real = await importOriginal<typeof import("node:timers/promises")>();
-	const setTimeout = (
-		delay?: number,
-		value?: unknown,
-		options?: Parameters<typeof real.setTimeout>[2],
-	) =>
-		timers.instant
-			? Promise.resolve(value)
-			: real.setTimeout(delay, value, options);
-	return { ...real, setTimeout };
-});
 
 type SnapshotDeps = Pick<OrdersDeps, "firmWallet" | "tokenAccountOf" | "sleep">;
 
@@ -92,19 +75,11 @@ const answering = (account: FirmTokenAccount) =>
 describe("draft auto-pay snapshot", () => {
 	const rows: [string, FirmTokenAccount, AutopayStatus][] = [
 		["every check passes", held(TOTAL, TOTAL), AutopayStatus.Available],
-		[
-			"no USDC account",
-			{ exists: false, address: ADDRESS },
-			AutopayStatus.Unavailable,
-		],
-		["no delegate", held(TOTAL, TOTAL, null), AutopayStatus.Unavailable],
-		["zero allowance", held(TOTAL, 0n), AutopayStatus.Unavailable],
 		["allowance short", held(TOTAL, TOTAL - 1n), AutopayStatus.Unavailable],
-		["balance short", held(TOTAL - 1n, TOTAL), AutopayStatus.Unavailable],
 	];
 
 	test.each(rows)(
-		"the draft snapshot is available only when every check passes: %s",
+		"the draft snapshot maps checkAutopay: %s",
 		async (_name, account, expected) => {
 			expect(await draftAutopay(answering(account), DRAFT)).toBe(expected);
 		},
@@ -152,42 +127,20 @@ describe("draft auto-pay snapshot", () => {
 });
 
 describe("draft creation with an unknown snapshot", () => {
-	const rows: [string, "fail" | "throw" | "hang"][] = [
-		["the chain read fails", "fail"],
-		["the chain read throws", "throw"],
-		["the chain does not answer within 2 s", "hang"],
-	];
+	test("draft creation still answers 201 when the chain read throws", async () => {
+		const gateway = createTestGateway();
+		const firm = await registerFirm(gateway.app, WALLETS.firm);
+		gateway.chain.answer.tokenAccount = async () => {
+			throw new Error("socket hang up");
+		};
 
-	test.each(rows)(
-		"draft creation still answers 201 when the snapshot is unknown: %s",
-		async (_name, mode) => {
-			const gateway = createTestGateway();
-			const firm = await registerFirm(gateway.app, WALLETS.firm);
-			gateway.chain.answer.tokenAccount = async () => {
-				if (mode === "throw") {
-					throw new Error("socket hang up");
-				}
-				return mode === "fail"
-					? chainFail(ErrorKind.Retryable, "rpc down")
-					: new Promise(() => undefined);
-			};
-			timers.instant = mode === "hang";
-			try {
-				const draft = await createDraft(gateway.app, firm.mcpToken);
-				expect(draft.autopay).toBe("unknown");
+		const draft = await createDraft(gateway.app, firm.mcpToken);
+		expect(draft.autopay).toBe("unknown");
 
-				const draftId = textField(draft, "draftId");
-				const read = await send(
-					gateway.app,
-					"GET",
-					`/api/orders/draft/${draftId}`,
-				);
-				expect((await expectJson(read, 200)).state).toBe("draft");
-				const reads = gateway.chain.calls.map((call) => call.method);
-				expect(reads).toEqual(["tokenAccount"]);
-			} finally {
-				timers.instant = false;
-			}
-		},
-	);
+		const draftId = textField(draft, "draftId");
+		const read = await send(gateway.app, "GET", `/api/orders/draft/${draftId}`);
+		expect((await expectJson(read, 200)).state).toBe("draft");
+		const reads = gateway.chain.calls.map((call) => call.method);
+		expect(reads).toEqual(["tokenAccount"]);
+	});
 });

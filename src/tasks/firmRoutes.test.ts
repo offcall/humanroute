@@ -1,103 +1,29 @@
 // Approve and reject by the owner firm (ADR 0030): failure table rows 21 and 22.
 import { describe, expect, test } from "vitest";
 import {
-	createDraft,
-	createTestGateway,
+	type Auth,
+	approve,
+	claim,
 	expectJson,
-	joinLinguist,
-	listField,
-	payDraft,
-	paymentFor,
-	registerAgency,
+	paidOrder,
 	registerFirm,
-	send,
-	type TestFirm,
-	type TestGateway,
+	reject,
+	rowCount,
+	type Scene,
+	stateOf,
+	submit,
+	submitted as submitAll,
 	testWallet,
-	textField,
-	WALLETS,
 } from "../testing/index.js";
 
-type Scene = TestGateway & {
-	firm: TestFirm;
-	linguist: string;
-	es: string;
-	fr: string;
-};
-
-// One paid order (es, fr) and a linguist of both pairs; nothing claimed yet.
-const paidOrder = async (): Promise<Scene> => {
-	const gateway = createTestGateway();
-	const { app } = gateway;
-	const firm = await registerFirm(app, WALLETS.firm);
-	const agency = await registerAgency(app, WALLETS.agency);
-	const linguist = await joinLinguist(
-		app,
-		WALLETS.linguist,
-		agency.inviteCode,
-		[
-			{ source: "en", target: "es" },
-			{ source: "en", target: "fr" },
-		],
-	);
-	const draftId = textField(await createDraft(app, firm.mcpToken), "draftId");
-	const header = await paymentFor(app, draftId, WALLETS.firm, "order-1");
-	const paid = await expectJson(await payDraft(app, draftId, header), 201);
-	const order = await expectJson(
-		await send(app, "GET", `/api/orders/${textField(paid, "orderId")}`, {
-			bearer: firm.mcpToken,
-		}),
-		200,
-	);
-	const idOf = (lang: string) =>
-		textField(
-			listField(order, "tasks").find((task) => task.targetLang === lang) ?? {},
-			"taskId",
-		);
-
-	return { ...gateway, firm, linguist, es: idOf("es"), fr: idOf("fr") };
-};
-
-const claim = (scene: Scene, taskId: string) =>
-	send(scene.app, "POST", `/api/tasks/${taskId}/claim`, {
-		cookie: scene.linguist,
-		body: {},
-	});
-
-const submit = (scene: Scene, taskId: string) =>
-	send(scene.app, "POST", `/api/tasks/${taskId}/submit`, {
-		cookie: scene.linguist,
-		body: { result: "Hola" },
-	});
-
+// One paid order (es, fr), both tasks claimed and submitted by the linguist.
 const submitted = async (): Promise<Scene> => {
 	const scene = await paidOrder();
-	for (const taskId of [scene.es, scene.fr]) {
-		await expectJson(await claim(scene, taskId), 200);
-		await expectJson(await submit(scene, taskId), 200);
-	}
+	await submitAll(scene, [scene.es, scene.fr]);
 	return scene;
 };
 
-const approve = (scene: Scene, taskId: string, auth: Auth) =>
-	send(scene.app, "POST", `/api/tasks/${taskId}/approve`, {
-		...auth,
-		body: {},
-	});
-
-const reject = (scene: Scene, taskId: string, auth: Auth, body: unknown) =>
-	send(scene.app, "POST", `/api/tasks/${taskId}/reject`, { ...auth, body });
-
-type Auth = { cookie?: string; bearer?: string };
-
-const stateOf = (scene: Scene, taskId: string): unknown =>
-	scene.database
-		.prepare("SELECT state FROM tasks WHERE id = ?")
-		.pluck()
-		.get(taskId);
-
-const transferCount = (scene: Scene): unknown =>
-	scene.database.prepare("SELECT COUNT(*) FROM transfers").pluck().get();
+const transferCount = (scene: Scene): unknown => rowCount(scene, "transfers");
 
 describe("approve and reject", () => {
 	test("the owner firm approves a submitted task by cookie and by MCP token", async () => {

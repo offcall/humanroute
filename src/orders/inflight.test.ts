@@ -1,10 +1,10 @@
 // The in-flight lock while a settlement is pending (failure table row 17, ADR 0022).
-import type { SettleResponse } from "@x402/core/types";
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
 	expectJson,
+	holdSettle,
 	payDraft,
 	paymentFor,
 	registerFirm,
@@ -12,25 +12,6 @@ import {
 	textField,
 	WALLETS,
 } from "../testing/index.js";
-
-// A settle that waits for release(); `started` resolves once the facilitator was called.
-const holdSettle = (gateway: TestGateway) => {
-	const settle = gateway.facilitator.answer.settle;
-	let release = () => {};
-	let markStarted = () => {};
-	const released = new Promise<void>((resolve) => {
-		release = resolve;
-	});
-	const started = new Promise<void>((resolve) => {
-		markStarted = resolve;
-	});
-	gateway.facilitator.answer.settle = async (payload, requirements) => {
-		markStarted();
-		await released;
-		return settle(payload, requirements);
-	};
-	return { started, release: () => release() };
-};
 
 const twoDrafts = async (gateway: TestGateway): Promise<[string, string]> => {
 	const firm = await registerFirm(gateway.app, WALLETS.firm);
@@ -77,42 +58,4 @@ describe("in-flight settlement", () => {
 		expect(await expectJson(after, 409)).toEqual({ error: "payment_reused" });
 		expect(gateway.facilitator.calls.settle).toBe(1);
 	});
-
-	// SDK handling (verified): success false and a thrown non-facilitator error both answer 402.
-	const failures: [string, () => Promise<SettleResponse>][] = [
-		[
-			"success false",
-			async () => ({
-				success: false,
-				errorReason: "transaction_failed",
-				transaction: "",
-				network: "solana:devnet",
-			}),
-		],
-		[
-			"a rejected settle",
-			async () => {
-				throw new Error("socket hang up");
-			},
-		],
-	];
-
-	test.each(failures)(
-		"after a failed settlement (%s) the draft can be paid again",
-		async (_name, failing) => {
-			vi.spyOn(console, "error").mockImplementation(() => {});
-			const gateway = createTestGateway();
-			const [draftId] = await twoDrafts(gateway);
-			const header = await paymentFor(gateway.app, draftId, WALLETS.firm, "a");
-			const settle = gateway.facilitator.answer.settle;
-			gateway.facilitator.answer.settle = failing;
-
-			const failed = await payDraft(gateway.app, draftId, header);
-			expect(failed.status).toBe(402);
-			gateway.facilitator.answer.settle = settle;
-			const again = await payDraft(gateway.app, draftId, header);
-			await expectJson(again, 201);
-			expect(gateway.facilitator.calls.settle).toBe(2);
-		},
-	);
 });

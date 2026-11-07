@@ -8,24 +8,13 @@ import {
 	payDraft,
 	paymentFor,
 	registerFirm,
+	settleAs,
 	type TestGateway,
 	type TestWallet,
-	testWallet,
 	textField,
 	WALLETS,
 } from "../testing/index.js";
 import { orderById } from "./orderRepo.js";
-
-// The facilitator reports `payer` as the settling wallet, as for a delegate or another wallet.
-const settledBy = (gateway: TestGateway, payer: TestWallet): void => {
-	const { answer } = gateway.facilitator;
-	const settle = answer.settle;
-	answer.verify = async () => ({ isValid: true, payer: payer.address });
-	answer.settle = async (payload, requirements) => ({
-		...(await settle(payload, requirements)),
-		payer: payer.address,
-	});
-};
 
 const payAs = async (gateway: TestGateway, payer: TestWallet) => {
 	const firm = await registerFirm(gateway.app, WALLETS.firm);
@@ -59,9 +48,9 @@ describe("recorded order", () => {
 		}
 	});
 
-	test("an auto-pay order stores the delegate as payer while refunds still go to the firm wallet", async () => {
+	test("an order paid by another wallet (the auto-pay delegate) stores it as payer and still refunds the firm's login wallet", async () => {
 		const gateway = createTestGateway();
-		settledBy(gateway, WALLETS.agent);
+		settleAs(gateway, WALLETS.agent);
 		const { orderId, tasks } = await payAs(gateway, WALLETS.agent);
 
 		expect(orderById(gateway.database, orderId)?.payer).toBe(
@@ -71,15 +60,6 @@ describe("recorded order", () => {
 		for (const task of tasks) {
 			expect(task.refundWallet).toBe(WALLETS.firm.address);
 		}
-	});
-
-	test("a pay-link payer different from the firm's login wallet still refunds the firm", async () => {
-		const gateway = createTestGateway();
-		const friend = testWallet(9);
-		settledBy(gateway, friend);
-		const { orderId } = await payAs(gateway, friend);
-		expect(orderById(gateway.database, orderId)?.payer).toBe(friend.address);
-
 		gateway.clock.advance(gateway.config.claimWindowSeconds * 1000);
 		await gateway.worker.tick();
 		const refunds = gateway.chain.calls.filter(

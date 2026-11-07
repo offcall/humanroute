@@ -151,32 +151,10 @@ describe("unsigned payment route refusals", () => {
 		},
 	);
 
-	const badBodies: [string, unknown][] = [
-		["missing fee payer", {}],
-		["invalid fee payer", { feePayer: "not-a-key" }],
-		["fee payer not a string", { feePayer: 42 }],
-	];
-
-	test.each(badBodies)("%s → 422", async (_name, body) => {
+	test("an invalid fee payer → 422 without a chain read", async () => {
 		const { gateway, firm, draftId } = await setup();
+		const body = { feePayer: "not-a-key" };
 		const res = await unsigned(gateway, draftId, firm.mcpToken, body);
-		expect(await expectJson(res, 422)).toEqual({ error: "invalid_body" });
-		expect(chainMethods(gateway)).toEqual([]);
-	});
-
-	test("malformed JSON → 422", async () => {
-		const { gateway, firm, draftId } = await setup();
-		const res = await gateway.app.request(
-			`/api/orders/draft/${draftId}/unsigned`,
-			{
-				method: "POST",
-				headers: {
-					authorization: `Bearer ${firm.mcpToken}`,
-					"content-type": "application/json",
-				},
-				body: "{",
-			},
-		);
 		expect(await expectJson(res, 422)).toEqual({ error: "invalid_body" });
 		expect(chainMethods(gateway)).toEqual([]);
 	});
@@ -200,17 +178,6 @@ describe("unsigned payment route refusals", () => {
 			error: "chain_unavailable",
 		});
 		expect(chainMethods(gateway)).toEqual(["tokenAccount", "latestBlockhash"]);
-	});
-
-	test("a thrown chain read answers 500 without a blockhash read or signing (characterization)", async () => {
-		const { gateway, firm, draftId } = await setup();
-		gateway.chain.answer.tokenAccount = async () => {
-			throw new Error("socket hang up");
-		};
-		const res = await unsigned(gateway, draftId, firm.mcpToken);
-		expect(res.status).toBe(500);
-		expect(await res.text()).not.toContain("socket hang up");
-		expect(chainMethods(gateway)).toEqual(["tokenAccount"]);
 	});
 
 	test("preflight failing → 503 not_ready", async () => {

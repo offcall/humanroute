@@ -1,6 +1,6 @@
-// POST /x/orders/:draftId refusals before and around the facilitator (failure table rows 3, 4, 16).
-import { FacilitatorResponseError } from "@x402/core/server";
-import { describe, expect, test, vi } from "vitest";
+// POST /x/orders/:draftId refusals before the facilitator and by verify (failure table rows 3, 4, 16).
+// Settle failures: settleUnknown.test.ts.
+import { describe, expect, test } from "vitest";
 import {
 	createDraft,
 	createTestGateway,
@@ -8,6 +8,7 @@ import {
 	payDraft,
 	paymentFor,
 	registerFirm,
+	rowCount,
 	type TestGateway,
 	textField,
 	WALLETS,
@@ -24,15 +25,9 @@ const draftWithPayment = async (gateway: TestGateway) => {
 	return { draftId, header };
 };
 
-const count = (gateway: TestGateway, table: string): unknown =>
-	gateway.database
-		.prepare(`SELECT COUNT(*) AS total FROM ${table}`)
-		.pluck()
-		.get();
-
 const expectNothingRecorded = (gateway: TestGateway) => {
 	for (const table of ["orders", "tasks", "payments", "orphans"]) {
-		expect(count(gateway, table)).toBe(0);
+		expect(rowCount(gateway, table)).toBe(0);
 	}
 };
 
@@ -99,40 +94,5 @@ describe("pay route", () => {
 		expect(res.status).toBe(402);
 		expect(gateway.facilitator.calls).toEqual({ verify: 1, settle: 0 });
 		expectNothingRecorded(gateway);
-	});
-
-	test("answers 402 and records nothing when settle returns success false", async () => {
-		const gateway = createTestGateway();
-		const { draftId, header } = await draftWithPayment(gateway);
-		gateway.facilitator.answer.settle = async () => ({
-			success: false,
-			errorReason: "transaction_failed",
-			transaction: "",
-			network: gateway.config.network,
-		});
-
-		const res = await payDraft(gateway.app, draftId, header);
-		expect(res.status).toBe(402);
-		expect(gateway.facilitator.calls.settle).toBe(1);
-		expectNothingRecorded(gateway);
-	});
-
-	test("a facilitator error during settlement answers 502 without orphan_payment and the draft can be paid again", async () => {
-		vi.spyOn(console, "error").mockImplementation(() => {});
-		const gateway = createTestGateway();
-		const { draftId, header } = await draftWithPayment(gateway);
-		const settle = gateway.facilitator.answer.settle;
-		gateway.facilitator.answer.settle = async () => {
-			throw new FacilitatorResponseError("facilitator answered HTML");
-		};
-
-		const failed = await payDraft(gateway.app, draftId, header);
-		expect(await expectJson(failed, 502)).toEqual({
-			error: "facilitator answered HTML",
-		});
-		expectNothingRecorded(gateway);
-
-		gateway.facilitator.answer.settle = settle;
-		await expectJson(await payDraft(gateway.app, draftId, header), 201);
 	});
 });

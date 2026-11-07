@@ -8,6 +8,7 @@ import {
 	listField,
 	payDraft,
 	paymentFor,
+	payOrder,
 	registerFirm,
 	send,
 	signIn,
@@ -124,16 +125,7 @@ describe("draft body and draft read refusals", () => {
 
 	const paidOrder = async (gateway: TestGateway) => {
 		const firm = await registerFirm(gateway.app, WALLETS.firm);
-		const draftId = textField(
-			await createDraft(gateway.app, firm.mcpToken),
-			"draftId",
-		);
-		const header = await paymentFor(gateway.app, draftId, WALLETS.firm, "a");
-		const paid = await expectJson(
-			await payDraft(gateway.app, draftId, header),
-			201,
-		);
-		return { firm, draftId, orderId: textField(paid, "orderId") };
+		return { firm, ...(await payOrder(gateway, firm, "a")) };
 	};
 	const readDraft = (gateway: TestGateway, draftId: string) =>
 		send(gateway.app, "GET", `/api/orders/draft/${draftId}`);

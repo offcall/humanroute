@@ -9,50 +9,22 @@ import {
 	chainFail,
 	chainOk,
 	createTestGateway,
-	FAKE_BLOCKHASH,
+	LAST_VALID,
+	OLD_SIG,
 	START,
-	WALLETS,
+	seedTransfer,
 } from "../testing/index.js";
-import { taskLedger } from "./ledger.js";
-import { LegRole, PayoutKind, type PayoutTransfer } from "./taskTypes.js";
 import { createTaskWorker } from "./taskWorker.js";
 
 const TRANSFER_ID = "transfer-1";
 const MEMO = "hr:task-1";
-const OLD_SIG = "old-sig";
-const LAST_VALID = 1000;
 
 // A gateway with one payout row already sent as OLD_SIG (valid up to height 1000).
 const setup = () => {
 	const gateway = createTestGateway();
-	const ledger = taskLedger(gateway.database);
-	ledger.insert(
-		{
-			id: TRANSFER_ID,
-			taskId: "task-1",
-			kind: PayoutKind.Payout,
-			legs: [
-				{ role: LegRole.Linguist, wallet: WALLETS.linguist.address, units: 1n },
-			],
-			memo: MEMO,
-		},
-		gateway.clock.now(),
-	);
-	const sent = {
-		txSig: OLD_SIG,
-		blockhash: FAKE_BLOCKHASH,
-		lastValidBlockHeight: LAST_VALID,
-	};
-	ledger.markSent(TRANSFER_ID, sent, gateway.clock.now());
-	const row = (): PayoutTransfer => {
-		const found = ledger.find(TRANSFER_ID);
-		if (!found) {
-			throw new Error("transfer row is missing");
-		}
-		return found;
-	};
-	const count = (method: string) =>
-		gateway.chain.calls.filter((call) => call.method === method).length;
+	const { ledger, row, count } = seedTransfer(gateway, {
+		status: TransferStatus.Sent,
+	});
 	const statuses = (bySig: Record<string, SignatureStatus>) => {
 		gateway.chain.answer.signatureStatus = async (sig) => {
 			const status = bySig[sig];

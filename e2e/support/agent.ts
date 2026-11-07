@@ -1,5 +1,5 @@
 // The agent side of auto-pay (ADR 0036): web/public/agent/setup.mjs and sign.mjs run as real
-// processes with a temp HOME, and the firm's SPL Approve/Revoke sent with the firm key.
+// processes with a temp HOME, and the firm's SPL Approve sent with the firm key.
 import { execFile } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -8,7 +8,6 @@ import { promisify } from "node:util";
 import {
 	approveChecked,
 	getAssociatedTokenAddressSync,
-	revoke,
 } from "@solana/spl-token";
 import { type Keypair, PublicKey } from "@solana/web3.js";
 import { ataOf } from "./chain.js";
@@ -80,6 +79,3 @@ export const approveAllowance = (
 		units,
 		6,
 	);
-
-export const revokeAllowance = (firm: Keypair): Promise<string> =>
-	revoke(connection(), firm, ataOf(firm.publicKey.toBase58()), firm);

@@ -1,56 +1,23 @@
 import type { Hono } from "hono";
 import { describe, expect, test } from "vitest";
-import { taskById } from "../tasks/index.js";
 import {
-	createDraft,
 	createTestGateway,
+	EN_ES_FR,
 	expectJson,
 	joinLinguist,
-	payDraft,
-	paymentFor,
+	payOrder,
 	registerAgency,
 	registerFirm,
 	send,
-	type TestGateway,
-	type TestWallet,
 	testWallet,
-	textField,
 	WALLETS,
 } from "../testing/index.js";
 import { moneyByAgency, moneyByFirm } from "./totals.js";
 
-const PAIRS = [
-	{ source: "en", target: "es" },
-	{ source: "en", target: "fr" },
-];
+const PAIRS = EN_ES_FR;
 
 const post = (app: Hono, path: string, cookie: string, body: unknown = {}) =>
 	send(app, "POST", path, { cookie, body });
-
-const paidOrder = async (
-	gateway: TestGateway,
-	mcpToken: string,
-	payer: TestWallet,
-	memo: string,
-) => {
-	const { app, database } = gateway;
-	const draftId = textField(await createDraft(app, mcpToken), "draftId");
-	const header = await paymentFor(app, draftId, payer, memo);
-	const paid = await expectJson(await payDraft(app, draftId, header), 201);
-	const ids = Array.isArray(paid.taskIds) ? paid.taskIds : [];
-	const lang = (target: string) => {
-		const id = ids.find(
-			(item) =>
-				typeof item === "string" &&
-				taskById(database, item)?.targetLang === target,
-		);
-		if (typeof id !== "string") {
-			throw new Error(`no ${target} task`);
-		}
-		return id;
-	};
-	return { es: lang("es"), fr: lang("fr") };
-};
 
 const work = async (app: Hono, taskId: string, linguist: string) => {
 	await expectJson(
@@ -96,20 +63,10 @@ describe("payout totals", () => {
 			PAIRS,
 		);
 
-		const kept = await paidOrder(gateway, firmA.mcpToken, WALLETS.firm, "a-1");
-		const distract = await paidOrder(
-			gateway,
-			firmA.mcpToken,
-			WALLETS.firm,
-			"a-2",
-		);
-		const failed = await paidOrder(
-			gateway,
-			firmA.mcpToken,
-			WALLETS.firm,
-			"a-3",
-		);
-		const other = await paidOrder(gateway, otherFirm.mcpToken, firmB, "b-1");
+		const kept = await payOrder(gateway, firmA, "a-1", WALLETS.firm);
+		const distract = await payOrder(gateway, firmA, "a-2", WALLETS.firm);
+		const failed = await payOrder(gateway, firmA, "a-3", WALLETS.firm);
+		const other = await payOrder(gateway, otherFirm, "b-1", firmB);
 
 		await approve(app, kept.es, l1, firmA.cookie);
 		await work(app, kept.fr, l1);

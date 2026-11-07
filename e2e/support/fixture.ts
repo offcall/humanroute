@@ -34,13 +34,6 @@ export const team = async (): Promise<Team> => {
 	return { agency, linguist };
 };
 
-export const secondLinguist = (agency: Agency): Promise<Linguist> =>
-	joinLinguist(
-		gatewayUrl(),
-		agency,
-		LANGS.map((target) => ({ source: "en", target })),
-	);
-
 export const paidOrder = async (
 	firm: Firm,
 	langs: string[],
