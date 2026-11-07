@@ -11,7 +11,6 @@ TypeScript, Hono, SQLite, one process. Toolchain and architecture decisions live
 ## Language
 
 - Code, identifiers, comments, docs, ADRs, README, commits, tests, agent instructions: English.
-- Replies and reports to the user: Russian.
 
 ## Communication
 
@@ -104,16 +103,10 @@ Target state. Tests are deferred for now by decision of the owner; do not add te
 
 `inspect → plan → implement → validate → commit → report`
 
-Before every commit: `npm run check` (Biome + tsc) passes.
+Before every commit: `npm run check` (Biome + tsc) passes. Never commit or push unless the user asks.
 
 Docs, ADR index rows and README updates go in the same commit as the behavior they describe. Check `README.md`, `docs/`, `docs/adr/README.md` for stale text before committing.
 
 One commit = one understandable unit. Conventional Commit: `<type>(<scope>): <short description>`, lowercase, type one of `feat`, `fix`, `docs`, `refactor`, `test`, `chore`. No `Co-Authored-By` or "Generated with" trailers.
 
 ADR edits go in their own commit. `AGENTS.md` changes: own `docs(agents): ...` commit, never with `.gitignore`, code or other changes.
-
-## Environment
-
-- Parallel agents in one checkout own disjoint file sets. Never touch files outside your set.
-- The coordinating agent owns shared files: `README.md`, `docs/adr/README.md`, `AGENTS.md`, `package.json`, `tsconfig.json`, `biome.json`.
-- Never commit or push unless the user asks.
