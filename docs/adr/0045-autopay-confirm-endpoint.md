@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed.
+Accepted (owner, 2026-11-07).
 
 ## Context
 
