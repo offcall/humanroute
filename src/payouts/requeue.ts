@@ -1,7 +1,7 @@
 // Operator requeue: failed -> pending, only when no earlier signature can still land (ADR 0006).
 // Sends nothing; the worker picks the pending row up. attempts is kept.
 import { TransferStatus } from "../store/index.js";
-import { checkExpiry } from "./recover.js";
+import { checkExpiry, uncoveredReason } from "./recover.js";
 import type { RequeueDeps, RequeueResult, Sendable } from "./types.js";
 
 const refuse = (reason: string): { outcome: "refused"; reason: string } => ({
@@ -14,7 +14,7 @@ const blocker = async <T extends Sendable = Sendable>(
 	deps: RequeueDeps<T>,
 	transfer: T,
 ): Promise<RequeueResult<T> | null> => {
-	const { txSig, lastValidBlockHeight, memo } = transfer;
+	const { txSig, lastValidBlockHeight, memo, createdAt } = transfer;
 	if (txSig === null) {
 		return null;
 	}
@@ -30,7 +30,12 @@ const blocker = async <T extends Sendable = Sendable>(
 		return refuse(`chain reports ${txSig} as ${status.value.state}`);
 	}
 
-	const expiry = await checkExpiry(deps.chain, memo, lastValidBlockHeight);
+	const expiry = await checkExpiry(
+		deps.chain,
+		memo,
+		lastValidBlockHeight,
+		createdAt,
+	);
 	switch (expiry.state) {
 		case "expired":
 			return null;
@@ -40,6 +45,8 @@ const blocker = async <T extends Sendable = Sendable>(
 			);
 		case "landed":
 			return refuse(`memo ${memo} found in ${expiry.signature}`);
+		case "uncovered":
+			return refuse(uncoveredReason(createdAt));
 		case "unavailable":
 			return { outcome: "error", error: expiry.error };
 	}

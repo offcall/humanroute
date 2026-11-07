@@ -1,10 +1,11 @@
 // web3.js 1.x implementation of SolanaClient. Logs nothing; callers log signatures and public keys only.
 import { Connection, PublicKey } from "@solana/web3.js";
 import { classify } from "./errors.js";
+import { findMemo } from "./memo.js";
 import { preflight } from "./preflight.js";
 import { preparePayout } from "./prepare-payout.js";
 import { latestBlockhash, solBalance, tokenAccount } from "./reads.js";
-import { blockHeight, findMemo, signatureStatus } from "./status.js";
+import { blockHeight, signatureStatus } from "./status.js";
 import { Phase, type SolanaClient, type SolanaOptions } from "./types.js";
 
 export const createSolanaClient = (opts: SolanaOptions): SolanaClient => {
@@ -29,7 +30,7 @@ export const createSolanaClient = (opts: SolanaOptions): SolanaClient => {
 
 		signatureStatus: (sig) => signatureStatus(conn, sig, opts.commitment),
 		blockHeight: () => blockHeight(conn, opts.commitment),
-		findMemo: (memo) => findMemo(conn, opts.hold.publicKey, memo),
+		findMemo: (memo, since) => findMemo(conn, opts.hold.publicKey, memo, since),
 		tokenAccount: (owner) => tokenAccount(conn, mint, owner, opts.commitment),
 		solBalance: (owner) => solBalance(conn, owner, opts.commitment),
 		latestBlockhash: () => latestBlockhash(conn, opts.commitment),

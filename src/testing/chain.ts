@@ -43,7 +43,7 @@ export const fakeChain = (holdAddress: string): FakeChain => {
 		broadcast: async () => chainOk(`payout-sig-${signed}`),
 		signatureStatus: async () => chainOk({ state: "confirmed" }),
 		blockHeight: async () => chainOk(1),
-		findMemo: async () => chainOk(null),
+		findMemo: async () => chainOk({ state: "absent" }),
 		tokenAccount: async (owner) =>
 			chainOk({ exists: false, address: `no-usdc-account-of-${owner}` }),
 		solBalance: async () => chainOk(1_000_000_000),
@@ -75,9 +75,9 @@ export const fakeChain = (holdAddress: string): FakeChain => {
 			record("blockHeight");
 			return answer.blockHeight();
 		},
-		findMemo: (memo) => {
-			record("findMemo", memo);
-			return answer.findMemo(memo);
+		findMemo: (memo, since) => {
+			record("findMemo", memo, since);
+			return answer.findMemo(memo, since);
 		},
 		tokenAccount: (owner) => {
 			record("tokenAccount", owner);

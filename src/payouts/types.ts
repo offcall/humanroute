@@ -26,6 +26,8 @@ export type Sendable = {
 	txSig: string | null;
 	lastValidBlockHeight: number | null;
 	attempts: number;
+	// Earliest time any attempt of the row can have been signed: the memo search window (ADR 0039).
+	createdAt: number;
 	updatedAt: number;
 };
 
@@ -52,9 +54,11 @@ export type SendDeps<T extends Sendable = Sendable> = {
 
 // Ruling on a signature the chain reports unknown (ADR 0006).
 // expired: past last_valid_block_height and no hold transaction carries the memo, so it can never land.
+// uncovered: the memo history does not reach back to the row's creation; never resend (ADR 0039).
 export type Expiry =
 	| { state: "live" }
 	| { state: "expired" }
+	| { state: "uncovered" }
 	| { state: "landed"; signature: string }
 	| { state: "unavailable"; error: string };
 

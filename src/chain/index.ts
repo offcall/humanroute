@@ -3,6 +3,7 @@ export {
 	type ChainError,
 	type ChainResult,
 	ErrorKind,
+	type MemoSearch,
 	type PayoutLeg,
 	type PayoutRequest,
 	type SignatureStatus,

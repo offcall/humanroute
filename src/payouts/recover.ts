@@ -5,11 +5,15 @@ import { TransferStatus } from "../store/index.js";
 import { fail, retry } from "./send.js";
 import type { Expiry, Sendable, SendDeps } from "./types.js";
 
-// Call only after the chain reported the signature unknown.
+export const uncoveredReason = (createdAt: number): string =>
+	`memo history of the hold wallet not covered back to ${createdAt}`;
+
+// Call only after the chain reported the signature unknown. since: the row's created_at.
 export const checkExpiry = async (
 	chain: SolanaClient,
 	memo: string,
 	lastValidBlockHeight: number,
+	since: number,
 ): Promise<Expiry> => {
 	const height = await chain.blockHeight();
 	if (!height.ok) {
@@ -19,14 +23,15 @@ export const checkExpiry = async (
 		return { state: "live" };
 	}
 
-	const found = await chain.findMemo(memo);
+	const found = await chain.findMemo(memo, since);
 	if (!found.ok) {
 		return { state: "unavailable", error: found.error.message };
 	}
-	if (found.value === null) {
-		return { state: "expired" };
+	const search = found.value;
+	if (search.state === "found") {
+		return { state: "landed", signature: search.signature };
 	}
-	return { state: "landed", signature: found.value };
+	return { state: search.state === "absent" ? "expired" : "uncovered" };
 };
 
 const confirmFromMemo = async <T extends Sendable = Sendable>(
@@ -79,9 +84,12 @@ export const checkSent = async <T extends Sendable = Sendable>(
 		deps.chain,
 		transfer.memo,
 		lastValidBlockHeight,
+		transfer.createdAt,
 	);
 	if (expiry.state === "landed") {
 		await confirmFromMemo(deps, transfer, expiry.signature);
+	} else if (expiry.state === "uncovered") {
+		fail(deps, transfer, uncoveredReason(transfer.createdAt));
 	} else if (expiry.state === "expired") {
 		const error = `signature ${txSig} unseen after block height ${lastValidBlockHeight}`;
 		retry(deps, transfer, error);

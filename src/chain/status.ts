@@ -1,10 +1,8 @@
-// Read-only chain lookups: signature status with history, block height, memo search.
-import type { Connection, PublicKey } from "@solana/web3.js";
+// Read-only chain lookups: signature status with history and block height.
+import type { Connection } from "@solana/web3.js";
 import { Commitment } from "../config/index.js";
 import { classify } from "./errors.js";
 import { type ChainResult, Phase, type SignatureStatus } from "./types.js";
-
-const MEMO_SEARCH_LIMIT = 200;
 
 export const signatureStatus = async (
 	conn: Connection,
@@ -42,28 +40,6 @@ export const blockHeight = async (
 ): Promise<ChainResult<number>> => {
 	try {
 		return { ok: true, value: await conn.getBlockHeight(commitment) };
-	} catch (err) {
-		return { ok: false, error: classify(err, Phase.Prepare) };
-	}
-};
-
-// Second safety net before a resend: a successful hold transaction that already carries this memo.
-export const findMemo = async (
-	conn: Connection,
-	hold: PublicKey,
-	memo: string,
-): Promise<ChainResult<string | null>> => {
-	try {
-		const sigs = await conn.getSignaturesForAddress(
-			hold,
-			{ limit: MEMO_SEARCH_LIMIT },
-			"confirmed",
-		);
-		const hit = sigs.find(
-			(info) =>
-				info.err === null && info.memo !== null && info.memo.includes(memo),
-		);
-		return { ok: true, value: hit ? hit.signature : null };
 	} catch (err) {
 		return { ok: false, error: classify(err, Phase.Prepare) };
 	}

@@ -62,6 +62,13 @@ export type SignatureStatus =
 	| { state: "confirmed" }
 	| { state: "failed"; error: string };
 
+// found: a successful hold transaction carries the memo. absent: none back to `since`.
+// uncovered: the history seen does not reach back to `since`, so absence is unproven (ADR 0039).
+export type MemoSearch =
+	| { state: "found"; signature: string }
+	| { state: "absent" }
+	| { state: "uncovered" };
+
 // A wallet's associated token account for the configured mint (ADR 0036).
 export type TokenAccount =
 	| { exists: false; address: string }
@@ -84,8 +91,8 @@ export type SolanaClient = {
 	broadcast(bytes: Uint8Array): Promise<ChainResult<string>>;
 	signatureStatus(signature: string): Promise<ChainResult<SignatureStatus>>;
 	blockHeight(): Promise<ChainResult<number>>;
-	// Signature of a successful hold transaction whose memo contains `memo`, or null.
-	findMemo(memo: string): Promise<ChainResult<string | null>>;
+	// A successful hold transaction whose memo contains `memo`, signed at or after `since` (ms).
+	findMemo(memo: string, since: number): Promise<ChainResult<MemoSearch>>;
 	tokenAccount(owner: string): Promise<ChainResult<TokenAccount>>;
 	// Lamports of a wallet: the firm pays the approve fee itself (ADR 0036).
 	solBalance(owner: string): Promise<ChainResult<number>>;

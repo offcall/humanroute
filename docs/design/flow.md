@@ -73,6 +73,7 @@ Memos: `hr:<taskId>` (approved), `hr:<taskId>:rejected`, `:unclaimed`, `:late` (
 | Broadcast or RPC error, retryable | back to `pending`, attempt + 1, backoff; after 10 attempts `failed` | payouts |
 | Signature unseen after its blockhash expired, memo not on chain | back to `pending` and sent again (ADR 0006) | payouts |
 | Signature landed under another send (found by memo) | marked `confirmed` | payouts |
+| Signature unseen after its blockhash expired, hold memo history not covered back to the transfer's creation | transfer `failed`; log `OPERATOR ACTION REQUIRED`; requeue refuses (ADR 0039) | payouts |
 | On-chain error for a sent signature | `failed` | payouts |
 | Recipient has no USDC token account | the same transaction creates it (idempotent ATA) | payouts |
 | Gateway restarts with a `sent` row | recovered on start by the same rules | payouts |
