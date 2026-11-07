@@ -39,11 +39,11 @@ Format: `# ADR NNNN: Title`, then `## Status`, `## Context`, `## Decision`, opti
 | [0033](0033-indigo-read-fields.md) | Indigo read fields | Accepted |
 | [0034](0034-sign-in-via-approve-in-phantom.md) | Sign-in via approve in Phantom | Proposed |
 | [0036](0036-agent-autopay-spl-delegate.md) | Agent auto-pay through an SPL delegate, with draft availability | Accepted (amended by 0040) |
-| [0037](0037-test-toolchain-vitest.md) | Test toolchain: Vitest projects and test layout | Proposed |
-| [0038](0038-e2e-environments.md) | E2E environments | Proposed |
-| [0039](0039-resend-guard-history-window.md) | Resend guard history window | Proposed |
-| [0040](0040-agent-signer-validation-and-fee-policy.md) | Agent signer validation and fee policy | Proposed |
-| [0041](0041-unknown-send-errors-are-ambiguous.md) | Unknown send errors are ambiguous | Proposed |
-| [0042](0042-draft-read-reports-orphans.md) | The draft read reports orphans and settling | Proposed (amended by 0043) |
-| [0043](0043-settle-unknown-outcome.md) | A settle that may have broadcast is an unknown outcome | Proposed |
-| [0044](0044-devnet-e2e-on-vitest.md) | Devnet e2e on Vitest | Proposed |
+| [0037](0037-test-toolchain-vitest.md) | Test toolchain: Vitest projects and test layout | Accepted |
+| [0038](0038-e2e-environments.md) | E2E environments | Accepted |
+| [0039](0039-resend-guard-history-window.md) | Resend guard history window | Accepted |
+| [0040](0040-agent-signer-validation-and-fee-policy.md) | Agent signer validation and fee policy | Accepted |
+| [0041](0041-unknown-send-errors-are-ambiguous.md) | Unknown send errors are ambiguous | Accepted |
+| [0042](0042-draft-read-reports-orphans.md) | The draft read reports orphans and settling | Accepted (amended by 0043) |
+| [0043](0043-settle-unknown-outcome.md) | A settle that may have broadcast is an unknown outcome | Accepted |
+| [0044](0044-devnet-e2e-on-vitest.md) | Devnet e2e on Vitest | Accepted |

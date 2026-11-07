@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Replaces the bash harness named by ADR 0011; builds on ADR 0038.
+Accepted (owner, 2026-11-07). Replaces the bash harness named by ADR 0011; builds on ADR 0038.
 
 ## Context
 

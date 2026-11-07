@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Lifts the owner's test deferral (owner, 2026-11-07). Replaces the "tests are deferred" sentence of ADR 0011; the rest of ADR 0011 stays.
+Accepted (owner, 2026-11-07). Lifts the owner's test deferral (owner, 2026-11-07). Replaces the "tests are deferred" sentence of ADR 0011; the rest of ADR 0011 stays.
 
 ## Context
 

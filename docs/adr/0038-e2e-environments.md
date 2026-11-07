@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Builds on ADR 0037 (Vitest projects) and ADR 0011 (devnet e2e outside the check).
+Accepted (owner, 2026-11-07). Builds on ADR 0037 (Vitest projects) and ADR 0011 (devnet e2e outside the check).
 
 ## Context
 

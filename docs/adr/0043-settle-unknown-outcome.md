@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Amends ADR 0016 (a new orphan reason), ADR 0022 and ADR 0042 (the pay route refuses an orphaned draft); their other decisions stay.
+Accepted (owner, 2026-11-07). Amends ADR 0016 (a new orphan reason), ADR 0022 and ADR 0042 (the pay route refuses an orphaned draft); their other decisions stay.
 
 ## Context
 
