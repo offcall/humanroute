@@ -1,118 +1,142 @@
 # HumanRoute
 
-A firm orders human translation from an AI agent. Claude Code (over MCP) drafts the texts and posts one order; the firm pays once over x402 in USDC on Solana devnet. Linguists claim the tasks, the firm approves or rejects each result, and every task is settled on-chain: one payout transaction splits the price between the linguist, the agency and the fee, or the firm gets a full refund.
+**AI agents hire a human expert in one HTTP request.** The agent pays over x402 in USDC on Solana, the job lands on a translator's phone, and each task ends in one on-chain transfer: a split payout or a full refund. First expert type: translation.
 
-Hackathon demo for Encode "Best Use of x402 on Solana". Devnet only. The gate is `npm run check` (Biome, `tsc`, unit and web tests).
+Solana devnet · x402 V2 (`exact`, USDC) · Encode Club Solana Hackathon 2026
 
-Live demo (devnet): https://humanroute.app.offcall.link
+[Live demo (devnet)](https://humanroute.app.offcall.link) · [Demo videos](#demo) · [Quick start](#quick-start) · [Docs](#docs-and-decisions)
 
-## How x402 is used
+## Demo
 
-- **One payment per order.** `POST /x/orders/:draftId` answers `402` with `PAYMENT-REQUIRED`: x402 V2, scheme `exact`, price `taskCount x TASK_PRICE_USDC`, `payTo` the hold wallet. The firm signs one USDC transfer; the x402.org facilitator verifies and settles it on Solana, and pays the network fee.
-- **The paid resource is the work.** Settlement creates the order and one task per language. The agent then reads the human results through MCP (`get_task`, `wait_task`), and the money for each task is released or refunded on-chain.
-- **Two payers, one route.** A person pays on the pay page with Phantom. The agent pays by itself (auto-pay, ADR 0036): the gateway builds the unsigned x402 payment from the firm's own USDC account under an SPL delegate allowance, and Claude signs it locally. Both go through the same verify and settle.
-- **Payment identity.** One payment pays one draft: the same payment sent again returns the same order, and a payment reused for another draft gets `409` (ADR 0004).
+<!-- Replace AGENT_VIDEO_UUID and LINGUIST_VIDEO_UUID with the user-attachments ids of the uploaded mp4 files. -->
+<table>
+<tr>
+<th width="62%">An AI agent orders work and auto-pays over x402</th>
+<th width="38%">A linguist gets a push on the phone and is paid</th>
+</tr>
+<tr>
+<td><video src="https://github.com/user-attachments/assets/AGENT_VIDEO_UUID" controls width="100%"></video></td>
+<td><video src="https://github.com/user-attachments/assets/LINGUIST_VIDEO_UUID" controls width="100%"></video></td>
+</tr>
+</table>
 
-## How Solana powers it
+## Problem
 
-- USDC (SPL, 6 decimals) is the money for payment, payout and refund; amounts are `bigint` base units end to end.
-- Sign-In With Solana (Phantom) is the only login for firms, agencies and linguists, on desktop and on the phone (ADR 0020, ADR 0034).
-- Each decided task is one on-chain transaction: a payout with three legs (linguist, agency, fee) or a refund to the firm. Every transfer carries a memo `hr:<taskId>` (`:rejected`, `:unclaimed`, `:late` for refunds), so the explorer shows what each payment was for (ADR 0024).
-- Auto-pay is an SPL `approve` with a limit, signed by the firm in Phantom and revocable; the agent key never holds the firm's funds (ADR 0036).
+AI agents cannot buy human judgment: there is no HTTP-native way to hire a person and pay for the result without a card, an invoice or a subscription. Firms also need protection from late or bad work; linguists want to be paid per task, on time.
 
-## Failed payments
+HumanRoute: one HTTP request orders the work, one x402 payment covers the order, the job reaches a linguist's phone, and the money is released only for an approved on-time result. Otherwise it returns to the firm on-chain, automatically.
 
-The full failure table is in [`docs/design/flow.md`](docs/design/flow.md#failure-table). The main payment cases:
+## How it works
+
+1. **Draft.** Claude Code calls MCP `post_task` with the text and up to 5 target languages. The gateway stores a draft (30 min TTL) and returns a pay link.
+2. **Pay.** One x402 payment of `taskCount × 0.50 USDC`, by the agent itself (auto-pay) or by the firm with Phantom.
+3. **Order.** After settlement, one SQLite transaction creates the order and one task per language.
+4. **Claim and submit.** Linguists with the language pair get a Web Push. The first claim wins; the linguist submits within the work window.
+5. **Decide.** The firm approves or rejects, in the cabinet or through Claude, which asks the user first.
+6. **Settle.** One on-chain transaction per task: payout split linguist 80 % / agency 18 % / fee 2 %, or full refund.
+
+Roles: the **firm** orders and pays, the **agency** employs linguists and gets its share, the **linguist** does the work and is paid per task. Task states: `open → claimed → submitted → approved | rejected`, plus `expired_unclaimed` and `expired_late` (both refunded).
+
+```
+Claude Code ──MCP──> MCP server ──HTTP──> Gateway (Hono + SQLite) ──verify/settle──> x402 facilitator ──> Solana devnet
+     │                                       │   ▲                                                        ▲
+     └── signs auto-pay locally (sign.mjs)   │   └── Phantom: firm pay page, SIWS login                   │
+                                             └── Web Push ──> linguist's phone (PWA)      payouts/refunds ─┘
+```
+
+## How Solana and x402 power it
+
+**x402**
+
+- **One payment per order.** `POST /x/orders/:draftId` answers `402` with `PAYMENT-REQUIRED` (x402 V2, `exact`, USDC on devnet, `payTo` the hold wallet). The client retries with `PAYMENT-SIGNATURE`; the x402.org facilitator verifies and settles on Solana.
+- **The paid resource is human work.** Settlement creates the order; the agent reads results through MCP `get_task` and `wait_task`.
+- **Two payers, one route.** A person pays with Phantom. The agent pays by itself (ADR 0036): the gateway builds the unsigned payment from the firm's USDC account under an SPL delegate allowance, `sign.mjs` signs it locally, and the facilitator pays the network fee (ADR 0040). `sign.mjs` refuses anything but a HumanRoute payment from the firm's account.
+- **Payment identity.** The same payment sent again returns the same order; reused for another draft, it gets `409` (ADR 0022).
+
+**Solana**
+
+- USDC (SPL, 6 decimals) for payment, payout and refund; amounts are `bigint` base units end to end.
+- One transaction per decided task: a payout with up to three legs, or a refund to the firm's login wallet. Missing token accounts are created in the same transaction (ADR 0024).
+- Every transfer carries a memo `hr:<taskId>` (`:rejected`, `:unclaimed`, `:late` for refunds): readable in the explorer and a guard against double sends (ADR 0006).
+- Sign-In With Solana (Phantom) is the only login, on desktop and phone (ADR 0020, 0034).
+- Auto-pay is a revocable SPL `approve` with a limit; the agent key never holds the firm's funds.
+- Cheap, fast finality makes a 0.50 USDC task payable and split three ways.
+
+## Failure and refund handling
+
+Every decided or expired task ends in exactly one transfer; every refund goes to the firm's login wallet. Full table: [`docs/design/flow.md`](docs/design/flow.md#failure-table).
 
 | Case | What happens |
 | --- | --- |
 | No payment header | `402` with `PAYMENT-REQUIRED` |
-| Same payment sent again for the same draft | Same `201` answer, no second order |
-| Another payment for a paid draft, or a payment reused for another draft | `409 draft_paid` / `409 payment_reused` |
-| Hold wallet or facilitator not ready | `503 not_ready` with reasons; payouts pause, nothing is sent |
-| Paid on-chain but not recorded | `502 orphan_payment`; the agent is told not to pay again |
-| Agent payment outcome unknown (timeout, broken connection) | Claude checks `get_task` and asks the user before any new payment |
-| Task never claimed, submitted late, or rejected | Full refund to the firm, memo `:unclaimed`, `:late` or `:rejected` |
-| Payout broadcast fails | Retried from `pending` with backoff; resend only when the memo is not on chain (ADR 0006) |
+| Same payment again, same draft | Same `201`, no second order |
+| Second payment for a paid draft, or payment reused for another draft | `409 draft_paid` / `409 payment_reused` |
+| Payment still settling | `409 payment_in_progress`; re-read the draft, no new payment |
+| Hold wallet or facilitator not ready | `503 not_ready` with reasons; no payment taken, payouts pause |
+| Settle refused by verify | `402`, nothing recorded, the draft can be paid again (ADR 0043) |
+| Settle outcome unknown (timeout, 5xx, broken connection) | `502 orphan_payment`, row `settle_unknown`; the operator refunds only if the transfer landed (ADR 0043) |
+| Paid on-chain but not recorded | `502 orphan_payment`; draft `orphaned`, the agent must not pay again, manual refund (ADR 0016, 0042) |
+| Agent unsure whether it paid | Claude checks `get_task` and asks the user before paying again |
+| Never claimed, late, or rejected | Full refund, memo `:unclaimed`, `:late` or `:rejected` |
+| Payout broadcast fails | Retry from `pending` with backoff, up to 10 attempts; ambiguous errors keep the row `sent`; resend only if the memo is not on chain (ADR 0006, 0039, 0041) |
+| Restart with a `sent` row | Recovered on start by the same rules |
 
-## Parts
+Each row of the table is meant to have a test (repo rule). `npm run test:e2e` runs the real gateway, MCP and web app on a local validator; the opt-in devnet e2e checks payment, payout and refunds on chain.
 
-| Part | What | Where |
-| --- | --- | --- |
-| Gateway | Node process: Hono HTTP API, SQLite, x402 payment route, payout worker | `src/` |
-| Web app | React + Vite, PWA manifest, Indigo UI (ADR 0032): landing, firm (jobs, review, task detail), agency, linguist (board, my tasks, wallet), join, approve and pay pages; sign-in from Safari or the home-screen icon via approve in Phantom (ADR 0034); Web Push for new tasks (ADR 0029) | `web/` |
-| MCP server | Remote MCP over Streamable HTTP, tools `post_task`, `get_task`, `wait_task` (waits for the next change) and `approve_task` and `reject_task` (Claude asks the user before deciding), `prepare_payment` and `pay_task` (auto-pay: Claude signs the order payment locally with the firm's agent key, ADR 0036); talks to the gateway over HTTP only | `mcp/` |
-| Scripts | Devnet wallet setup and an opt-in e2e flow | `scripts/` |
-| Spike | First proof of x402 V2 `exact` on devnet (2026-10-20): payment, settle, replay, refund. Throwaway code kept with its report and raw fixtures | `spike/` |
+## Quick start
 
-Money moves only from `src/payouts/`. Decisions (approve, reject, timers) only record state and queue a transfer.
+No install: the [live demo](https://humanroute.app.offcall.link) runs on devnet (claim window 30 min, work window 60 min). Switch Phantom to devnet.
 
-## Docs
-
-Design: [`docs/design/flow.md`](docs/design/flow.md). Endpoints and shapes: [`docs/design/api.md`](docs/design/api.md). Decisions: [`docs/adr/`](docs/adr/README.md). Not built yet: [`docs/roadmap.md`](docs/roadmap.md).
-
-## Run locally
-
-Requirements: Node 22.12 or newer, npm.
+Requirements: Node 22.12+, npm. Without a prebuilt `better-sqlite3` binary for your platform, also python3, make and a C++ compiler.
 
 1. `npm ci`
-2. `cp .env.example .env`, then set `FEE_WALLET` (any devnet address you own).
-3. Wallets: `npm run setup:wallets` creates `keys/hold.json` and `keys/agent.json` (mode 0600), airdrops devnet SOL and creates token accounts. The firm, agency and linguist wallets are Phantom accounts you prepare yourself; the firm needs devnet USDC.
-4. `npm run build`: builds the web app into `web/dist`. The gateway serves it.
-5. `npm start`: gateway on `PORT` (default 4021). The SQLite file at `DB_PATH` is created on first start.
-6. `npm run mcp`: MCP server on `MCP_PORT` (default 4022), needs `GATEWAY_URL`. Firm cabinet shows the MCP URL and token; add them to Claude Code:
-   `claude mcp add --transport http humanroute <MCP_PUBLIC_URL> --header "Authorization: Bearer <token>"`
-   Connect only this way; a claude.ai connector is not supported, because its proxy cuts the long `wait_task` call (ADR 0031).
-   Do not pre-allow `approve_task` and `reject_task` in Claude Code permissions: they pay out or refund, and the permission prompt is part of the guard (ADR 0030).
-   Auto-pay (optional, ADR 0036): in the cabinet's Connect Claude panel, run the shown command on the Claude Code machine. It downloads `sign.mjs` and `setup.mjs` from the gateway and creates `~/.humanroute/agent-key.json` (mode 0600). Then enable auto-pay with a limit (the firm wallet needs a little devnet SOL for the fee, from faucet.solana.com): Phantom (on devnet) signs an SPL approve that lets the agent key spend up to the limit from the firm's own USDC account. Claude offers auto-pay only when the draft's chain snapshot says the delegate, allowance and balance cover its total; it does not check the local key. Unless already instructed to pay, Claude shows the link and immediately waits for payment, including while an auto-pay question is pending: no "paid" message from the user is needed. When instructed, it signs locally with `sign.mjs` and pays through `prepare_payment` and `pay_task`, which check availability again. One wait runs per draft. An unknown payment outcome is checked before any further payment; an orphan must not be paid again. Refunds always go to the firm's login wallet.
-7. Frontend development: `npm run web:dev` (proxies `/api`, `/x`, `/health` to the gateway on port 4021).
+2. `cp .env.example .env` and set `FEE_WALLET` to a devnet address you own (`npx tsx scripts/fee-pubkey.ts` creates `keys/fee.json` and prints one).
+3. `npm run setup:wallets`: creates `keys/hold.json` and `keys/agent.json` (mode 0600), airdrops devnet SOL, creates USDC token accounts. Rate-limited airdrop: fund the printed hold address at https://faucet.solana.com and rerun. Firm, agency and linguist wallets are your own Phantom accounts; the firm needs devnet USDC.
+4. `npm run build && npm start`: gateway and web app on http://localhost:4021. `GET /health` shows `ready: false` with reasons until the hold wallet and facilitator are ready.
+5. Second terminal: `GATEWAY_URL=http://localhost:4021 npm run mcp` (port 4022; this script does not read `.env`).
+6. Sign in as a firm with Phantom, open **Connect Claude** and run the shown command on the Claude Code machine:
+   `claude mcp add --transport http humanroute http://localhost:4022/mcp --header "Authorization: Bearer <token>"`
+   Use only this way: a claude.ai connector cuts the long `wait_task` call (ADR 0031). Do not pre-allow `approve_task` and `reject_task`; the permission prompt is part of the guard (ADR 0030). Auto-pay: [`docs/setup.md`](docs/setup.md#auto-pay).
+7. Ask Claude Code: "Translate this text into French and Spanish with HumanRoute." Pay, claim as a linguist on your phone, submit, approve.
 
-Checks: `npm run check` runs Biome, the gateway `tsc`, the web `tsc`, the service worker `tsc` and `npm test` (Vitest `unit` and `web` projects, offline; [ADR 0037](docs/adr/0037-test-toolchain-vitest.md)). `npm run test:e2e` runs the real gateway and MCP against a local validator, without internet ([ADR 0038](docs/adr/0038-e2e-environments.md)). `npm run e2e:devnet` (alias of `npm run test:e2e:devnet`; opt-in, real devnet, needs `keys/hold.json`, `keys/agent.json` with about 9 USDC and a little SOL, and `FEE_WALLET` in the environment) runs the same e2e suite against devnet and x402.org: SIWS sign-in, order, payment, payout and refunds, checked on chain. Not part of `check` ([ADR 0011](docs/adr/0011-devnet-e2e-outside-check.md), [ADR 0044](docs/adr/0044-devnet-e2e-on-vitest.md)).
+**Checks.** `npm run check`: Biome, `tsc`, unit and web tests; offline, no `.env` or keys. `npm run test:e2e`: local validator, no internet; needs `solana-test-validator` (Agave CLI) and `npx playwright install chromium`. Manual local stack: `npm run build && node --import tsx e2e/env/serve.ts`. Devnet e2e: [`docs/setup.md`](docs/setup.md#devnet-e2e).
 
-A database from v1 is refused (ADR 0022). Use a fresh `DB_PATH`.
+## Architecture
 
-## Environment
+One Node process, one SQLite file, no second service (ADR 0007). Chain, facilitator, clock and database sit behind small interfaces, so core logic is tested without them.
 
-| Variable | Default | Meaning |
+| Part | Role | Path |
 | --- | --- | --- |
-| `RPC_URL` | devnet RPC | Solana JSON-RPC |
-| `SOLANA_NETWORK` | devnet CAIP-2 id | x402 network |
-| `FACILITATOR_URL` | x402.org facilitator | verifies and settles payments |
-| `USDC_MINT` | devnet USDC | payment and payout mint |
-| `HOLD_KEYPAIR_PATH` | `keys/hold.json` | hold wallet: receives payments, sends payouts and refunds (mode 0600) |
-| `AGENT_KEYPAIR_PATH` | `keys/agent.json` | agent wallet, funds the firm wallets of the devnet e2e |
-| `PORT`, `DB_PATH`, `COMMITMENT` | 4021, `data/humanroute.db`, `confirmed` | server, SQLite file, commitment |
-| `TASK_PRICE_USDC` | `0.50` | price of one task |
-| `TIMER_MODE` | `video` | `video` (claim 60 s, work 180 s) or `public` (claim 30 min, work 60 min) |
-| `CLAIM_WINDOW_SECONDS`, `WORK_WINDOW_SECONDS` | empty | override the preset |
-| `LINGUIST_SHARE_BPS`, `AGENCY_SHARE_BPS`, `FEE_SHARE_BPS` | 8000, 1800, 200 | payout split, must sum to 10000 |
-| `FEE_WALLET` | required | address of the fee leg |
-| `PUBLIC_BASE_URL` | required | base of invite and pay links, SIWS domain |
-| `MCP_PUBLIC_URL` | required | MCP URL shown to firms |
-| `DRAFT_TTL_SECONDS`, `SESSION_TTL_SECONDS`, `NONCE_TTL_SECONDS` | 1800, 604800, 300 | lifetimes |
-| `WEB_DIST_DIR` | `web/dist` | built web app |
-| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | empty | Web Push for new tasks (ADR 0029); all three or none, none = push off; the subject must be a real `mailto:` or `https:` (Apple rejects placeholder domains); keys from `npx web-push generate-vapid-keys` |
-| `GATEWAY_URL`, `MCP_PORT` | required, 4022 | MCP process only |
+| Gateway | Hono API, SQLite, x402 route, SIWS, Web Push, payout worker | `src/` |
+| Web app | React + Vite PWA: firm, agency, linguist cabinets, join and pay pages | `web/` |
+| MCP server | Streamable HTTP: `post_task`, `get_task`, `wait_task`, `approve_task`, `reject_task`, `prepare_payment`, `pay_task`; HTTP-only client of the gateway | `mcp/` |
+| Agent-side signer | `sign.mjs`, `setup.mjs` and their contract tests | `web/public/agent/`, `agent/`, `contracts/` |
+| Scripts and e2e | Wallet setup; e2e on a local validator and on devnet | `scripts/`, `e2e/` |
+| Spike | First x402 V2 `exact` proof on devnet (2026-10-20) | `spike/` |
 
-Startup: invalid configuration exits 1. A failing preflight (hold without SOL or token account, facilitator without devnet) keeps the server up: `/health` shows `ready: false`, payments answer `503 not_ready` with the reasons, and payouts pause.
+Rules: money moves only from `src/payouts/`; decisions only record state and queue a transfer; a send starts only from a `pending` row. Devnet only; the hold wallet is a hot key on the gateway (ADR 0008). Escrow program, mainnet and disputes: [roadmap](docs/roadmap.md).
 
-## Deploy on Coolify
+## Docs and decisions
 
-- **Gateway app** (Nixpacks, Node 22; `NIXPACKS_NODE_VERSION=22`, `NIXPACKS_APT_PKGS=python3` for better-sqlite3). Nixpacks runs `npm run build`. Start command: `npx tsx src/index.ts` (no `.env` file on the server, so not `npm start`). Port 4021, health `GET /health`.
-- **MCP app**: second Coolify app from the same repo, start command `npx tsx mcp/index.ts`, `GATEWAY_URL` set to the gateway's public URL, its own domain. Set `MCP_PUBLIC_URL` on the gateway to this domain.
-- **Volume** for SQLite at `/app/data`. **Keys mount** contains only `hold.json` (mode 0600), mounted read-only; no other keypair is needed on the server.
-- **Fresh database**: v2 refuses a v1 file. Remove the old DB file (or use a new `DB_PATH`) before the first v2 start.
+- [`docs/design/flow.md`](docs/design/flow.md): order flow, state machines, failure table.
+- [`docs/design/api.md`](docs/design/api.md): endpoints and shapes.
+- [`docs/adr/`](docs/adr/README.md): 44 decisions. Start with 0022 (one payment, many tasks), 0006 (resend), 0024 (split payout), 0031 (`wait_task`), 0036 (auto-pay), 0043 (unknown settle).
+- [`docs/setup.md`](docs/setup.md): environment, auto-pay, devnet e2e, Coolify, operator commands.
+- [`docs/roadmap.md`](docs/roadmap.md): not built yet.
 
-## Layout
+Module import rules: [ADR 0019](docs/adr/0019-module-layout-v2.md). `keys/` and `.env` are never committed.
 
-```
-src/     gateway: config, store, chain, auth, accounts, tasks, orders, payouts, rating, http, wiring
-web/     React app (landing, firm, agency, linguist, join, pay)
-mcp/     MCP server (post_task, get_task, wait_task, approve_task, reject_task, prepare_payment, pay_task)
-scripts/ wallet setup
-e2e/     real-process e2e (localnet and devnet)
-spike/   first x402 devnet proof (throwaway)
-docs/    design, ADRs, roadmap
-```
+## Encode Club Solana Hackathon 2026
 
-Slices and their rules: [ADR 0019](docs/adr/0019-module-layout-v2.md). Secrets: `keys/` and `.env` are never committed.
+Submission to the [Encode Club](https://www.encode.club/) Solana Hackathon 2026, two tracks. Deadline: Monday 9 November 2026, 18:59 GMT+7 (11:59 UTC). Devnet only.
+
+**Best Use of x402 on Solana.** An AI agent pays for a human service over HTTP, with no subscription or checkout. The agent video shows the full flow: `402` request, verification and settlement on Solana, delivery of the order and the human result. Beyond a basic integration: one payment for many tasks, split payouts, automatic refunds, orphan handling, and auto-pay that never gives the agent the firm's funds. Failures: [above](#failure-and-refund-handling).
+
+**Best Consumer App on Solana.** A linguist signs in on the phone by approving in Phantom, with no code to type, gets a push for each task in their language pair, claims, submits, and is paid on-chain once the firm approves. Solana carries the login, the payment and every payout and refund.
+
+- [x] Working demo on devnet: https://humanroute.app.offcall.link
+- [x] Repository with README and setup instructions: this file and [`docs/setup.md`](docs/setup.md)
+- [ ] 2–4 minute demo video: [Demo](#demo)
+- [x] How Solana powers the project: [How Solana and x402 power it](#how-solana-and-x402-power-it)
+
+Status: devnet only; no escrow program yet; orphan payments are refunded by hand. License: Apache-2.0.
