@@ -6,6 +6,7 @@ export enum Next {
 	Reload = "reload",
 	FirmCabinet = "firm-cabinet",
 	CopyDraft = "copy-draft",
+	CheckStatus = "check-status",
 }
 
 export type Failure = {
@@ -38,6 +39,15 @@ export const failureOf = (message: string): Failure => {
 	if (message === "this draft was already paid with another payment") {
 		const title = "This draft is already paid. Your payment was not used.";
 		return fail(title, IconName.Alarm, Next.FirmCabinet);
+	}
+	// Signed and sent, no definitive answer: it may have settled, so never offer Pay again.
+	if (
+		message.startsWith("payment aborted:") ||
+		message.startsWith("payment outcome unknown")
+	) {
+		const title =
+			"We do not know if your payment went through. Do not pay again: check its status.";
+		return fail(title, IconName.Alarm, Next.CheckStatus);
 	}
 	if (message === "wallet connection was rejected") {
 		return fail("Phantom did not connect. Nothing was paid.", IconName.Cross);

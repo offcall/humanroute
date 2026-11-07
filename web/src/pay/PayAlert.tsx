@@ -1,18 +1,27 @@
 import { Icon, IconName, shortWallet } from "../shared";
+import { CheckStatus } from "./CheckStatus";
 import { CopyButton } from "./CopyButton";
 import { FirmLink } from "./FirmLink";
 import { type Failure, failureOf, Next } from "./failure";
 import { formatUsdc } from "./format";
 import type { DraftView } from "./types";
 
-type Props = { message: string; draft: DraftView; payer: string | undefined };
+type Check = { checked: boolean; onCheck: () => void };
+
+type Props = Check & {
+	message: string;
+	draft: DraftView;
+	payer: string | undefined;
+};
 
 const Action = ({
 	failure,
 	draftId,
+	check,
 }: {
 	failure: Failure;
 	draftId: string;
+	check: Check;
 }) => {
 	switch (failure.next) {
 		case Next.Reload:
@@ -30,6 +39,8 @@ const Action = ({
 			return <FirmLink small />;
 		case Next.CopyDraft:
 			return <CopyButton value={draftId} label="Copy draft id" />;
+		case Next.CheckStatus:
+			return <CheckStatus {...check} />;
 		case Next.Retry:
 			return null;
 	}
@@ -56,13 +67,23 @@ const OrphanProof = ({ draft, payer }: { draft: DraftView; payer: string }) => (
 	</>
 );
 
-export const PayAlert = ({ message, draft, payer }: Props) => {
+export const PayAlert = ({
+	message,
+	draft,
+	payer,
+	checked,
+	onCheck,
+}: Props) => {
 	const failure = failureOf(message);
 	const tone = failure.info ? "alert alert--info" : "alert alert--error";
 	const action =
 		failure.next === Next.Retry ? null : (
 			<div className="alert__actions">
-				<Action failure={failure} draftId={draft.draftId} />
+				<Action
+					failure={failure}
+					draftId={draft.draftId}
+					check={{ checked, onCheck }}
+				/>
 			</div>
 		);
 

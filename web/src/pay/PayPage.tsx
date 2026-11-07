@@ -2,6 +2,7 @@ import "./pay.css";
 import "./pay-states.css";
 import { useEffect, useState } from "react";
 import { useSession } from "../shared";
+import { checkStatus } from "./checkStatus";
 import { loadDraft } from "./loadDraft";
 import { PayBody } from "./PayBody";
 import { PayHead } from "./PayHead";
@@ -43,7 +44,12 @@ export const PayPage = ({ draftId }: { draftId: string }) => {
 		setStatus({ name: Step.Paying, draft });
 		const wallet = await connectPhantom(phantom);
 		if (!wallet.ok) {
-			setStatus({ name: Step.Failed, message: wallet.error, draft });
+			setStatus({
+				name: Step.Failed,
+				message: wallet.error,
+				draft,
+				checked: false,
+			});
 			return;
 		}
 		setPayer(wallet.value.address);
@@ -55,7 +61,7 @@ export const PayPage = ({ draftId }: { draftId: string }) => {
 		setStatus(
 			paid.ok
 				? { name: Step.Paid, draft, result: paid.value }
-				: { name: Step.Failed, message: paid.error, draft },
+				: { name: Step.Failed, message: paid.error, draft, checked: false },
 		);
 	};
 
@@ -77,6 +83,7 @@ export const PayPage = ({ draftId }: { draftId: string }) => {
 						payer={payer}
 						guest={me === null}
 						onPay={(draft) => void pay(draft)}
+						onCheck={(failed) => void checkStatus(failed).then(setStatus)}
 						onReload={reload}
 					/>
 				</main>

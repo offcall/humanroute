@@ -11,15 +11,23 @@ const errorByCode: Record<string, string> = {
 	payment_reused: "this payment was already used for another draft",
 	orphan_payment: "payment settled but was not recorded, contact support",
 	not_ready: "the gateway is not ready, try again later",
+	payment_in_progress: "payment outcome unknown: the payment is still settling",
 };
 
-const readError = async (response: Response): Promise<string> => {
+// After signing, an answer that is neither a 201 nor a refusal leaves the outcome unknown.
+const readError = async (
+	response: Response,
+	signed: boolean,
+): Promise<string> => {
 	const body: unknown = await response.json().catch(() => undefined);
 	const code =
 		typeof body === "object" && body !== null ? Reflect.get(body, "error") : "";
 	const known = typeof code === "string" ? errorByCode[code] : undefined;
 	if (known !== undefined) {
 		return known;
+	}
+	if (signed && response.status >= 500) {
+		return `payment outcome unknown (HTTP ${response.status})`;
 	}
 	if (response.status === 404) {
 		return "draft not found or expired";
@@ -43,13 +51,17 @@ export const payOrder = async (input: {
 	totalUnits: bigint;
 	signer: ClientSvmSigner;
 }): Promise<Parsed<PayResult>> => {
+	let signed = false;
 	const client = new x402Client()
 		.register(SOLANA_DEVNET_CAIP2, new ExactSvmScheme(input.signer))
 		// The default $1 cap would reject orders above 1 USDC; the policy below caps the amount exactly.
 		.setSpendControls(false)
 		.registerPolicy((_version, requirements) =>
 			requirements.filter((req) => req.amount === input.totalUnits.toString()),
-		);
+		)
+		.onAfterPaymentCreation(async () => {
+			signed = true;
+		});
 	const payingFetch = wrapFetchWithPayment(fetch, client);
 
 	let response: Response;
@@ -60,11 +72,13 @@ export const payOrder = async (input: {
 		);
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : "unknown error";
+		// Before signing nothing could settle; after it the payment may have.
+		const stage = signed ? "payment aborted" : "payment not sent";
 
-		return { ok: false, error: `payment aborted: ${reason}` };
+		return { ok: false, error: `${stage}: ${reason}` };
 	}
 	if (response.status !== 201) {
-		return { ok: false, error: await readError(response) };
+		return { ok: false, error: await readError(response, signed) };
 	}
 
 	// After HTTP 201 the payment has settled: an unreadable result must not look like a failed payment.

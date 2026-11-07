@@ -54,6 +54,12 @@ const reached = (state: TaskState): number => {
 // publicState comes from the server; an unknown value falls back to the task state.
 export const statusOf = (state: TaskState, publicState: string): Status => {
 	switch (publicState) {
+		case "open":
+			return make(TagKind.Open, 0, false);
+		case "claimed":
+			return make(TagKind.Claimed, 1, false);
+		case "submitted":
+			return make(TagKind.Submitted, 2, false);
 		case "paid_out":
 			return make(TagKind.Paid, 4, false);
 		case "paying_out":

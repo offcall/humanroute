@@ -10,6 +10,7 @@ export const PayBody = (props: {
 	payer: string | undefined;
 	guest: boolean;
 	onPay: (draft: DraftView) => void;
+	onCheck: (failed: { draft: DraftView; message: string }) => void;
 	onReload: () => void;
 }) => {
 	const { status } = props;
@@ -38,7 +39,13 @@ export const PayBody = (props: {
 					paying={status.name === Step.Paying}
 					error={status.name === Step.Failed ? status.message : undefined}
 					payer={props.payer}
+					checked={status.name === Step.Failed && status.checked}
 					onPay={() => props.onPay(status.draft)}
+					onCheck={() => {
+						if (status.name === Step.Failed) {
+							props.onCheck(status);
+						}
+					}}
 				/>
 			);
 	}

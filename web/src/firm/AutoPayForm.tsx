@@ -1,3 +1,4 @@
+import { isAddress } from "@solana/kit";
 import { useState } from "react";
 import { formatUsdc } from "../shared";
 import { FundsWarning, hasFeeSol } from "./AutoPayState";
@@ -13,7 +14,6 @@ export const agentFromUrl = (): string =>
 export const clearAgentLink = () => {
 	window.history.replaceState(null, "", window.location.pathname);
 };
-const BASE58_KEY = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const PRESETS = ["1", "5", "10"];
 
 type Props = {
@@ -30,7 +30,7 @@ export const AutoPayForm = ({ status, busy, onApprove, onBack }: Props) => {
 	const units = parseUsdcInput(limit);
 	const key = agent.trim();
 	const ready = status.exists && hasFeeSol(status) && units !== undefined;
-	const canApprove = ready && BASE58_KEY.test(key) && !busy;
+	const canApprove = ready && isAddress(key) && !busy;
 
 	return (
 		<>

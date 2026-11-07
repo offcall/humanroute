@@ -1,4 +1,5 @@
 import { formatUsdc, shortWallet, TxLink } from "../shared";
+import { FundsWarning, hasFeeSol } from "./AutoPayState";
 import { recallLimit } from "./autopayLimit";
 import type { Autopay } from "./autopayParse";
 import { WalletFunds } from "./WalletFunds";
@@ -36,7 +37,7 @@ export const AutoPayOn = ({ status, lastTx, busy, onChange, onOff }: Props) => {
 				<button
 					type="button"
 					className="btn btn--text ap-danger"
-					disabled={busy}
+					disabled={busy || !hasFeeSol(status)}
 					onClick={onOff}
 				>
 					Turn off
@@ -69,6 +70,7 @@ export const AutoPayOn = ({ status, lastTx, busy, onChange, onOff }: Props) => {
 					<WalletFunds status={status} />
 				</dd>
 			</dl>
+			<FundsWarning status={status} />
 		</div>
 	);
 };

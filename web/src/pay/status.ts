@@ -17,4 +17,4 @@ export type PageStatus =
 	| { name: Step.AlreadyPaid; orderId: string | undefined }
 	| { name: Step.Ready | Step.Paying; draft: DraftView }
 	| { name: Step.Paid; draft: DraftView; result: PayResult }
-	| { name: Step.Failed; draft: DraftView; message: string };
+	| { name: Step.Failed; draft: DraftView; message: string; checked: boolean };

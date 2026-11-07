@@ -10,7 +10,9 @@ type Props = {
 	paying: boolean;
 	error: string | undefined;
 	payer: string | undefined;
+	checked: boolean;
 	onPay: () => void;
+	onCheck: () => void;
 };
 
 // Ready, paying and failed: the draft stays on screen; Pay only where nothing settled.
@@ -20,7 +22,9 @@ export const PayView = ({
 	paying,
 	error,
 	payer,
+	checked,
 	onPay,
+	onCheck,
 }: Props) => {
 	const retry = error === undefined || canRetry(error);
 	// orphan payment: no order, so no escrow promise
@@ -31,7 +35,13 @@ export const PayView = ({
 		<>
 			<DraftSummary draft={draft} promise={!orphan} />
 			{error === undefined ? null : (
-				<PayAlert message={error} draft={draft} payer={payer} />
+				<PayAlert
+					message={error}
+					draft={draft}
+					payer={payer}
+					checked={checked}
+					onCheck={onCheck}
+				/>
 			)}
 			{retry ? (
 				<PayCta
