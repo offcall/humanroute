@@ -3,7 +3,7 @@
 import { getAccount } from "@solana/spl-token";
 import { type AgentHome, approveAllowance, setupAgent } from "./agent.js";
 import { ataOf } from "./chain.js";
-import { connection } from "./env.js";
+import { connection, pacePayment } from "./env.js";
 import { firmAt } from "./fixture.js";
 import { connectMcp, type Mcp, type ToolReply } from "./mcp.js";
 import type { Firm } from "./people.js";
@@ -54,6 +54,7 @@ export const autopayPay = async (
 	draftId: string,
 ): Promise<ToolReply> => {
 	const signature = await prepareAndSign(fixture, draftId);
+	await pacePayment();
 	return fixture.mcp.call("pay_task", { draftId, signature });
 };
 

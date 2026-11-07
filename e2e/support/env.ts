@@ -2,7 +2,7 @@
 import { Connection, Keypair } from "@solana/web3.js";
 import { inject } from "vitest";
 import { installEgressGuard } from "../env/egress.js";
-import type { E2eEnv } from "../env/types.js";
+import { type E2eEnv, E2eMode } from "../env/types.js";
 
 // Localnet workers inherit E2E_EGRESS_LOG from the setup and refuse non-loopback hosts too.
 if (process.env.E2E_EGRESS_LOG) {
@@ -51,4 +51,14 @@ export const pollUntil = async <T = unknown>(
 	throw new Error(
 		`${what}: not reached in ${timeoutMs} ms, last ${String(JSON.stringify(last))}`,
 	);
+};
+
+// Devnet only: x402.org's RPC answers 429 to bursts of settlements (logged as
+// settlement_pending), so each payment waits a little first. Localnet pays at once.
+const DEVNET_PAY_PAUSE_MS = 6_000;
+
+export const pacePayment = async (): Promise<void> => {
+	if (e2eEnv().mode === E2eMode.Devnet) {
+		await new Promise((resolve) => setTimeout(resolve, DEVNET_PAY_PAUSE_MS));
+	}
 };

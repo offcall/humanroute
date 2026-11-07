@@ -8,7 +8,7 @@ import {
 	encodePaymentSignatureHeader,
 } from "@x402/core/http";
 import { ExactSvmScheme } from "@x402/svm/exact/client";
-import { e2eEnv, gatewayUrl } from "./env.js";
+import { e2eEnv, gatewayUrl, pacePayment } from "./env.js";
 import { type Body, call, isRecord, text } from "./http.js";
 
 export const LEAFLET =
@@ -67,6 +67,7 @@ export const postPayment = async (
 	draftId: string,
 	header: string,
 ): Promise<{ status: number; body: Body }> => {
+	await pacePayment();
 	const res = await fetch(payUrl(draftId), {
 		method: "POST",
 		headers: { "PAYMENT-SIGNATURE": header },
