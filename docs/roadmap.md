@@ -48,3 +48,4 @@ Not built in the hackathon version. Each item is a product or architecture chang
 - **Devnet firm keys.** The devnet e2e firm keys live only in memory, so a crash strands their funds; writing them to disk is an owner decision.
 - **Orphans before ADR 0042.** Orphans recorded before the migration have no draft id, so their drafts still read as unpaid.
 - **File size.** `web/public/agent/sign.mjs` (~276 lines, ADR 0040 allows a split) and several test and support files are over ~100 lines.
+- **Settle connection error answers 402.** When the connection to the facilitator breaks during settlement, the gateway answers 402 and the payer may pay again although the first payment may have settled (`src/orders/inflight.test.ts` pins this behavior). Treating it as an unknown outcome changes a payment rule; needs an ADR.
