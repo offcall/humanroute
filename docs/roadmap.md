@@ -29,9 +29,9 @@ Not built in the hackathon version. Each item is a product or architecture chang
 
 ## Quality
 
-- **Tests.** Vitest unit and web tests run in `npm run check`, real-process e2e on a local validator in `npm run test:e2e` ([ADR 0037](adr/0037-test-toolchain-vitest.md), [ADR 0038](adr/0038-e2e-environments.md)). No CI.
+- **Tests.** Vitest unit and web tests run in `npm run check`, real-process e2e on a local validator in `npm run test:e2e`, the same suite on devnet in `npm run e2e:devnet` ([ADR 0037](adr/0037-test-toolchain-vitest.md), [ADR 0038](adr/0038-e2e-environments.md), [ADR 0044](adr/0044-devnet-e2e-on-vitest.md)). No CI.
 - **Signed receipts and self-facilitation** ([ADR 0013](adr/0013-signed-receipt.md), [ADR 0014](adr/0014-self-facilitation-fallback.md)): deferred.
-- **Web playground.** Dropped for the hackathon; `scripts/e2e-flow.ts` (with `scripts/e2e/pay.ts`) plays the agent's role on devnet.
+- **Web playground.** Dropped for the hackathon; the e2e suite (`e2e/`, also on devnet) plays the agent's role.
 - **Observability.** Logs only; no metrics or alerting beyond `/health`.
 - **Home redirect on a failed session read.** A network or 5xx error on `/api/me` uses up the one-shot home redirect; only a 200 or 401 should.
 - **Home redirect flag.** The redirect flag is a module-level `let` read during render; move it to a ref or a router-level decision.

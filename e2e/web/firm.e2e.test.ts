@@ -1,9 +1,12 @@
-// Browser: the firm from the landing to Jobs, and Review with real payouts on the local chain.
+// Browser: the firm from the landing to Jobs, and Review with real payouts on the chain, the
+// :rejected refund and the public ratings.
 import { Keypair } from "@solana/web3.js";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { firmKey } from "../support/env.js";
+import { txFacts } from "../support/chain.js";
+import { firmKey, gatewayUrl } from "../support/env.js";
 import { FirmSlot } from "../support/firms.js";
 import { firmAt, paidOrder, team } from "../support/fixture.js";
+import { call } from "../support/http.js";
 import { claim, submit, waitConfirmed } from "../support/tasks.js";
 import { openBrowser, type Session, useSession } from "./browser.js";
 import { captureFailures } from "./capture.js";
@@ -38,7 +41,7 @@ describe("firm cabinet", () => {
 
 	test("Review approves one translation and rejects another with a reason", async () => {
 		const firm = await firmAt(FirmSlot.BrowserFirm);
-		const { linguist } = await team();
+		const { agency, linguist } = await team();
 		const order = await paidOrder(firm, ["es", "fr"]);
 		for (const lang of ["es", "fr"]) {
 			await claim(linguist.jar, order.task(lang).taskId);
@@ -112,6 +115,17 @@ describe("firm cabinet", () => {
 		expect(
 			await page.getByText(rejected.reason ?? "", { exact: false }).count(),
 		).toBeGreaterThan(0);
+		expect(rejected.memo).toBe(`hr:${rejectedId}:rejected`);
+		const refund = await txFacts(rejected.transferTx ?? "");
+		expect(refund.deltas.get(firm.key.publicKey.toBase58())).toBe(500_000n);
+		expect(refund.memos).toContain(`hr:${rejectedId}:rejected`);
+
+		const gateway = gatewayUrl();
+		const outcomes = { approved: 1, rejected: 1 };
+		const agencyPath = `/api/rating/agency/${agency.agencyId}`;
+		const firmPath = `/api/rating/firm/${firm.firmId}`;
+		expect(await call(gateway, "GET", agencyPath)).toMatchObject(outcomes);
+		expect(await call(gateway, "GET", firmPath)).toMatchObject(outcomes);
 		expect(session.blocked).toEqual([]);
 	});
 });

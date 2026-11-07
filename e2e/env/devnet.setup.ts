@@ -1,6 +1,6 @@
 // Global setup of the e2e-devnet project (ADR 0038): the same suites against devnet and
 // x402.org. Manual only (`npm run test:e2e:devnet`), and only with the owner's permission for
-// each run: it moves devnet USDC and SOL. Like scripts/e2e-devnet.sh it starts the real gateway
+// each run: it moves devnet USDC and SOL (ADR 0044). It starts the real gateway
 // (hold key HOLD_KEYPAIR_PATH, default keys/hold.json) and MCP on free ports with a fresh DB, and
 // funds fresh firm wallets from the agent wallet (AGENT_KEYPAIR_PATH, default keys/agent.json).
 // FEE_WALLET is required (npx tsx scripts/fee-pubkey.ts prints it). No egress guard here.

@@ -1,4 +1,4 @@
-// SIWS sign-in and the three roles through the cabinet routes (api.md), as scripts/e2e does.
+// SIWS sign-in and the three roles through the cabinet routes (api.md).
 import { createPrivateKey, sign } from "node:crypto";
 import { Keypair } from "@solana/web3.js";
 import { call, type Jar, record, request, text } from "./http.js";

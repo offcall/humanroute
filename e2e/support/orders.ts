@@ -1,5 +1,5 @@
 // Order draft over the firm's MCP token and the x402 exact payment signed by a Node key, as
-// scripts/e2e/pay.ts does, with the environment's RPC (localnet or devnet).
+// the agent does, with the environment's RPC (localnet or devnet).
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import type { Keypair } from "@solana/web3.js";
 import { x402Client } from "@x402/core/client";

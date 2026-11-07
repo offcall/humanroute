@@ -1,4 +1,4 @@
-// Order money path on real processes (reproduces scripts/e2e-flow.ts): payment and replay,
+// Order money path on real processes: payment and replay,
 // payout split, timer refund (flow.md row 25). Every case builds its own fixture.
 import { describe, expect, test } from "vitest";
 import { ataExists, txFacts, usdcOf } from "./support/chain.js";

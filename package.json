@@ -17,7 +17,7 @@
 		"test:e2e:devnet": "npm run build && E2E_DEVNET=1 vitest run --project e2e-devnet",
 		"test:smoke": "vitest run --project smoke",
 		"setup:wallets": "tsx --env-file-if-exists=.env scripts/setup-wallets.ts",
-		"e2e:devnet": "bash scripts/e2e-devnet.sh",
+		"e2e:devnet": "npm run test:e2e:devnet",
 		"requeue": "tsx --env-file=.env src/requeue.ts",
 		"web:dev": "vite --config web/vite.config.ts",
 		"build": "vite build --config web/vite.config.ts",
