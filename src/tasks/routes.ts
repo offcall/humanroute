@@ -7,6 +7,7 @@ import {
 	isClaimer,
 	isOwnerFirm,
 } from "./access.js";
+import { hasJsonType } from "./body.js";
 import type { TasksDeps } from "./deps.js";
 import { firmRoutes } from "./firmRoutes.js";
 import { ClaimOutcome, claimTask } from "./lifecycle.js";
@@ -51,6 +52,10 @@ export const tasksRoutes = (deps: TasksDeps): Hono => {
 		const linguist = currentLinguist(deps, ctx);
 		if (linguist instanceof Response) {
 			return linguist;
+		}
+		// No body, but the cookie caller needs the CSRF content type.
+		if (!hasJsonType(ctx)) {
+			return ctx.json({ error: "invalid_json" }, 400);
 		}
 		const taskId = ctx.req.param("id");
 		const found = taskById(deps.database, taskId);

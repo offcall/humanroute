@@ -2,7 +2,7 @@
 // are written by payouts through deps.decider (ADR 0023); false means not submitted any more.
 import { type Context, Hono } from "hono";
 import { bearerToken, denied, sessionWallet } from "./access.js";
-import { parseReason, readJson } from "./body.js";
+import { hasJsonType, parseReason, readJson } from "./body.js";
 import type { TasksDeps } from "./deps.js";
 import { taskById } from "./repo.js";
 import type { Task } from "./types.js";
@@ -47,6 +47,10 @@ export const firmRoutes = (deps: TasksDeps): Hono => {
 		const task = ownTask(ctx);
 		if (task instanceof Response) {
 			return task;
+		}
+		// No body, but a cookie caller still needs the CSRF content type; MCP Bearer does not.
+		if (bearerToken(ctx) === null && !hasJsonType(ctx)) {
+			return ctx.json({ error: "invalid_json" }, 400);
 		}
 		return decided(ctx, task.id, deps.decider.approve(task.id));
 	});

@@ -23,7 +23,7 @@ HTTP contract of the v2 gateway: routes, auth, shapes, memos, timers. Draft: str
 
 ## Auth
 
-- **Cookie session** (ADR 0020): Sign-In With Solana. `POST /api/auth/verify` sets cookie `hr_session` (HttpOnly, `SameSite=Lax`, `Secure` on https), TTL 7 days. Used by the three cabinets. Cookie-authenticated POST/PUT require `content-type: application/json` (CSRF).
+- **Cookie session** (ADR 0020): Sign-In With Solana. `POST /api/auth/verify` sets cookie `hr_session` (HttpOnly, `SameSite=Lax`, `Secure` on https), TTL 7 days. Used by the three cabinets. Cookie-authenticated POST/PUT require `content-type: application/json` (CSRF; media type compared without parameters, any case), including bodyless approve and claim, which send `{}`; otherwise `400 invalid_json`.
 - **MCP Bearer token**: `Authorization: Bearer <mcpToken>`; one token per firm, created with the firm, shown in the firm cabinet (ADR 0021). The MCP process forwards the caller's token to the gateway, which resolves it to the firm. Stored in the accounts DB in plaintext (ADR 0027).
 - **x402**: `PAYMENT-SIGNATURE` header, verified and settled by the facilitator (ADR 0004).
 - **None**: public.
@@ -93,11 +93,11 @@ Columns: auth / role, request, response (success), errors (codes beyond the conv
 | Route | Auth / role | Request | Response | Errors | Slice |
 | --- | --- | --- | --- | --- | --- |
 | `GET /api/board` | cookie, linguist | - | `200 {serverTime, tasks: [{taskId, firmName, sourceLang, targetLang, priceUnits, claimDeadline, text, draft}]}`: `open` tasks in the linguist's pairs only | `403` | tasks |
-| `POST /api/tasks/:id/claim` | cookie, linguist | - | `200 TaskView` (`claimed`); first claim wins; snapshots linguist and agency wallets | `404` (unknown or outside pairs), `409 claim_taken`, `409 claim_closed` | tasks |
+| `POST /api/tasks/:id/claim` | cookie, linguist | `{}` | `200 TaskView` (`claimed`); first claim wins; snapshots linguist and agency wallets | `400 invalid_json` (no JSON content type), `404` (unknown or outside pairs), `409 claim_taken`, `409 claim_closed` | tasks |
 | `POST /api/tasks/:id/submit` | cookie, linguist (claimer) | `{result}` (non-empty) | `200 TaskView` (`submitted`) | `403`, `409 late` (after the work deadline), `409 bad_state`, `422 invalid_body` | tasks |
-| `POST /api/tasks/:id/approve` | cookie firm owner, or MCP Bearer of the owner firm | - | `200 TaskView` (`approved`, public `paying_out`) | `403`, `409 bad_state` (not `submitted` or already decided) | tasks |
+| `POST /api/tasks/:id/approve` | cookie firm owner, or MCP Bearer of the owner firm | - (cookie callers send `{}`) | `200 TaskView` (`approved`, public `paying_out`) | `400 invalid_json` (cookie without JSON content type), `401`, `403`, `409 bad_state` (not `submitted` or already decided) | tasks |
 | `POST /api/tasks/:id/reject` | cookie firm owner, or MCP Bearer of the owner firm | `{reason}` (non-empty, <= 1000 chars) | `200 TaskView` (`rejected`, public `refunding`) | `403`, `409 bad_state`, `422 reason_required` | tasks |
-| `GET /api/tasks/:id` | cookie firm owner, claimer, claimer's agency; or MCP Bearer of the owner firm | - | `200 {serverTime, ...TaskView, executorPairs}`: `serverTime` as on the board, for server-based countdowns; `executorPairs` = the claimer's `[pair]` for the owner firm, null while `open` and for other callers | `403`, `404` | tasks |
+| `GET /api/tasks/:id` | cookie firm owner, claimer, claimer's agency; or MCP Bearer of the owner firm | - | `200 {serverTime, ...TaskView, executorPairs}`: `serverTime` as on the board, for server-based countdowns; `executorPairs` = the claimer's `[pair]` for the owner firm, null while `open` and for other callers | `401` (unknown MCP token), `403`, `404` | tasks |
 
 Approve and reject come from the firm cabinet or from MCP `approve_task` / `reject_task`, which Claude calls only after asking the user (ADR 0030). With a Bearer header the token decides: unknown is `401`, another firm's `403`.
 

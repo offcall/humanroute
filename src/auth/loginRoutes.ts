@@ -48,6 +48,12 @@ export const loginRoutes = (deps: AuthDeps): Hono => {
 			return ctx.json({ error: "unauthorized" }, 401);
 		}
 
+		// The id first, so a malformed id never consumes the nonce.
+		const requestId = ctx.req.param("id");
+		if (!REQUEST_ID.test(requestId)) {
+			return ctx.json({ error: "gone" }, 410);
+		}
+
 		const message = consumeNonce(deps, input.wallet, input.nonce);
 		if (
 			message === null ||
@@ -56,10 +62,7 @@ export const loginRoutes = (deps: AuthDeps): Hono => {
 			return ctx.json({ error: "unauthorized" }, 401);
 		}
 
-		const requestId = ctx.req.param("id");
-		const outcome = REQUEST_ID.test(requestId)
-			? approveLoginRequest(deps, requestId, input.wallet)
-			: LoginOutcome.Gone;
+		const outcome = approveLoginRequest(deps, requestId, input.wallet);
 
 		return settled(ctx, outcome, () => ctx.json({}));
 	});

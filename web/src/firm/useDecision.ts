@@ -58,7 +58,7 @@ export const useDecision = ({
 		busy,
 		error,
 		setError,
-		approve: () => void send(Action.Approve, undefined),
+		approve: () => void send(Action.Approve, {}),
 		reject: (reason: string) => void send(Action.Reject, { reason }),
 	};
 };

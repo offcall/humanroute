@@ -10,8 +10,14 @@ export type JsonBody = { ok: true; value: unknown } | { ok: false };
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	typeof value === "object" && value !== null && !Array.isArray(value);
 
+// The media type essence must be application/json (any case, parameters allowed), the CSRF guard.
+const JSON_TYPE = /^application\/json[ \t]*(;|$)/i;
+
+export const hasJsonType = (ctx: Context): boolean =>
+	JSON_TYPE.test(ctx.req.header("content-type") ?? "");
+
 export const readJson = async (ctx: Context): Promise<JsonBody> => {
-	if (!(ctx.req.header("content-type") ?? "").includes("application/json")) {
+	if (!hasJsonType(ctx)) {
 		return { ok: false };
 	}
 	try {

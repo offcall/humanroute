@@ -13,7 +13,7 @@ export const bearerToken = (ctx: Context): string | null => {
 	return token === undefined ? null : token;
 };
 
-// null: no credentials at all (401); false: authenticated but not allowed (403).
+// null: no valid credentials (401); false: authenticated but not allowed (403).
 export const canView = (
 	deps: TasksDeps,
 	ctx: Context,
@@ -21,7 +21,8 @@ export const canView = (
 ): boolean | null => {
 	const token = bearerToken(ctx);
 	if (token !== null) {
-		return deps.firmByMcpToken(token)?.id === task.firmId;
+		const firm = deps.firmByMcpToken(token);
+		return firm === null ? null : firm.id === task.firmId;
 	}
 	const wallet = sessionWallet(deps, ctx);
 	if (wallet === null) {

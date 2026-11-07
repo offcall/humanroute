@@ -1,12 +1,13 @@
 // Serves the built web app (web/dist). Unknown paths get index.html so client routes like /join/:code work.
 // /api, /x and /health never fall back to the web app (ADR 0026).
-import { readFile, stat } from "node:fs/promises";
+import { readFile, realpath, stat } from "node:fs/promises";
 import { extname, join, resolve, sep } from "node:path";
 import { Hono } from "hono";
 
 const MIME: Record<string, string> = {
 	".html": "text/html; charset=utf-8",
 	".js": "text/javascript; charset=utf-8",
+	".mjs": "text/javascript; charset=utf-8",
 	".css": "text/css; charset=utf-8",
 	".json": "application/json; charset=utf-8",
 	".webmanifest": "application/manifest+json",
@@ -18,10 +19,21 @@ const MIME: Record<string, string> = {
 const isGatewayPath = (path: string): boolean =>
 	path === "/health" || path.startsWith("/api/") || path.startsWith("/x/");
 
-const readIfFile = async (file: string): Promise<Buffer | null> => {
+// A regular file whose real path (symlinks resolved) is inside the real root, else null.
+const readInside = async (
+	root: string,
+	file: string,
+): Promise<Buffer | null> => {
 	try {
-		const info = await stat(file);
-		return info.isFile() ? await readFile(file) : null;
+		const [realRoot, realFile] = await Promise.all([
+			realpath(root),
+			realpath(file),
+		]);
+		if (!realFile.startsWith(`${realRoot}${sep}`)) {
+			return null;
+		}
+		const info = await stat(realFile);
+		return info.isFile() ? await readFile(realFile) : null;
 	} catch {
 		return null;
 	}
@@ -37,12 +49,14 @@ export const webRoutes = (distDir: string): Hono => {
 			return ctx.json({ error: "not_found" }, 404);
 		}
 		const requested = resolve(root, `.${path}`);
-		const asset = requested.startsWith(`${root}${sep}`)
-			? await readIfFile(requested)
-			: null;
-		const index = await readIfFile(join(root, "index.html"));
+		const asset = await readInside(root, requested);
+		const index = await readInside(root, join(root, "index.html"));
 		if (index === null) {
 			return ctx.text("web app not built: run npm run build", 503);
+		}
+		// A stale hashed chunk after a deploy must fail, not load index.html as code.
+		if (asset === null && path.startsWith("/assets/")) {
+			return ctx.text("not found", 404);
 		}
 		const type = asset ? MIME[extname(requested)] : MIME[".html"];
 		return ctx.body(new Uint8Array(asset ?? index), 200, {

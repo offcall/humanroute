@@ -42,9 +42,15 @@ const isEndpoint = (value: unknown): value is string => {
 	}
 };
 
+// The media type essence must be application/json (any case, parameters allowed), the CSRF guard.
+const JSON_TYPE = /^application\/json[ \t]*(;|$)/i;
+
+const hasJsonType = (ctx: Context): boolean =>
+	JSON_TYPE.test(ctx.req.header("content-type") ?? "");
+
 // undefined: not JSON at all (400).
 export const readJson = async (ctx: Context): Promise<unknown> => {
-	if (!(ctx.req.header("content-type") ?? "").includes("application/json")) {
+	if (!hasJsonType(ctx)) {
 		return undefined;
 	}
 	try {
