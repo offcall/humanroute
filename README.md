@@ -4,21 +4,13 @@
 
 Solana devnet · x402 V2 (`exact`, USDC) · Encode Club Solana Hackathon 2026
 
-[Live demo (devnet)](https://humanroute.app.offcall.link) · [Demo videos](#demo) · [Quick start](#quick-start) · [Docs](#docs-and-decisions)
+[Live demo (devnet)](https://humanroute.app.offcall.link) · [Demo](#demo) · [Quick start](#quick-start) · [Docs](#docs-and-decisions)
 
 ## Demo
 
-<!-- Replace AGENT_VIDEO_UUID and LINGUIST_VIDEO_UUID with the user-attachments ids of the uploaded mp4 files. -->
-<table>
-<tr>
-<th width="62%">An AI agent orders work and auto-pays over x402</th>
-<th width="38%">A linguist gets a push on the phone and is paid</th>
-</tr>
-<tr>
-<td><video src="https://github.com/user-attachments/assets/AGENT_VIDEO_UUID" controls width="100%"></video></td>
-<td><video src="https://github.com/user-attachments/assets/LINGUIST_VIDEO_UUID" controls width="100%"></video></td>
-</tr>
-</table>
+<p align="center">
+  <img src="docs/media/readme.gif" width="1200" alt="Left: Claude Code pays a 1.50 USDC HumanRoute order on Solana devnet, approves Spanish and German and rejects the French one that only says 'Demo'. Right: the translator's phone gets the push, claims, submits and is paid out (PAID +0.40 USDC).">
+</p>
 
 ## Problem
 
@@ -130,7 +122,7 @@ Module import rules: [ADR 0019](docs/adr/0019-module-layout-v2.md). `keys/` and 
 
 Submission to the [Encode Club](https://www.encode.club/) Solana Hackathon 2026, two tracks. Deadline: Monday 9 November 2026, 18:59 GMT+7 (11:59 UTC). Devnet only.
 
-**Best Use of x402 on Solana.** An AI agent pays for a human service over HTTP, with no subscription or checkout. The agent video shows the full flow: `402` request, verification and settlement on Solana, delivery of the order and the human result. Beyond a basic integration: one payment for many tasks, split payouts, automatic refunds, orphan handling, and auto-pay that never gives the agent the firm's funds. Failures: [above](#failure-and-refund-handling).
+**Best Use of x402 on Solana.** An AI agent pays for a human service over HTTP, with no subscription or checkout. The demo shows the full flow: `402` request, verification and settlement on Solana, delivery of the order and the human result. Beyond a basic integration: one payment for many tasks, split payouts, automatic refunds, orphan handling, and auto-pay that never gives the agent the firm's funds. Failures: [above](#failure-and-refund-handling).
 
 **Best Consumer App on Solana.** A linguist signs in on the phone by approving in Phantom, with no code to type, gets a push for each task in their language pair, claims, submits, and is paid on-chain once the firm approves. Solana carries the login, the payment and every payout and refund.
 
